@@ -1,7 +1,7 @@
 # 当前状态（与代码库 / 文档交叉核对）
 
 > 交叉核对依据：`docs/PROJECT-STRATEGY-HANDOFF.md`、`README.md`、`docs/EVAL-RERUN-NOTES.md`、`.planning/ROADMAP.md` / `STATE.md`，以及 `app/*.py`、`scripts/run_eval_retrieve.py`、`docs/eval*.json` 摘要字段。  
-> 更新时间：2026-05-13（仓库快照）。
+> 更新时间：2026-05-14（仓库快照）。
 
 ---
 
@@ -98,6 +98,29 @@
 3. **无独立 `behavior_guard` 评估脚本**；不应与检索 eval 混谈。  
 4. **Rerank**：最近一次文档化企业双基线为 **关 Rerank**；与 `eval_enterprise_retrieve.json`（rerank on、Top-1 0.8）**不可混为一谈**。  
 
+### Query Rewrite 常见误解（与 `app/config.py` / `app/query_rewrite.py` 一致）
+
+**1）默认是不是「关改写」？**  
+**不是。** `query_rewrite_mode` 在 **`app/config.py` 中默认为 `auto`**（不是 `off`）。若在运行日志或 `/health/config` 里看到 `off`，多半是本机 **`.env` 或环境变量显式覆盖了 `QUERY_REWRITE_MODE`**，请核对。
+
+**2）`auto` 是不是「智谱先判断是否改写」？**  
+**不是。** `auto` 走的是 **`should_use_llm_rewrite()` 启发式**（口语词、`?`/`？`、长度、疑问短语、短关键词跳过等），用来 **有时跳过** 智谱改写以省延迟与费用；**并非**「由 LLM 裁决要不要改写」。  
+三种模式：**`off`** 永不调用智谱改写；**`on`** 在配置了 Key 时 **每次都** 走智谱改写；**`auto`** 为 **启发式门控 + 条件性** 调用智谱。
+
+**3）若想要「由 LLM 决定是否改写」？**  
+当前代码路径下：**没有** 单独的「轻量判别」接口。可选做法：**`on`** = 每次都改写（成本高）；**`auto`** = 启发式门控（省成本）。若要做 **真正的 LLM 门控**（例如单独一次 yes/no 或分类再决定是否全量改写），属于 **新能力**，已列入下文「下一阶段」中的可选项。
+
+**4）无智谱 Key 时？**  
+即便模式为 `on`/`auto` 且启发式允许改写，**未配置 `ZHIPUAI_API_KEY`（或等价变量）时整条改写链路退回原句**，不调用智谱（与 `resolve_retrieval_query` 行为一致）。
+
+**方向说明（选型，非 Bug）**：启发式 `auto` 在成本与延迟上是 **合理默认**。若要「更好」，可考虑：(a) 用评测迭代调整启发式；(b) 增加基于智谱的 **廉价 yes/no 判别** 再决定是否全量改写；(c) 高 stakes 场景对 API 传入 **`use_query_rewrite`**（强制开/关）而生产默认仍用 `auto`。
+
+#### Query Rewrite 配置速查
+
+- **`QUERY_REWRITE_MODE`**：`off` | `on` | `auto`；代码默认 **`auto`**（勿与「默认关闭」混淆）。  
+- **单次请求**：`/retrieve`、`/chat` 请求体 **`use_query_rewrite`**：`true` 强制改写、`false` 禁用、`null` 跟随 Settings（见 `app/schemas.py`）。  
+- **依赖**：实际调用智谱改写需要 Key；否则始终使用原始检索句。
+
 从 **代码/README** 额外可见：
 
 - 默认 `EVAL_SKIP_DOMAIN_ROUTER=true`（`scripts/run_eval_retrieve.py`），与企业历史 Top-1 对齐；测真实路由过滤需显式 `false`。  
@@ -109,10 +132,11 @@
 ## 下一阶段目标（对齐交接 §5 / §11）
 
 1. **维持** `docs/CURRENT-STATUS.md` 与评估产物同步（本文档）。  
-2. **重跑干净评估矩阵**：企业环境变量下 **router on/off × rerank on/off** 四组，产出 `docs/EVAL-BASELINE-COMPARISON.md`（交接 §5 任务 2）。  
+2. **澄清并完成四组 rerun 基线**：在企业索引与 BM25/collection 对齐前提下，固化 **router on/off × rerank on/off** 全矩阵；与 `docs/EVAL-RERUN-NOTES.md` / `PROJECT-STRATEGY-HANDOFF.md` 口径一致，产出可信对照（含可在本文档引用的摘要或 `docs/EVAL-BASELINE-COMPARISON.md`，交接 §5 任务 2）。  
 3. **新增** `scripts/run_eval_behavior_guard.py` 与 `docs/eval_behavior_guard.json`、`docs/BEHAVIOR-GUARD-EVAL.md`（交接 §5 任务 3）。  
 4. **根据评估决定** domain router 是否默认仅记录 `router_trace`、不强过滤（交接 §5 任务 4）。  
-5. 远期仍按交接 §6：`VECTOR_BACKEND`、embedding router、权限检索前过滤、LangGraph、可观测性等。
+5. **可选：改写门控升级**——在沿用 **`auto` 启发式** 的基础上，用评测迭代规则；或新增 **轻量 LLM 判别**（廉价 yes/no）再决定是否调用全量改写；高 stakes 亦可依赖 API **`use_query_rewrite`**，与全局默认解耦。  
+6. 远期仍按交接 §6：`VECTOR_BACKEND`、embedding router、权限检索前过滤、LangGraph、可观测性等。
 
 ---
 
@@ -165,7 +189,7 @@ $env:DOCS_DIR="data/docs/enterprise_ai_ops"
 $env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
 $env:BM25_CORPUS_PATH="data/bm25_enterprise_corpus.jsonl"
 $env:EVAL_QUESTIONS_PATH="data/eval_enterprise_questions.jsonl"
-$env:QUERY_REWRITE_MODE="auto"          # off | on | auto
+$env:QUERY_REWRITE_MODE="auto"          # off | on | auto（代码默认 auto；见上文「Query Rewrite 常见误解」）
 $env:RERANK_ENABLED="true"             # true | false
 $env:EVAL_SKIP_DOMAIN_ROUTER="true"    # 评估脚本默认语义
 $env:BEHAVIOR_GUARD_ENABLED="true"
