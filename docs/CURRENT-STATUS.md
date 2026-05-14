@@ -16,7 +16,8 @@
 **哪些已经跑过评估？**  
 - **企业检索评测**（`data/eval_enterprise_questions.jsonl`，50 条）：已有 JSON 产物与 README/重跑笔记中的指标（见下节）；其中 **2026-05-11 双基线** 的权威数字以 `docs/EVAL-RERUN-NOTES.md` 为准。  
 - **学习文档评测**：`docs/eval_retrieve_autorun.json`（默认 `eval_questions.jsonl`，与 README 描述一致）。  
-- **未单独脚本化**：`behavior_guard` 命中率评测、`user_context` 权限评测仍 **未** 作为独立 eval 跑批（交接 §4 / §5）。
+- **行为护栏**：`scripts/run_eval_behavior_guard.py` 产出 `docs/eval_behavior_guard.json` 与 `docs/BEHAVIOR-GUARD-EVAL.md`（边界标签子集命中率）。  
+- **`user_context` 权限评测**仍 **未** 作为独立 eval 跑批（交接 §4 / §5）。
 
 ---
 
@@ -85,7 +86,7 @@
 | `expect_top5_hit_rate` | **0.80**（40/50） | **0.60**（30/50） |
 | `domain_top1_hit_rate` | **0.72**（36/50） | **0.62**（31/50） |
 
-**未完成矩阵（交接 §5 建议）**：尚未在仓库文档中固化 **router on/off × rerank on/off** 四组完整对照；当前仅有 **rerank 关** 下的 router 对照笔记 + 磁盘上单次 JSON。
+**未完成矩阵（交接 §5 建议）**：尚未在仓库中填全 **router on/off × rerank on/off** 四组跑分；已提供固定 env 与输出文件名的 **模板** `docs/EVAL-BASELINE-COMPARISON.md`，供手工长跑后填表。历史笔记仍为 **rerank 关** 下的 router 对照（见上节）。
 
 ---
 
@@ -93,9 +94,9 @@
 
 与 **交接文档 §4** 对齐：
 
-1. **评估基线必须与 `DOCS_DIR`/collection/BM25 路径对齐**，否则会命中默认 `rag_kb` 学习文档（`eval_enterprise_retrieve_router_off.json` 现状即疑似此类污染）。  
+1. **评估基线必须与 `DOCS_DIR`/collection/BM25 路径对齐** — `scripts/run_eval_retrieve.py` 在运行 **企业问题集**（`eval_enterprise_questions.jsonl`）或 `EVAL_ENTERPRISE_STRICT=1` 时，会校验路径/collection 是否指向 `enterprise_ai_ops`；未对齐则 **stderr WARNING**，设置 `EVAL_STRICT_ENTERPRISE=1` 时 **退出码 2**，降低误用默认 `rag_kb` 的静默污染风险（仍需人工保证 BM25 语料等与索引一致）。  
 2. **Router on** 在笔记中降低 Top-1/Top-5；控制台可出现「过滤后无候选，回退全库」（`domain_router_fallback_all`）。  
-3. **无独立 `behavior_guard` 评估脚本**；不应与检索 eval 混谈。  
+3. **Behavior guard**：已有独立脚本 `scripts/run_eval_behavior_guard.py` 及产物说明（见 `docs/BEHAVIOR-GUARD-EVAL.md`）。  
 4. **Rerank**：最近一次文档化企业双基线为 **关 Rerank**；与 `eval_enterprise_retrieve.json`（rerank on、Top-1 0.8）**不可混为一谈**。  
 
 ### Query Rewrite 常见误解（与 `app/config.py` / `app/query_rewrite.py` 一致）
@@ -132,8 +133,8 @@
 ## 下一阶段目标（对齐交接 §5 / §11）
 
 1. **维持** `docs/CURRENT-STATUS.md` 与评估产物同步（本文档）。  
-2. **澄清并完成四组 rerun 基线**：在企业索引与 BM25/collection 对齐前提下，固化 **router on/off × rerank on/off** 全矩阵；与 `docs/EVAL-RERUN-NOTES.md` / `PROJECT-STRATEGY-HANDOFF.md` 口径一致，产出可信对照（含可在本文档引用的摘要或 `docs/EVAL-BASELINE-COMPARISON.md`，交接 §5 任务 2）。  
-3. **新增** `scripts/run_eval_behavior_guard.py` 与 `docs/eval_behavior_guard.json`、`docs/BEHAVIOR-GUARD-EVAL.md`（交接 §5 任务 3）。  
+2. **四组 rerun 基线**：在企业索引与 BM25/collection 对齐前提下，按 `docs/EVAL-BASELINE-COMPARISON.md` 跑齐 **router × rerank** 全矩阵并回填表格（可与 `EVAL-RERUN-NOTES.md` / `PROJECT-STRATEGY-HANDOFF.md` 口径对照）。  
+3. **Behavior guard eval**：`scripts/run_eval_behavior_guard.py`、`docs/eval_behavior_guard.json`、`docs/BEHAVIOR-GUARD-EVAL.md`（已落地；随重跑更新 JSON/Markdown）。  
 4. **根据评估决定** domain router 是否默认仅记录 `router_trace`、不强过滤（交接 §5 任务 4）。  
 5. **可选：改写门控升级**——在沿用 **`auto` 启发式** 的基础上，用评测迭代规则；或新增 **轻量 LLM 判别**（廉价 yes/no）再决定是否调用全量改写；高 stakes 亦可依赖 API **`use_query_rewrite`**，与全局默认解耦。  
 6. 远期仍按交接 §6：`VECTOR_BACKEND`、embedding router、权限检索前过滤、LangGraph、可观测性等。
