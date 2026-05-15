@@ -1,7 +1,7 @@
 # 当前状态（与代码库 / 文档交叉核对）
 
 > 交叉核对依据：`docs/PROJECT-STRATEGY-HANDOFF.md`、`README.md`、`docs/EVAL-RERUN-NOTES.md`、`.planning/ROADMAP.md` / `STATE.md`，以及 `app/*.py`、`scripts/run_eval_retrieve.py`、`docs/eval*.json` 摘要字段。  
-> 更新时间：2026-05-14（仓库快照）。
+> 更新时间：2026-05-14（护栏 Phase 2 验收后同步）。分阶段验收见 [`docs/POLICY-MILESTONE-ACCEPTANCE.md`](POLICY-MILESTONE-ACCEPTANCE.md)。
 
 ---
 
@@ -11,12 +11,13 @@
 下文「当前功能清单」中标注为 **已落地** 的条目即为当前已实现的能力（FastAPI、`/retrieve` 与 `/chat`、LlamaIndex + Chroma、本地 Qwen Embedding、BM25 混合检索、可选 Qwen Rerank、Query Rewrite、领域路由、检索后门控、behavior guard、`trace_id` / `router_trace`、引用重叠度、citation 等）。
 
 **哪些只是雏形？**  
-标注为 **雏形** 的条目：领域路由（规则 + 可选 LLM，非 embedding router）、访问控制（检索后 Python 层过滤）、behavior guard（demo 级正则规则）、可观测性（结构化日志片段，非完整 LLMOps）。**规划中**：Qdrant 默认向量后端、LangGraph 工单 Agent、独立权限/护栏评测流水线等（见交接文档 §6）。
+标注为 **雏形** 的条目：领域路由（规则 + 可选 LLM，非 embedding router）、访问控制（检索后 Python 层过滤）、**企业策略引擎**（规则/向量/LLM 分层已有，**尚无** DB 规则表、管理 UI、OPA、输出侧 post-generation guard）、可观测性（`policy_eval` 审计 logger 未接集中式后端，非完整 LLMOps）。**规划中**：Qdrant、LangGraph、权限独立 eval、四组检索矩阵填满等（见 `ROADMAP-PHASES-A-F.md`）。
 
 **哪些已经跑过评估？**  
 - **企业检索评测**（`data/eval_enterprise_questions.jsonl`，50 条）：已有 JSON 产物与 README/重跑笔记中的指标（见下节）；其中 **2026-05-11 双基线** 的权威数字以 `docs/EVAL-RERUN-NOTES.md` 为准。  
 - **学习文档评测**：`docs/eval_retrieve_autorun.json`（默认 `eval_questions.jsonl`，与 README 描述一致）。  
-- **行为护栏**：`scripts/run_eval_behavior_guard.py` 产出 `docs/eval_behavior_guard.json` 与 `docs/BEHAVIOR-GUARD-EVAL.md`（边界标签子集命中率）。  
+- **路线图 A–F checklist**：[`docs/ROADMAP-PHASES-A-F.md`](ROADMAP-PHASES-A-F.md)（与交接 §6 对齐；**不含** OPA / 全量 LangGraph / Qdrant 生产默认 / 管理 UI 等本 Pass 范围）。  
+- **行为护栏**：`scripts/run_eval_behavior_guard.py` 评估 **`evaluate_policy`** 的 **intercept**（`should_skip_rag`）；产物 `docs/eval_behavior_guard.json`、`docs/BEHAVIOR-GUARD-EVAL.md`。
 - **`user_context` 权限评测**仍 **未** 作为独立 eval 跑批（交接 §4 / §5）。
 
 ---
@@ -34,7 +35,7 @@
 | 领域路由（规则 + 可选 LLM）、rerank 前过滤、`domain_router_fallback_all` | **雏形** | `app/domain_router.py`；交接文档指出关键词路由不稳定 |
 | `UserContext` / tenant / audience / 密级检索后过滤 | **雏形** | `app/access_control.py`；非向量库检索前过滤 |
 | 检索相似度门控（rerank 后阈值） | **已落地** | `app/retrieval_gates.py` |
-| Behavior guard（短路 RAG/LLM） | **雏形** | `app/behavior_guard.py`（demo-grade） |
+| 企业策略引擎（规则优先级 + 可选 embedding / 智谱分类 + 审计） | **雏形→可升级** | `app/policy/`、`data/behavior_rules.default.json`；`app/behavior_guard.py` 为兼容入口 |
 | `citation_overlap_ratio`（chat 生成后） | **已落地** | `app/citation_verify.py`、`routes_rag.py` |
 | 结构化日志（`trace_id`、`event`） | **雏形** | JSON line 日志；非完整 OTel/Langfuse |
 | Docker Compose Qdrant（可选本地服务） | **已落地** | `docker-compose.yml`；应用默认仍 Chroma |
@@ -96,7 +97,7 @@
 
 1. **评估基线必须与 `DOCS_DIR`/collection/BM25 路径对齐** — `scripts/run_eval_retrieve.py` 在运行 **企业问题集**（`eval_enterprise_questions.jsonl`）或 `EVAL_ENTERPRISE_STRICT=1` 时，会校验路径/collection 是否指向 `enterprise_ai_ops`；未对齐则 **stderr WARNING**，设置 `EVAL_STRICT_ENTERPRISE=1` 时 **退出码 2**，降低误用默认 `rag_kb` 的静默污染风险（仍需人工保证 BM25 语料等与索引一致）。  
 2. **Router on** 在笔记中降低 Top-1/Top-5；控制台可出现「过滤后无候选，回退全库」（`domain_router_fallback_all`）。  
-3. **Behavior guard**：已有独立脚本 `scripts/run_eval_behavior_guard.py` 及产物说明（见 `docs/BEHAVIOR-GUARD-EVAL.md`）。  
+3. **Behavior / policy intercept**：独立脚本 `scripts/run_eval_behavior_guard.py`；**规则层单独启用**（未开 `POLICY_EMBEDDING_GUARD` / `POLICY_LLM_GUARD`）时，边界标签子集 **recall 已达 1.0**（见最新 `docs/BEHAVIOR-GUARD-EVAL.md` / `eval_behavior_guard.json`）。向量/LLM 扩展层的误杀抽检仍待 Phase 3–4 验收（见 [`POLICY-MILESTONE-ACCEPTANCE.md`](POLICY-MILESTONE-ACCEPTANCE.md)）。  
 4. **Rerank**：最近一次文档化企业双基线为 **关 Rerank**；与 `eval_enterprise_retrieve.json`（rerank on、Top-1 0.8）**不可混为一谈**。  
 
 ### Query Rewrite 常见误解（与 `app/config.py` / `app/query_rewrite.py` 一致）
