@@ -1,0 +1,19 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 本地向量库与索引（用 scripts/reindex.py 重建）
+data/chroma/
+data/qdrant_local/
+data/qdrant_local_test/
+
+# 前端依赖与构建产物（源码在 frontend/；发布物在 static/app/）
+frontend/node_modules/
+frontend/dist/
+
+logs/

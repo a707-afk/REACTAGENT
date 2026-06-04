@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAG 开发测试</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 920px; margin: 1.5rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    textarea { width: 100%; min-height: 80px; box-sizing: border-box; }
+    button { margin-right: 0.5rem; margin-top: 0.5rem; padding: 0.4rem 0.8rem; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    pre { background: #f4f4f4; padding: 1rem; overflow: auto; max-height: 480px; font-size: 13px; }
+    label { display: block; margin-top: 0.75rem; }
+    input[type="number"] { width: 5rem; }
+    .hint { color: #555; font-size: 0.9rem; margin-top: 0.5rem; }
+    hr { margin: 2rem 0; border: none; border-top: 1px solid #ddd; }
+    input[type="text"] { width: 100%; box-sizing: border-box; padding: 0.35rem; }
+  </style>
+</head>
+<body>
+  <h1>知识库 RAG 开发页</h1>
+  <p>与 API 同域：<code>/retrieve</code>、<code>/chat</code>、<code>/agent/ticket</code>。请先在后端执行 <code>python scripts/reindex.py</code>。</p>
+  <p class="hint">首次点击「仅检索/问答」会加载 Embedding（日志里会看到 Loading SentenceTransformer），<strong>可能需几十秒～数分钟</strong>，请勿重复狂点；若一直无结果请看下方是否出现 HTTP 状态或非 JSON 报错。</p>
+
+  <label>问题</label>
+  <textarea id="q" placeholder="输入问题…"></textarea>
+  <label>Top-K <input type="number" id="k" value="5" min="1" max="30" /></label>
+  <div>
+    <button type="button" id="btnRet">仅检索</button>
+    <button type="button" id="btnChat">问答（智谱）</button>
+  </div>
+  <h2>结果 JSON</h2>
+  <pre id="out">{}</pre>
+
+  <hr />
+  <h1>工单 Agent</h1>
+  <p class="hint">调用 <code>POST /agent/ticket</code>，展示 <code>final_action</code>、<code>draft_reply</code>、<code>audit_trace</code>。</p>
+  <label>工单号 ticket_id</label>
+  <input type="text" id="ticketId" value="T-dev-001" />
+  <label>用户问题 user_query</label>
+  <textarea id="ticketQ" placeholder="客户要退款怎么办…"></textarea>
+  <label>user_context（可选 JSON）</label>
+  <textarea id="ticketCtx" placeholder='{"tenant_id":"corp-default","roles":["support_agent"]}' style="min-height:48px"></textarea>
+  <label>Top-K <input type="number" id="ticketK" value="5" min="1" max="30" /></label>
+  <div>
+    <button type="button" id="btnAgent">运行工单 Agent</button>
+  </div>
+  <h2>Agent 结果</h2>
+  <pre id="outAgent">{}</pre>
+
+  <script>
+    function apiUrl(path) {
+      const p = path.startsWith("/") ? path : "/" + path;
+      return new URL(p, window.location.origin).href;
+    }
+
+    async function postJson(path, body) {
+      const url = apiUrl(path);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      let json = null;
+      if (text) {
+        try {
+          json = JSON.parse(text);
+        } catch (e) {
+          return { ok: res.ok, status: res.status, url, json, raw: text, parseError: String(e) };
+        }
+      }
+      return { ok: res.ok, status: res.status, url, json, raw: text, parseError: null };
+    }
+
+    function payload() {
+      const query = document.getElementById("q").value.trim();
+      const top_k = Number(document.getElementById("k").value) || 5;
+      return { query, top_k };
+    }
+
+    function renderResult(r) {
+      const out = document.getElementById("out");
+      if (!r.ok) {
+        out.textContent =
+          "请求失败 HTTP " + r.status + "\nURL: " + r.url + "\n\n响应正文：\n" + (r.raw || "(空)");
+        return;
+      }
+      if (r.parseError) {
+        out.textContent =
+          "HTTP " + r.status + " 但正文不是合法 JSON\nURL: " + r.url +
+          "\n解析错误: " + r.parseError + "\n\n原始正文：\n" + (r.raw || "(空)");
+        return;
+      }
+      if (Array.isArray(r.json)) {
+        out.textContent =
+          "警告：收到 JSON「数组」而不是接口约定的对象（正常应为 query/chunks/gate_passed 等字段）。\n" +
+          "请确认浏览器地址栏是否为本服务（如 http://127.0.0.1:8000/static/index.html），且未被代理改写。\n\nURL: " + r.url +
+          "\n\n原始正文：\n" + (r.raw || "(空)");
+        return;
+      }
+      if (r.json == null && (r.raw === "" || r.raw == null)) {
+        out.textContent = "HTTP " + r.status + " 但响应体为空\nURL: " + r.url;
+        return;
+      }
+      out.textContent = JSON.stringify(r.json, null, 2);
+    }
+
+    async function runAction(path, btnId, otherBtnId) {
+      const p = payload();
+      const out = document.getElementById("out");
+      const btn = document.getElementById(btnId);
+      const other = document.getElementById(otherBtnId);
+      if (!p.query) {
+        out.textContent = "请填写问题";
+        return;
+      }
+      btn.disabled = true;
+      other.disabled = true;
+      out.textContent =
+        "请求中…（若为本机首次推理，请等待 Embedding / Rerank 加载完成，终端会有日志）\n→ " + apiUrl(path);
+      try {
+        const r = await postJson(path, p);
+        renderResult(r);
+      } catch (e) {
+        out.textContent = "网络或脚本错误（请求未正常结束）：\n" + e + "\n\n常见原因：连接被重置、本机内存不足、或关了代理/VPN 后重试。";
+      } finally {
+        btn.disabled = false;
+        other.disabled = false;
+      }
+    }
+
+    document.getElementById("btnRet").onclick = () => runAction("/retrieve", "btnRet", "btnChat");
+    document.getElementById("btnChat").onclick = () => runAction("/chat", "btnChat", "btnRet");
+
+    function agentPayload() {
+      const ticket_id = document.getElementById("ticketId").value.trim() || "T-dev-001";
+      const user_query = document.getElementById("ticketQ").value.trim();
+      const top_k = Number(document.getElementById("ticketK").value) || 5;
+      const body = { ticket_id, user_query, top_k };
+      const ctxRaw = document.getElementById("ticketCtx").value.trim();
+      if (ctxRaw) {
+        try {
+          body.user_context = JSON.parse(ctxRaw);
+        } catch (e) {
+          throw new Error("user_context 不是合法 JSON: " + e);
+        }
+      }
+      return body;
+    }
+
+    document.getElementById("btnAgent").onclick = async () => {
+      const out = document.getElementById("outAgent");
+      const btn = document.getElementById("btnAgent");
+      let body;
+      try {
+        body = agentPayload();
+      } catch (e) {
+        out.textContent = String(e);
+        return;
+      }
+      if (!body.user_query) {
+        out.textContent = "请填写 user_query";
+        return;
+      }
+      btn.disabled = true;
+      out.textContent = "请求中… → " + apiUrl("/agent/ticket");
+      try {
+        const r = await postJson("/agent/ticket", body);
+        if (!r.ok) {
+          out.textContent =
+            "请求失败 HTTP " + r.status + "\nURL: " + r.url + "\n\n" + (r.raw || "(空)");
+          return;
+        }
+        if (r.parseError || r.json == null) {
+          out.textContent = "非 JSON 响应\n" + (r.raw || "");
+          return;
+        }
+        const j = r.json;
+        const summary = {
+          trace_id: j.trace_id,
+          final_action: j.final_action,
+          human_review_required: j.human_review_required,
+          draft_reply: j.draft_reply,
+          ticket_note: j.ticket_note,
+          gate_passed: j.gate_passed,
+          gate_error_code: j.gate_error_code,
+          audit_trace: j.audit_trace,
+        };
+        out.textContent = JSON.stringify(summary, null, 2);
+      } catch (e) {
+        out.textContent = "网络或脚本错误：\n" + e;
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>

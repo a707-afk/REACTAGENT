@@ -1,11 +1,11 @@
 # Behavior guard eval
 
-- **Run date (UTC)**: 2026-05-15T00:40:08Z
+- **Run date (UTC)**: 2026-05-15T01:39:38Z
 - **Command**: `python scripts/run_eval_behavior_guard.py` (from repo root)
 - **Questions file**: `data\eval_enterprise_questions.jsonl`
 - **behavior_guard_enabled**: True
-- **POLICY_EMBEDDING_GUARD**: False (threshold=0.72)
-- **POLICY_LLM_GUARD**: False (confidence≥0.8 → intercept)
+- **POLICY_EMBEDDING_GUARD**: True (threshold=0.72)
+- **POLICY_LLM_GUARD**: True (confidence≥0.8 → intercept)
 
 ## MVP behavior (consistent with handoff 「中危记录」)
 

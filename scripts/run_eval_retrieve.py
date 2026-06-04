@@ -19,7 +19,10 @@
 
 输出：docs/eval_retrieve_autorun.json
 
+**领域路由**：`EVAL_SKIP_DOMAIN_ROUTER` 控制是否调用推断（默认 ``true``=跳过）；**``DOMAIN_ROUTER_HARD_FILTER``** 控制是否在 rerank 前按域 **淘汰候选**（默认 ``false``，与生产一致）；四组合矩阵 **r1** 需 ``false`` + ``true``。
+
 改写策略见环境变量 QUERY_REWRITE_MODE；设备见 INFERENCE_DEVICE。
+生产型 Router 矩阵（Rerank ON、hard filter OFF）：``scripts/run_eval_prod_router_matrix.py``，见 ``docs/EVAL-RERUN-NOTES.md``。
 """
 from __future__ import annotations
 
@@ -72,7 +75,7 @@ def _maybe_warn_enterprise_index_alignment(settings, eval_path: Path) -> None:
 def main() -> None:
     from app.config import get_settings
     from app.inference_device import resolve_inference_device
-    from app.index_store import get_vector_index
+    from app.vector_index import get_vector_index
     from app.retrieval_gates import evaluate_similarity_gate
     from app.retrieval_pipeline import retrieve_scored_nodes
 
@@ -217,6 +220,8 @@ def main() -> None:
         "inference_device": settings.inference_device,
         "inference_device_resolved": resolve_inference_device(settings),
         "hybrid_bm25_enabled": settings.hybrid_bm25_enabled,
+        "hybrid_fusion": settings.hybrid_fusion,
+        "hybrid_rrf_k": settings.hybrid_rrf_k,
         "bm25_candidate_top_k": settings.bm25_candidate_top_k,
         "rerank_enabled": settings.rerank_enabled,
         "rerank_backend": settings.rerank_backend,
@@ -248,6 +253,10 @@ def main() -> None:
         if domain_total
         else None,
         "eval_skip_domain_router": skip_dr,
+        "domain_router_hard_filter": settings.domain_router_hard_filter,
+        "domain_router_soft_boost_enabled": settings.domain_router_soft_boost_enabled,
+        "domain_router_enhanced": settings.domain_router_enhanced,
+        "domain_router_embedding_enabled": settings.domain_router_embedding_enabled,
     }
     payload = {"summary": summary, "results": rows_out}
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

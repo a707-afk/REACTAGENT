@@ -1,0 +1,214 @@
+{
+  "summary": {
+    "golden": "data\\eval_hallucination.jsonl",
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "failed_ids": [],
+    "python": "D:\\fly\\PhpWebStudy-Data\\env\\python\\python.exe",
+    "run_utc": "2026-06-04T03:25:47Z"
+  },
+  "results": [
+    {
+      "id": "HG-01",
+      "description": "草稿与证据高度重合-应通过",
+      "expect": {
+        "passed": true
+      },
+      "actual": {
+        "passed": true,
+        "method": "ngram",
+        "overlap_ratio": 0.0,
+        "unsupported_sentence_rate": 0.0,
+        "feedback": "grounding_ok (ngram, unsupported_rate=0.00)",
+        "sentences": [
+          {
+            "sentence": "建议按标准退款流程处理，引导客户提交工单。",
+            "support_score": 0.6071,
+            "best_chunk_id": "n-refund",
+            "unsupported": false,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-02",
+      "description": "草稿编造时效-应不通过",
+      "expect": {
+        "passed": false
+      },
+      "actual": {
+        "passed": false,
+        "method": "ngram",
+        "overlap_ratio": 0.0,
+        "unsupported_sentence_rate": 1.0,
+        "feedback": "unsupported_rate=1.00 (ngram); 例: 退款将在 24 小时内自动到账，无需任何审批。",
+        "sentences": [
+          {
+            "sentence": "退款将在 24 小时内自动到账，无需任何审批。",
+            "support_score": 0.0,
+            "best_chunk_id": null,
+            "unsupported": true,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-03",
+      "description": "无证据 chunk-应不通过",
+      "expect": {
+        "passed": false,
+        "unsupported_sentence_rate_min": 0.99
+      },
+      "actual": {
+        "passed": false,
+        "method": "ngram",
+        "overlap_ratio": 1.0,
+        "unsupported_sentence_rate": 1.0,
+        "feedback": "无证据 chunk，全部句子 unsupported",
+        "sentences": [
+          {
+            "sentence": "这是一句无法溯源的陈述。",
+            "support_score": 0.0,
+            "best_chunk_id": null,
+            "unsupported": true,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-04",
+      "description": "空草稿-应不通过",
+      "expect": {
+        "passed": false
+      },
+      "actual": {
+        "passed": false,
+        "method": "ngram",
+        "overlap_ratio": 1.0,
+        "unsupported_sentence_rate": 0.0,
+        "feedback": "无有效句子",
+        "sentences": []
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-05",
+      "description": "P1 升级句式对齐-应通过",
+      "expect": {
+        "passed": true
+      },
+      "actual": {
+        "passed": true,
+        "method": "ngram",
+        "overlap_ratio": 1.0,
+        "unsupported_sentence_rate": 0.0,
+        "feedback": "grounding_ok (ngram, unsupported_rate=0.00)",
+        "sentences": [
+          {
+            "sentence": "P1 应升级至二线 on-call。",
+            "support_score": 0.8969,
+            "best_chunk_id": "n-sla",
+            "unsupported": false,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-06",
+      "description": "reindex 操作对齐-应通过",
+      "expect": {
+        "passed": true
+      },
+      "actual": {
+        "passed": true,
+        "method": "ngram",
+        "overlap_ratio": 0.0,
+        "unsupported_sentence_rate": 0.0,
+        "feedback": "grounding_ok (ngram, unsupported_rate=0.00)",
+        "sentences": [
+          {
+            "sentence": "请运行 reindex 脚本并确认 DOCS_DIR。",
+            "support_score": 0.6562,
+            "best_chunk_id": "n-reindex",
+            "unsupported": false,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-07",
+      "description": "多句仅一句 grounded-应不通过",
+      "expect": {
+        "passed": false
+      },
+      "actual": {
+        "passed": false,
+        "method": "ngram",
+        "overlap_ratio": 0.0,
+        "unsupported_sentence_rate": 0.5,
+        "feedback": "unsupported_rate=0.50 (ngram); 例: 另外火星基地明日开放参观。",
+        "sentences": [
+          {
+            "sentence": "标准退款流程需提交工单。",
+            "support_score": 0.725,
+            "best_chunk_id": "n-refund",
+            "unsupported": false,
+            "method": "ngram"
+          },
+          {
+            "sentence": "另外火星基地明日开放参观。",
+            "support_score": 0.0,
+            "best_chunk_id": null,
+            "unsupported": true,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "id": "HG-08",
+      "description": "字符 overlap 命中",
+      "expect": {
+        "overlap_ratio_min": 0.01
+      },
+      "actual": {
+        "passed": true,
+        "method": "ngram",
+        "overlap_ratio": 1.0,
+        "unsupported_sentence_rate": 0.0,
+        "feedback": "grounding_ok (ngram, unsupported_rate=0.00)",
+        "sentences": [
+          {
+            "sentence": "请按以下办理：标准退款流程：提交工单、审核、3-5 工作日原路退回。",
+            "support_score": 0.7742,
+            "best_chunk_id": "chunk-0",
+            "unsupported": false,
+            "method": "ngram"
+          }
+        ]
+      },
+      "passed": true,
+      "errors": []
+    }
+  ]
+}

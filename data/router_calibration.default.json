@@ -1,0 +1,18 @@
+{
+  "schema": "domain_router_calibration_v1",
+  "temperature": {
+    "rules": 1.0,
+    "embedding": 1.35,
+    "llm": 1.0,
+    "merged": 1.0
+  },
+  "platt": {
+    "_comment": "logit(cal) ~= A * logit_clip(raw + eps) + B；离线用 history 样本拟合后替换下列默认值（当前为近似恒等映射）",
+    "rules": { "A": 1.0, "B": 0.0 },
+    "embedding": { "A": 1.0, "B": 0.0 },
+    "llm": { "A": 1.0, "B": 0.0 },
+    "merged": { "A": 1.0, "B": 0.0 }
+  },
+  "_history_paths": [],
+  "_comment": "将历史评测 jsonl/log 离线拟合写入本文件或由 ROUTER_CALIBRATION_PATH 指向自定义路径。"
+}

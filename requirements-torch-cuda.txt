@@ -1,0 +1,8 @@
+# PyTorch GPU（RTX 50 系 / sm_120）— 勿与 requirements.txt 一起 pip install -r
+# 在 conda 环境 rags 中执行 scripts/setup_pytorch_cuda.ps1，或：
+#
+#   pip uninstall -y torch torchvision torchaudio
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#
+# CPU-only 机器用官方 CPU 索引：
+#   --index-url https://download.pytorch.org/whl/cpu

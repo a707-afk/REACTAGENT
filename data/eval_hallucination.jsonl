@@ -1,0 +1,8 @@
+{"id": "HG-01", "description": "草稿与证据高度重合-应通过", "draft": "建议按标准退款流程处理，引导客户提交工单。", "chunks": [{"text": "标准退款流程：提交工单、审核、3-5 工作日原路退回。", "node_id": "n-refund"}], "expect": {"passed": true}}
+{"id": "HG-02", "description": "草稿编造时效-应不通过", "draft": "退款将在 24 小时内自动到账，无需任何审批。", "chunks": [{"text": "标准退款流程：提交工单、审核、3-5 工作日原路退回。", "node_id": "n-refund"}], "expect": {"passed": false}}
+{"id": "HG-03", "description": "无证据 chunk-应不通过", "draft": "这是一句无法溯源的陈述。", "chunks": [], "expect": {"passed": false, "unsupported_sentence_rate_min": 0.99}}
+{"id": "HG-04", "description": "空草稿-应不通过", "draft": "   ", "chunks": [{"text": "任意证据。", "node_id": "n1"}], "expect": {"passed": false}}
+{"id": "HG-05", "description": "P1 升级句式对齐-应通过", "draft": "P1 应升级至二线 on-call。", "chunks": [{"text": "P1 升级至二线 on-call。", "node_id": "n-sla"}], "expect": {"passed": true}}
+{"id": "HG-06", "description": "reindex 操作对齐-应通过", "draft": "请运行 reindex 脚本并确认 DOCS_DIR。", "chunks": [{"text": "运行 scripts/reindex.py 并设置 DOCS_DIR。", "node_id": "n-reindex"}], "expect": {"passed": true}}
+{"id": "HG-07", "description": "多句仅一句 grounded-应不通过", "draft": "标准退款流程需提交工单。另外火星基地明日开放参观。", "chunks": [{"text": "标准退款流程：提交工单、审核。", "node_id": "n-refund"}], "expect": {"passed": false}}
+{"id": "HG-08", "description": "字符 overlap 命中", "draft": "请按以下办理：标准退款流程：提交工单、审核、3-5 工作日原路退回。", "chunks": [{"text": "标准退款流程：提交工单、审核、3-5 工作日原路退回。"}], "expect": {"overlap_ratio_min": 0.01}}

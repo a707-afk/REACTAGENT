@@ -1,22 +1,22 @@
 # 状态
 
-**里程碑**: enterprise-rag-kb 路线图落地（2026-05）
+**里程碑**: enterprise-rag-kb 路线图落地（2026-05 → 2026-06）
 
 **已完成**:
 
-- 状态汇总：`docs/CURRENT-STATUS.md`（功能清单、评估产物与笔记对齐、已知问题、下一阶段命令）。
-- 配置漂移：文档与 `.env.example` 统一为 **`QUERY_REWRITE_MODE`**（`off` / `on` / `auto`），与 `app/config.py` 一致；旧名 **`QUERY_REWRITE_ENABLED`** 无对应字段，Settings 为 `extra="ignore"` 时会被忽略。
-- 策略护栏：`app/policy/`（默认 JSON `data/behavior_rules.default.json`，mtime 热读）、`app/behavior_guard.py` 兼容入口；`/retrieve`、`/chat` 短路拦截；审计 `event=policy_eval`。分阶段验收：`docs/POLICY-MILESTONE-ACCEPTANCE.md`。**Phase 2（规则层）** boundary intercept recall **1.0**（见 `docs/BEHAVIOR-GUARD-EVAL.md`）。
-- 企业 eval 双基线重跑摘要：`docs/EVAL-RERUN-NOTES.md`（需 conda `rags` 及企业索引环境变量；本次跑使用了 `RERANK_ENABLED=false` 以缩短 CPU 耗时，见该文说明）。
+- 状态汇总：`docs/CURRENT-STATUS.md`。
+- 策略护栏：`docs/POLICY-MILESTONE-ACCEPTANCE.md`、`docs/BEHAVIOR-GUARD-EVAL.md`。
+- Embedding Router：`docs/ROUTER-EVAL.md`（primary_accuracy≈0.80）。
+- **阶段 C 权限**：Pre-filter、混合归一化、权限评测 **23/26 / 22/24 / 4/4**；收口 `docs/PHASE-C-CLOSURE.md`。
+- **阶段 D Qdrant**：本地 `data/qdrant_local` reindex + 权限 eval（`docs/QDRANT-MIGRATION-EVAL.md`）；默认运行仍 Chroma。
+- **阶段 E**：LangGraph MVP + E4 路径评测 **15/15**（`docs/PHASE-E-CLOSURE.md`）。
+- **阶段 F**：可观测性设计（`docs/OBSERVABILITY-DESIGN.md`）；router eval 含 `domain_weights` 等字段。
+- **下一里程碑（本 Pass）**：F JSON 日志切片、`run_eval_agent_ticket_live.py`、`smoke_agent_ticket.py`、`static/index.html` Agent UI、`docs/NEXT-MILESTONE.md`、Chroma Pre-filter ID 对齐修复。
 
-**阻塞**:
+**当前阶段**: **A–F 之后 Pass 收尾 — 可观测性 + Agent DX + 快速验证**
 
-- 无。默认 `python` 若无 LlamaIndex/Chroma 依赖则评估脚本无法运行，请使用已安装依赖的解释器（如 README 中的 `rags` 环境）。
+**暂缓**: 权限 AC02/07/28；OPA；多 Agent；Qdrant 生产默认切换；Langfuse/OTel SDK
 
-**未纳入本阶段（只记录，未实现）**:
+**阻塞**: 无。
 
-- 全量 **Embedding 路由器**
-- **Qdrant** 迁移与 payload 过滤
-- **LangGraph** 工单编排
-
-**下一步建议**: 按 `docs/POLICY-MILESTONE-ACCEPTANCE.md` 推进 Phase 3–6（embedding/LLM 护栏抽检、检索四矩阵）；路线图大块见 `docs/ROADMAP-PHASES-A-F.md`。
+**Backlog**: 见 `docs/NEXT-MILESTONE.md`（Qdrant 生产默认、OTel、管理 UI、G 微调）

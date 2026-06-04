@@ -1,15 +1,14 @@
-"""Batch-evaluate `evaluate_behavior_guard` on enterprise eval boundary rows.
+"""Batch-evaluate `evaluate_policy` (intercept tier) on enterprise eval boundary rows.
 
 Loads JSONL from ``EVAL_QUESTIONS_PATH`` (default ``data/eval_enterprise_questions.jsonl``),
 keeps rows whose ``expected_behavior`` is exactly one of:
-``human_review``, ``refuse_or_human_review``, ``refuse_or_clarify_boundary``,
+``human_review``, ``refuse_or_human_review``, ``refuse_or_clarify_boundary``, …
 
 Writes ``docs/eval_behavior_guard.json`` and a short ``docs/BEHAVIOR-GUARD-EVAL.md``.
 
-Assumptions for metrics (documented in BEHAVIOR-GUARD-EVAL.md): for these labels the eval
-marks policy/boundary scenarios; a **hit** (non-None guard) is a successful intercept.
-**recall** on ``risk_level == high`` rows in that subset counts hits over those rows;
-an additional recall over all boundary-labeled rows is included for context.
+Metrics: intercept **hit** means ``PolicyEvalResult.should_skip_rag`` (rule / embedding /
+LLM 任一触发短路). Optional stages controlled by ``POLICY_EMBEDDING_GUARD`` /
+``POLICY_LLM_GUARD`` appear in summary.
 """
 from __future__ import annotations
 
@@ -42,19 +41,24 @@ def _relative_to_repo(path: Path) -> str:
         return str(ap)
 
 
-def _hit_to_dict(hit) -> dict | None:
-    if hit is None:
+def _result_to_hit_dict(pe) -> dict | None:
+    if not getattr(pe, "should_skip_rag", False):
         return None
     return {
-        "reason_code": hit.reason_code,
-        "behavior": hit.behavior,
-        "message_zh": hit.message_zh,
+        "reason_code": pe.intercept_reason_code or "POLICY_HIT",
+        "behavior": pe.behavior or "human_review",
+        "message_zh": pe.message_zh,
+        "policy_action": getattr(pe.policy_action, "value", str(pe.policy_action)),
+        "matched_rule_ids": list(pe.matched_rule_ids),
+        "embedding_hit": pe.embedding_hit,
+        "embedding_max_sim": pe.embedding_max_sim,
+        "llm_hit": pe.llm_hit,
     }
 
 
 def main() -> None:
-    from app.behavior_guard import evaluate_behavior_guard
     from app.config import get_settings
+    from app.policy.engine import evaluate_policy
 
     settings = get_settings()
     eval_path = Path(os.getenv("EVAL_QUESTIONS_PATH", "data/eval_enterprise_questions.jsonl"))
@@ -75,15 +79,27 @@ def main() -> None:
         q = (obj.get("question") or "").strip()
         if not q:
             continue
-        hit = evaluate_behavior_guard(q, settings)
+        pe = evaluate_policy(
+            q,
+            settings,
+            trace_id=None,
+            user_context_summary=None,
+            endpoint="eval_behavior_guard",
+            skip_audit_log=True,
+        )
         rows.append(
             {
                 "id": obj.get("id"),
                 "question": q,
                 "expected_behavior": eb,
                 "risk_level": obj.get("risk_level"),
-                "guard_hit": hit is not None,
-                "hit": _hit_to_dict(hit),
+                "guard_hit": bool(pe.should_skip_rag),
+                "hit": _result_to_hit_dict(pe),
+                "policy_trace": {
+                    "policy_action": getattr(pe.policy_action, "value", str(pe.policy_action)),
+                    "policy_warnings": list(pe.policy_warnings),
+                    "requires_human_review": pe.requires_human_review,
+                },
             }
         )
 
@@ -100,6 +116,14 @@ def main() -> None:
         "eval_questions_path": _relative_to_repo(eval_path),
         "behavior_guard_enabled": settings.behavior_guard_enabled,
         "behavior_guard_rules_path": settings.behavior_guard_rules_path,
+        "policy_embedding_guard_enabled": getattr(
+            settings, "policy_embedding_guard_enabled", False
+        ),
+        "policy_embedding_threshold": getattr(settings, "policy_embedding_threshold", None),
+        "policy_llm_guard_enabled": getattr(settings, "policy_llm_guard_enabled", False),
+        "policy_llm_confidence_threshold": getattr(
+            settings, "policy_llm_confidence_threshold", None
+        ),
         "subset_boundary_labeled_total": boundary_total,
         "subset_boundary_labeled_hits": boundary_hits,
         "recall_boundary_labeled": round(boundary_hits / boundary_total, 4)
@@ -127,13 +151,25 @@ def main() -> None:
         f"- **Command**: `{ran_cmd}` (from repo root)",
         f"- **Questions file**: `{summary['eval_questions_path']}`",
         f"- **behavior_guard_enabled**: {settings.behavior_guard_enabled}",
+        f"- **POLICY_EMBEDDING_GUARD**: {summary['policy_embedding_guard_enabled']} "
+        f"(threshold={summary['policy_embedding_threshold']})",
+        f"- **POLICY_LLM_GUARD**: {summary['policy_llm_guard_enabled']} "
+        f"(confidence≥{summary['policy_llm_confidence_threshold']} → intercept)",
+        "",
+        "## MVP behavior (consistent with handoff 「中危记录」)",
+        "",
+        "- **`intercept`**：短路，不调用 RAG/完整生成；沿用 `behavior: human_review` 与 "
+        "`refusal_reason_code`。",
+        "- **`warn`**：写审计、`policy_warnings` 入 JSON，**仍继续检索**（吞吐优先）。",
+        "- **向量 / LLM 阶段**：仅在 **规则层未短路**时运行； cosine ≥ `POLICY_EMBEDDING_THRESHOLD` "
+        "或 LLM `medium|high` 且 confidence ≥ `POLICY_LLM_CONFIDENCE` 时 **短路**（intercept）。",
         "",
         "## Metrics",
         "",
         "Assumption: rows with `expected_behavior` in "
         "`human_review` / `refuse_or_human_review` / `refuse_or_clarify_boundary` "
-        "denote boundary/policy scenarios; a non-None `evaluate_behavior_guard` result is "
-        "counted as an **intercept (hit)**. **Recall (high risk)** = hits / count where "
+        "denote boundary/policy scenarios; `evaluate_policy(...).should_skip_rag` is an "
+        "**intercept (hit)**. **Recall (high risk)** = hits / count where "
         "`risk_level == \"high\"` within that subset. **Recall (all boundary-labeled)** uses "
         "the full three-behavior subset.",
         "",
@@ -147,7 +183,7 @@ def main() -> None:
         f"| Recall (risk_level=high) | {summary['recall_risk_level_high']} |",
         f"| False negatives (no hit), count | {len(fn_ids)} |",
         "",
-        "### False negative ids (expected boundary label, guard missed)",
+        "### False negative ids (expected boundary label, intercept missed)",
         "",
         ", ".join(str(i) for i in fn_ids) if fn_ids else "(none)",
         "",

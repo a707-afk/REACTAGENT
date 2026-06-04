@@ -1,0 +1,27 @@
+{"id": 1, "question": "RAG 最小闭环包含哪些步骤？", "notes": "流程类", "expect_top1_file_contains": "建议"}
+{"id": 2, "question": "为什么建议先做 RAG 再做复杂 Agent？", "notes": "路线类", "expect_top1_file_contains": "建议"}
+{"id": 3, "question": "LangGraph 学习路线里提到了哪些阶段？", "notes": "LangGraph", "expect_top1_file_contains": "LangGraph"}
+{"id": 4, "question": "Function Calling 和工具使用有什么关系？", "notes": "Agent 基础", "expect_top1_file_contains": "模块6-7"}
+{"id": 5, "question": "Chunk Size 在面试里通常怎么讲？", "notes": "面试/RAG", "expect_top1_file_contains": "建议"}
+{"id": 6, "question": "多 Agent 系统不要一开始就上哪些能力？", "notes": "反模式", "expect_top1_file_contains": "建议"}
+{"id": 7, "question": "企业知识库 RAG 的 V1 目标是什么？", "notes": "V1", "expect_top1_file_contains": "建议"}
+{"id": 8, "question": "智谱或 LLM 在 RAG 项目里通常负责什么环节？", "notes": "开放题", "expect_top1_file_contains": null}
+{"id": 9, "question": "Tool Use 在 Agent 里解决什么问题？", "notes": "模块6-7", "expect_top1_file_contains": "模块6-7"}
+{"id": 10, "question": "给 AI Coding 的任务应该怎样拆分？", "notes": "第四节", "expect_top1_file_contains": "建议"}
+{"id": 11, "question": "每天项目记录建议写哪几条？", "notes": "第六节", "expect_top1_file_contains": "建议"}
+{"id": 12, "question": "Agent 进阶讲义里状态管理指什么？", "notes": "模块8-12", "expect_top1_file_contains": "模块8-12"}
+{"id": 13, "question": "面试时如何讲 Reranker 与向量检索区别？", "notes": "RAG", "expect_top1_file_contains": "建议"}
+{"id": 14, "question": "项目验收标准里评估集要多少条问题？", "notes": "第七节", "expect_top1_file_contains": "建议"}
+{"id": 15, "question": "什么情况必须拒答或降级？", "notes": "边界", "expect_top1_file_contains": "建议"}
+{"id": 16, "question": "ReAct 大致是什么思路？", "notes": "Agent", "expect_top1_file_contains": "模块"}
+{"id": 17, "question": "BM25 和向量检索为什么要结合？", "notes": "混合检索", "expect_top1_file_contains": "建议"}
+{"id": 18, "question": "文档里建议的 4-6 周节奏大概怎么排？", "notes": "节奏", "expect_top1_file_contains": "建议"}
+{"id": 19, "question": "客户要求 AI 自动审批合同你怎么回应？", "notes": "边界/面试", "expect_top1_file_contains": "建议"}
+{"id": 20, "question": "先搞哪个项目啊，RAG 还是 Agent？", "notes": "口语/可先开 query rewrite 再跑", "expect_top1_file_contains": "建议"}
+{"id": 21, "question": "LangGraph 那篇路线第一步是啥？", "notes": "指代+口语", "expect_top1_file_contains": "LangGraph"}
+{"id": 22, "question": "模块6里单次推理和自主行动差在哪？", "notes": "模块6-7", "expect_top1_file_contains": "模块6-7"}
+{"id": 23, "question": "RAG 为什么会幻觉？", "notes": "基础", "expect_top1_file_contains": "建议"}
+{"id": 24, "question": "检索不到时工程上一般怎么处理？", "notes": "拒答", "expect_top1_file_contains": "建议"}
+{"id": 25, "question": "Docker 在项目验收里是硬性要求吗？", "notes": "验收", "expect_top1_file_contains": "建议"}
+{"id": 26, "question": "你必须亲自负责的部分有哪些大类？", "notes": "第三节", "expect_top1_file_contains": "建议"}
+{"id": 27, "question": "BadRAG 或投毒大致指什么？", "notes": "安全/进阶", "expect_top1_file_contains": "模块8-12"}

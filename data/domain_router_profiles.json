@@ -1,0 +1,91 @@
+{
+  "version": 2,
+  "description": "各域加权与 embedding 原型短文本；每条 prototype 单独编码后在内存中 centroid（见 app/embedding_router 缓存）。",
+  "domain_defaults": [
+    "agent_design",
+    "ai_governance",
+    "case",
+    "customer_service",
+    "internal_policy",
+    "operations",
+    "product",
+    "security",
+    "ticket_workflow"
+  ],
+  "domain_weight_multipliers": {
+    "security": 1.15,
+    "internal_policy": 1.08,
+    "customer_service": 1.02,
+    "ticket_workflow": 1.0,
+    "ai_governance": 1.06,
+    "product": 1.0,
+    "operations": 1.0,
+    "agent_design": 1.0,
+    "case": 1.0
+  },
+  "prototypes": {
+    "customer_service": [
+      "企业客服与用户支持热线：账号验证码密码 SSO 登录失败",
+      "发票账单退款催单VIP客户体验与话术规范",
+      "客户咨询套餐账单对不齐对公转账电子发票红冲",
+      "一线客服兜底自助入口报错与外呼录音合规",
+      "客户情绪安抚与升级工单前信息收集 checklist"
+    ],
+    "ticket_workflow": [
+      "工单系统 P0 P1 SLA 超时升级与二线 handoff war room",
+      "事故故障复盘 on-call 轮换与会议纪要进工单字段",
+      "退款财务复核必填附件重复工单合并规则",
+      "升级路径 breach 后告警与客户同步口径模板",
+      "客服与研发的工单字段上下文截断补救"
+    ],
+    "internal_policy": [
+      "内部制度文档元数据必填 owner 分级与发布时间线",
+      "数据分级 internal confidential restricted 对齐治理",
+      "知识上架审批流谁签字外链与租户可见矩阵",
+      "制度版本号 status active 与外审材料导出门禁",
+      "口头约定不落库的风险与补足 metadata 的流程"
+    ],
+    "security": [
+      "信息安全 prompt injection 越狱前缀检测与断路",
+      "敏感数据 PII 正则误报白名单 SOC 工单联动审计",
+      "向量库误入库身份证彻底删除回放与渗透发现沉淀",
+      "红队演练越权条目是否进知识库的判定",
+      "恶意删除日志逃避审计请求的拦截与话术"
+    ],
+    "ai_governance": [
+      "AI 应用与 RAG 上线评审门禁灰度放量监控阈值",
+      "模型卡片风险 AB 分流公平记录与高风险人工兜底",
+      "提示词基线变更走哪级审批与评测对齐安全题库",
+      "Agent 自主权边界与人类在环分级策略",
+      "老板口述尽快上线别太啰嗦仍需要清单式评审的情形"
+    ],
+    "product": [
+      "产品 API SDK 开放平台套餐配额租户 feature flag",
+      "幂等与 Webhook 重试退避 OpenAPI 与实现漂移责任",
+      "私有化与 SaaS SLA 差异化及超额提示 UX",
+      "升降级对已生成向量与索引兼容性说明",
+      "对公大客户合同里的并发与限流隐含条款映射"
+    ],
+    "operations": [
+      "向量索引 BM25 Chroma compaction 离线批处理与隔离",
+      "导入重建停机窗口成本控制限流拓扑路由观测",
+      "Embedding 漂移监测阈值召回抖动空结果页面白板排查",
+      "混合检索词典更新频率与冷热备 checksum 校验",
+      "运维 on-call runbook：资源打满降级顺序"
+    ],
+    "agent_design": [
+      "LangGraph Agent 多节点编排子图超时父图补偿",
+      "人机协同 HITL 节点挂载与权限白名单读写工具",
+      "工具调用 JSON schema 校验失败的重试熔断",
+      "多代理路由冲突仲裁与工作流拓扑文档化",
+      "工单机器人的状态机在异常分支如何兜底"
+    ],
+    "case": [
+      "生产事故与用户 bad case 复盘模板时间线与截图",
+      "同类问题多次转案例合并与反哺路由规则",
+      "客服培训的事故案例是否要脱敏与版本冻结",
+      "VIP 工单与普通案例对齐指标差异",
+      "创意写作或非知识场景仍记案例库的边界说明"
+    ]
+  }
+}

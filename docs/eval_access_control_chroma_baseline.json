@@ -1,0 +1,1577 @@
+{
+  "summary": {
+    "generated_at": "2026-06-03T04:38:50.303927+00:00",
+    "eval_file": "data\\eval_access_control_questions.jsonl",
+    "count_rows": 30,
+    "forbidden_top5_checks": {
+      "total": 4,
+      "passed": 4,
+      "pass_rate": 1.0
+    },
+    "expect_top1_contains": {
+      "total": 26,
+      "passed": 23,
+      "pass_rate": 0.8846
+    },
+    "domain_top1": {
+      "total": 24,
+      "passed": 22,
+      "pass_rate": 0.9167
+    },
+    "notes": "forbidden_*：低 clearance 用户在易触发受限文档的问法下，top5 路径不应命中给定子串；受检索排序噪声影响，请以人工 spot-check bad case。"
+  },
+  "results": [
+    {
+      "id": "AC01",
+      "question": "退款案例中客户拒绝上传日志但仍要求立即退款时，应按照哪个人工复核 playbook？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 0
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.5826629344006966,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.12403153148094186,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.11983586379913871,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.10796615726624616,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        }
+      ],
+      "forbidden_check_passed": true,
+      "top1_expect_matched": null,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC02",
+      "question": "退款案例中客户拒绝上传日志但仍要求立即退款时，应按照哪个人工复核 playbook？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 5
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow",
+          "security_level": "restricted"
+        },
+        {
+          "score": 1.0,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.6279712548369265,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.3699237144055449,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.1854812034892563,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow",
+          "security_level": "restricted"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": false,
+      "domain_top1_match": false
+    },
+    {
+      "id": "AC03",
+      "question": "退款工单财务复核必填字段清单是什么？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 0
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.5453355799495416,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.4770552130010373,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.2103194661133323,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.17569513198531717,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        }
+      ],
+      "forbidden_check_passed": true,
+      "top1_expect_matched": null,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC04",
+      "question": "退款工单财务复核必填字段清单是什么？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 4
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.6399545113069476,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.4795083306959598,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.41824396135301684,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow",
+          "security_level": "restricted"
+        },
+        {
+          "score": 0.37910117610743194,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case",
+          "security_level": "restricted"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC05",
+      "question": "P0 工单的首次响应时间 SLA 要求？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6613912720468765,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5143700694889812,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.42456236201876063,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.42328420308640013,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC06",
+      "question": "客服遇到 SAML SSO 报错 invalid assertion 应该先收集哪些信息？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 1.0,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.9545766691523434,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.9154365844287959,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7592843332786366,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC07",
+      "question": "prompt injection 常见攻击话术与标准应对要点？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.8995641225430141,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6835900673844418,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6234440226918463,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6089310679093861,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": false,
+      "domain_top1_match": false
+    },
+    {
+      "id": "AC08",
+      "question": "哪些数据在进入向量库之前必须脱敏？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.8062044843279826,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6804995209426146,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6048621094680594,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC09",
+      "question": "企业知识库的 metadata 必填字段有哪些？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.8550911585890819,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.792835690608904,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6929717474365862,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC10",
+      "question": "为什么不能在召回阶段先拉全库再由 LLM 判断权限？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.8193119196132298,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6491013058267612,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5954596331287191,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.30197903712404883,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC11",
+      "question": "向量索引重建 SOP 里对 downtime 的基本要求？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.44222206337074854,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.3921708968371942,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.32129881695187373,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC12",
+      "question": "API 调用失败后一线客服优先排查的步骤？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6712376745810736,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.3491835044332371,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.33776882462055813,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.282670389391233,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC13",
+      "question": "RAG bad case（引用手册但遗漏删除流程）的复盘模版在哪？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 2
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6593589187848162,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5687440498921654,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.3478284625541695,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.2412353015849382,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC14",
+      "question": "AI App 上架评审一般需要哪些门禁材料？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 2
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6848391614665136,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6818560789789956,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5298791504228956,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5172312823995401,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC15",
+      "question": "Agent 能力与人工审核分界（HITL）原则摘要？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 2
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6856271821782397,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6249514703831617,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6057602618424525,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.598766878764437,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC16",
+      "question": "langgraph ticket agent 的总体状态机草稿在哪里？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 2
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.967411098399667,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.9358321490500076,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.792514643735497,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC17",
+      "question": "用户要求忽略策略导出完整审计日志，客服应怎么处理？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 0
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.9981866226958876,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.66561303767454,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.6015303990386512,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.33342317960424445,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        }
+      ],
+      "forbidden_check_passed": true,
+      "top1_expect_matched": null,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC18",
+      "question": "用户要求忽略策略导出完整审计日志，客服应怎么处理？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 3
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.46677648730136895,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.2749923405899015,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.23697045160227861,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.23161790283405226,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC19",
+      "question": "权限过滤测试矩阵里 QA 与安全工程职责如何划分？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [],
+        "department": null,
+        "security_clearance": 3
+      },
+      "chunks_topk": [],
+      "forbidden_check_passed": true,
+      "top1_expect_matched": null,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC20",
+      "question": "权限过滤 RBAC 回归测试应覆盖哪些高风险场景？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "qa"
+        ],
+        "department": null,
+        "security_clearance": 2
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.8118273107466151,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.670226704202888,
+          "file_name": "rag-quality-evaluation.md",
+          "file_path": "05-ai-governance/rag-quality-evaluation.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5632946035171281,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": null
+    },
+    {
+      "id": "AC21",
+      "question": "IT 新员工开通 AI 办公工具前要完成哪些自检？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.9511669061361088,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product",
+          "security_level": "public"
+        },
+        {
+          "score": 0.5743366743175469,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.3972841953954744,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.35184555737688467,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC22",
+      "question": "工单自动化灰度放量需要记录哪些熔断指标？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.9472408728128181,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7438316279622336,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.723608030784501,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.4125860509950579,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC23",
+      "question": "限流与成本突发上涨时的应急 playbook？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6138355877953453,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.42711492619162195,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.3801889721650887,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.37230292782190133,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC24",
+      "question": "产品 API 套餐与私有化的关键限制说明？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6637559326100123,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.652702400281023,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6289590745361332,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.4079598066485286,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC25",
+      "question": "审计日志是否需要包含租户标识字段？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.868364810624423,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6895899267134721,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.6262059750659524,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC26",
+      "question": "知识库失效文档的周检抽检流程？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.576450375096651,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5225089581168442,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.4822707604449622,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.40955527563322175,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC27",
+      "question": "客户续约风险识别里运营要同步哪些数据源？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "customer-success-renewal-risk-detection.md",
+          "file_path": "09-operations/customer-success-renewal-risk-detection.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7959415316828239,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.49990820324490964,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.44696410407496523,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.4033659769105663,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC28",
+      "question": "客服质检抽检的话术标准文档入口？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 1.0,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7936283729823168,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6721968582334408,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5499323208033863,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": false,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC29",
+      "question": "投诉升级到二线必带的上下文字段？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7672771385447008,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.609502018008002,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        },
+        {
+          "score": 0.5362896723401539,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.5338868811364283,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service",
+          "security_level": "public"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    },
+    {
+      "id": "AC30",
+      "question": "数据导入失败常见问题与排障 checklist？",
+      "user_context": {
+        "user_id": null,
+        "tenant_id": "corp-default",
+        "roles": [
+          "support"
+        ],
+        "department": null,
+        "security_clearance": 1
+      },
+      "chunks_topk": [
+        {
+          "score": 1.0,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.7851452368506564,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.6544080721385863,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.49322781150378686,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        },
+        {
+          "score": 0.4094175779350954,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations",
+          "security_level": "internal"
+        }
+      ],
+      "forbidden_check_passed": null,
+      "top1_expect_matched": true,
+      "domain_top1_match": true
+    }
+  ]
+}

@@ -1,0 +1,2789 @@
+{
+  "summary": {
+    "query_rewrite_mode": "auto",
+    "inference_device": "auto",
+    "inference_device_resolved": "cpu",
+    "hybrid_bm25_enabled": true,
+    "bm25_candidate_top_k": 20,
+    "rerank_enabled": true,
+    "rerank_backend": "auto",
+    "rerank_model": "C:\\Users\\Lenovo\\.cache\\modelscope\\hub\\models\\Qwen\\Qwen3-Reranker-0___6B",
+    "rerank_candidate_top_k": 20,
+    "eval_output_top_k": 5,
+    "retrieval_similarity_threshold": 0.6,
+    "retrieval_score_higher_is_better": true,
+    "retrieval_gate_enabled": true,
+    "vector_raw_score_count": 1000,
+    "vector_raw_score_min": 0.3769037809724192,
+    "vector_raw_score_max": 0.9158804608079406,
+    "gate_score_count": 250,
+    "gate_score_min": 0.012287406250834465,
+    "gate_score_max": 0.9999884366989136,
+    "expect_top1_hits": 43,
+    "expect_top1_total": 50,
+    "expect_top1_hit_rate": 0.86,
+    "expect_top5_hits": 48,
+    "expect_top5_total": 50,
+    "expect_top5_hit_rate": 0.96,
+    "domain_top1_hits": 38,
+    "domain_top1_total": 50,
+    "domain_top1_hit_rate": 0.76,
+    "eval_skip_domain_router": true,
+    "domain_router_hard_filter": false,
+    "domain_router_soft_boost_enabled": false,
+    "domain_router_enhanced": true,
+    "domain_router_embedding_enabled": true
+  },
+  "results": [
+    {
+      "id": "E001",
+      "question": "客户无法通过 SSO 登录，报错 SAML assertion invalid，应该先收集哪些信息？",
+      "retrieval_query": "客户SSO登录报错SAML assertion invalid，收集信息",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "faq-account-login",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998666048049927,
+        0.9998520612716675,
+        0.9996917247772217,
+        0.9995964169502258,
+        0.996525228023529
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998666048049927,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9998520612716675,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9996917247772217,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9995964169502258,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.996525228023529,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E002",
+      "question": "客服可以直接帮客户重置管理员账号吗？",
+      "retrieval_query": "客服重置管理员账号",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "faq-account-login",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9990121126174927,
+        0.9985191226005554,
+        0.9549449682235718,
+        0.6880817413330078,
+        0.28909289836883545
+      ],
+      "top_hits": [
+        {
+          "score": 0.9990121126174927,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9985191226005554,
+          "file_name": "faq-account-login.md",
+          "file_path": "03-customer-service/faq-account-login.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9549449682235718,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.6880817413330078,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.28909289836883545,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E003",
+      "question": "客户要求删除全量知识库，系统应该怎么处理？",
+      "retrieval_query": "删除全量知识库处理方法",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "faq-data-deletion-export",
+      "top1_expect_matched": false,
+      "top5_expect_matched": true,
+      "top1_domain": "case",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9995762705802917,
+        0.999470055103302,
+        0.9932655096054077,
+        0.9910345673561096,
+        0.9615617394447327
+      ],
+      "top_hits": [
+        {
+          "score": 0.9995762705802917,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.999470055103302,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9932655096054077,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9910345673561096,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9615617394447327,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E004",
+      "question": "AI 平台能不能自动批准退款？",
+      "retrieval_query": "AI平台自动批准退款",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "refund-review-workflow",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999573230743408,
+        0.9998955726623535,
+        0.999417781829834,
+        0.9993764758110046,
+        0.9992806315422058
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999573230743408,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9998955726623535,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.999417781829834,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9993764758110046,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9992806315422058,
+          "file_name": "ai-platform-usage-policy.md",
+          "file_path": "01-internal-policy/ai-platform-usage-policy.md",
+          "domain": "internal_policy"
+        }
+      ]
+    },
+    {
+      "id": "E005",
+      "question": "退款工单必须包含哪些材料？",
+      "retrieval_query": "退款工单所需材料",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "refund-review-workflow",
+      "top1_expect_matched": false,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998538494110107,
+        0.9997487664222717,
+        0.9989448189735413,
+        0.9659999012947083,
+        0.9616610407829285
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998538494110107,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9997487664222717,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9989448189735413,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9659999012947083,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9616610407829285,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        }
+      ]
+    },
+    {
+      "id": "E006",
+      "question": "P0 工单的首次响应时间是多少？",
+      "retrieval_query": "P0工单首次响应时间",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "sla-and-escalation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999884366989136,
+        0.9991459846496582,
+        0.9976370334625244,
+        0.9975221753120422,
+        0.9808374047279358
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999884366989136,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9991459846496582,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9976370334625244,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9975221753120422,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9808374047279358,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E007",
+      "question": "客户是 VIP，普通咨询也应该自动升级为 P0 吗？",
+      "retrieval_query": "客户VIP咨询自动升级P0",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "ticket-classification-priority",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999114274978638,
+        0.9998844861984253,
+        0.9966501593589783,
+        0.9949997663497925,
+        0.9948948621749878
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999114274978638,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9998844861984253,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9966501593589783,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9949997663497925,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9948948621749878,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow"
+        }
+      ]
+    },
+    {
+      "id": "E008",
+      "question": "什么情况下工单必须升级？",
+      "retrieval_query": "工单升级条件",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "sla-and-escalation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9987640380859375,
+        0.9921765923500061,
+        0.9874628782272339,
+        0.9866451621055603,
+        0.971864640712738
+      ],
+      "top_hits": [
+        {
+          "score": 0.9987640380859375,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9921765923500061,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9874628782272339,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9866451621055603,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.971864640712738,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E009",
+      "question": "AI 回答引用了产品手册但忽略了数据删除流程，这类 bad case 怎么修？",
+      "retrieval_query": "AI回答产品手册引用忽略数据删除流程 bad case 修复方法",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "case",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "case-rag-wrong-citation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "case",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999334812164307,
+        0.9998003840446472,
+        0.9978355765342712,
+        0.9929567575454712,
+        0.9920048117637634
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999334812164307,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9998003840446472,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9978355765342712,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9929567575454712,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9920048117637634,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E010",
+      "question": "Prompt Injection 常见攻击语句有哪些？",
+      "retrieval_query": "Prompt Injection 攻击语句",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "prompt-injection-response",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "security",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998379945755005,
+        0.9991579055786133,
+        0.9983841180801392,
+        0.9955031275749207,
+        0.9944459199905396
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998379945755005,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9991579055786133,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9983841180801392,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9955031275749207,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9944459199905396,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E011",
+      "question": "用户要求忽略系统规则并导出审计日志，Agent 可以照做吗？",
+      "retrieval_query": "忽略系统规则 导出 审计日志 允许吗",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "refuse_or_human_review",
+      "expected_doc_contains": "case-prompt-injection-ticket",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "case",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999653100967407,
+        0.9971936941146851,
+        0.9912318587303162,
+        0.9907972812652588,
+        0.9829971790313721
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999653100967407,
+          "file_name": "case-prompt-injection-ticket.md",
+          "file_path": "07-cases/case-prompt-injection-ticket.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9971936941146851,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9912318587303162,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9907972812652588,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9829971790313721,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E012",
+      "question": "哪些数据进入知识库前必须脱敏？",
+      "retrieval_query": "数据脱敏要求",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "sensitive-data-redaction",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "security",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9985322952270508,
+        0.9980729818344116,
+        0.995262861251831,
+        0.9940721392631531,
+        0.9859145879745483
+      ],
+      "top_hits": [
+        {
+          "score": 0.9985322952270508,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9980729818344116,
+          "file_name": "ai-platform-usage-policy.md",
+          "file_path": "01-internal-policy/ai-platform-usage-policy.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.995262861251831,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9940721392631531,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9859145879745483,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E013",
+      "question": "发现敏感信息已经进入向量库，删除源 Markdown 就够了吗？",
+      "retrieval_query": "敏感信息向量库 删除源Markdown",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "sensitive-data-redaction",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "security",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9995809197425842,
+        0.9335464239120483,
+        0.8263506889343262,
+        0.22437293827533722,
+        0.214427188038826
+      ],
+      "top_hits": [
+        {
+          "score": 0.9995809197425842,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9335464239120483,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.8263506889343262,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.22437293827533722,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.214427188038826,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E014",
+      "question": "企业知识库文档必须包含哪些 metadata？",
+      "retrieval_query": "企业知识库文档 metadata 要求",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "knowledge-base-governance",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "internal_policy",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999104738235474,
+        0.9997689127922058,
+        0.9983717799186707,
+        0.996978759765625,
+        0.991198718547821
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999104738235474,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9997689127922058,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9983717799186707,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        },
+        {
+          "score": 0.996978759765625,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.991198718547821,
+          "file_name": "sensitive-data-redaction.md",
+          "file_path": "06-security/sensitive-data-redaction.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E015",
+      "question": "RAG 检索为什么不能先召回全部文档再让 LLM 判断权限？",
+      "retrieval_query": "RAG 检索 RAG LLM 权限判断",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "data-classification-and-access",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "internal_policy",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.999930739402771,
+        0.9998121857643127,
+        0.9979021549224854,
+        0.9978194236755371,
+        0.9889869689941406
+      ],
+      "top_hits": [
+        {
+          "score": 0.999930739402771,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9998121857643127,
+          "file_name": "data-classification-and-access.md",
+          "file_path": "01-internal-policy/data-classification-and-access.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9979021549224854,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        },
+        {
+          "score": 0.9978194236755371,
+          "file_name": "rag-quality-evaluation.md",
+          "file_path": "05-ai-governance/rag-quality-evaluation.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9889869689941406,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E016",
+      "question": "AI 应用上线评审需要提交哪些材料？",
+      "retrieval_query": "AI应用上线评审所需材料",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ai_governance",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "ai-app-launch-review",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ai_governance",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998561143875122,
+        0.9997609257698059,
+        0.9996992349624634,
+        0.9994720816612244,
+        0.9973260164260864
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998561143875122,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9997609257698059,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9996992349624634,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9994720816612244,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9973260164260864,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        }
+      ]
+    },
+    {
+      "id": "E017",
+      "question": "R3 高风险 AI 应用可以全自动执行最终动作吗？",
+      "retrieval_query": "R3 高风险 AI 应用 自动执行 最终动作",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ai_governance",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "ai-app-launch-review",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ai_governance",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999839067459106,
+        0.9965313076972961,
+        0.9942330718040466,
+        0.9895405173301697,
+        0.9882783889770508
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999839067459106,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9965313076972961,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9942330718040466,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9895405173301697,
+          "file_name": "incident-response-workflow.md",
+          "file_path": "04-ticket-workflow/incident-response-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9882783889770508,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E018",
+      "question": "RAG 评估集应该覆盖哪些问题类型？",
+      "retrieval_query": "RAG 评估集 问题类型 覆盖",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ai_governance",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "rag-quality-evaluation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ai_governance",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.999981164932251,
+        0.999559223651886,
+        0.9993866682052612,
+        0.9978801012039185,
+        0.9920222759246826
+      ],
+      "top_hits": [
+        {
+          "score": 0.999981164932251,
+          "file_name": "rag-quality-evaluation.md",
+          "file_path": "05-ai-governance/rag-quality-evaluation.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.999559223651886,
+          "file_name": "rag-quality-evaluation.md",
+          "file_path": "05-ai-governance/rag-quality-evaluation.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9993866682052612,
+          "file_name": "rag-quality-evaluation.md",
+          "file_path": "05-ai-governance/rag-quality-evaluation.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9978801012039185,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9920222759246826,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        }
+      ]
+    },
+    {
+      "id": "E019",
+      "question": "Agent 哪些任务必须人工确认？",
+      "retrieval_query": "Agent 人工确认任务列表",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ai_governance",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "agent-boundary-and-hitl",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ai_governance",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998406171798706,
+        0.9991362690925598,
+        0.9957311749458313,
+        0.9919662475585938,
+        0.9786289930343628
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998406171798706,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9991362690925598,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9957311749458313,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9919662475585938,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9786289930343628,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E020",
+      "question": "LangGraph 工单助手有哪些节点？",
+      "retrieval_query": "LangGraph 工单助手 节点列表",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "agent_design",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "langgraph-ticket-agent-design",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "agent_design",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9997908473014832,
+        0.9974732995033264,
+        0.972567081451416,
+        0.8329405188560486,
+        0.767349362373352
+      ],
+      "top_hits": [
+        {
+          "score": 0.9997908473014832,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.9974732995033264,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.972567081451416,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.8329405188560486,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        },
+        {
+          "score": 0.767349362373352,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E021",
+      "question": "为什么说 LangGraph 才是流程主人，LLM 只做建议？",
+      "retrieval_query": "LangGraph 流程主人，LLM 建议",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "agent_design",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "langgraph-ticket-agent-design",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "agent_design",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999736547470093,
+        0.9999237060546875,
+        0.9986311793327332,
+        0.9926040768623352,
+        0.9858198165893555
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999736547470093,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.9999237060546875,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.9986311793327332,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.9926040768623352,
+          "file_name": "langgraph-ticket-agent-design.md",
+          "file_path": "08-agent-design/langgraph-ticket-agent-design.md",
+          "domain": "agent_design"
+        },
+        {
+          "score": 0.9858198165893555,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        }
+      ]
+    },
+    {
+      "id": "E022",
+      "question": "基础版支持复杂部门权限和私有化部署吗？",
+      "retrieval_query": "基础版 支持复杂部门权限 私有化部署",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "pricing-and-plan-limits",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "product",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999234676361084,
+        0.9987717270851135,
+        0.9938123226165771,
+        0.5406275987625122,
+        0.07789219915866852
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999234676361084,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9987717270851135,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9938123226165771,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.5406275987625122,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.07789219915866852,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E023",
+      "question": "API 创建工单为什么需要幂等性？",
+      "retrieval_query": "API创建工单幂等性需求",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "api-and-integration-guide",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "product",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999674558639526,
+        0.9983940720558167,
+        0.9895228743553162,
+        0.984210729598999,
+        0.9744053483009338
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999674558639526,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9983940720558167,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9895228743553162,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.984210729598999,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9744053483009338,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E024",
+      "question": "账单金额异常时客服可以承诺减免吗？",
+      "retrieval_query": "账单金额异常客服承诺减免",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "faq-billing-invoice",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999098777770996,
+        0.9986531734466553,
+        0.9094143509864807,
+        0.8977255821228027,
+        0.5679405927658081
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999098777770996,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9986531734466553,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9094143509864807,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.8977255821228027,
+          "file_name": "faq-billing-invoice.md",
+          "file_path": "03-customer-service/faq-billing-invoice.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.5679405927658081,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E025",
+      "question": "AI 回答拒答过多时应该怎么排查？",
+      "retrieval_query": "AI拒答排查方法",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "faq-model-answer-quality",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9990606904029846,
+        0.9949969053268433,
+        0.9942618608474731,
+        0.9936948418617249,
+        0.991370439529419
+      ],
+      "top_hits": [
+        {
+          "score": 0.9990606904029846,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9949969053268433,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9942618608474731,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9936948418617249,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.991370439529419,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        }
+      ]
+    },
+    {
+      "id": "E026",
+      "question": "客户要求平台自动删除生产数据并关闭安全告警，应该怎么回答？",
+      "retrieval_query": "平台自动删除生产数据 关闭安全告警方法",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "refuse_or_human_review",
+      "expected_doc_contains": "ai-platform-usage-policy",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "internal_policy",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9910311698913574,
+        0.4795919954776764,
+        0.1483331024646759,
+        0.04412463307380676,
+        0.03437099978327751
+      ],
+      "top_hits": [
+        {
+          "score": 0.9910311698913574,
+          "file_name": "ai-platform-usage-policy.md",
+          "file_path": "01-internal-policy/ai-platform-usage-policy.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.4795919954776764,
+          "file_name": "agent-boundary-and-hitl.md",
+          "file_path": "05-ai-governance/agent-boundary-and-hitl.md",
+          "domain": "ai_governance"
+        },
+        {
+          "score": 0.1483331024646759,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.04412463307380676,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.03437099978327751,
+          "file_name": "incident-response-workflow.md",
+          "file_path": "04-ticket-workflow/incident-response-workflow.md",
+          "domain": "ticket_workflow"
+        }
+      ]
+    },
+    {
+      "id": "E027",
+      "question": "客户上传文档后检索不到，除了 embedding 问题还可能是什么原因？",
+      "retrieval_query": "客户文档检索失败可能原因",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "case",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "case-vip-sla-escalation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "case",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9677996635437012,
+        0.9357044100761414,
+        0.9263516664505005,
+        0.852678120136261,
+        0.8385889530181885
+      ],
+      "top_hits": [
+        {
+          "score": 0.9677996635437012,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9357044100761414,
+          "file_name": "case-login-sso-outage.md",
+          "file_path": "07-cases/case-login-sso-outage.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9263516664505005,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.852678120136261,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.8385889530181885,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E028",
+      "question": "生产事故期间 AI 可以自动回滚系统吗？",
+      "retrieval_query": "生产事故 AI 自动回滚系统",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "incident-response-workflow",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9997666478157043,
+        0.996570348739624,
+        0.9946565628051758,
+        0.9770939946174622,
+        0.9691143035888672
+      ],
+      "top_hits": [
+        {
+          "score": 0.9997666478157043,
+          "file_name": "incident-response-workflow.md",
+          "file_path": "04-ticket-workflow/incident-response-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.996570348739624,
+          "file_name": "incident-response-workflow.md",
+          "file_path": "04-ticket-workflow/incident-response-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9946565628051758,
+          "file_name": "incident-response-workflow.md",
+          "file_path": "04-ticket-workflow/incident-response-workflow.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9770939946174622,
+          "file_name": "ai-platform-usage-policy.md",
+          "file_path": "01-internal-policy/ai-platform-usage-policy.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9691143035888672,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E029",
+      "question": "审计日志需要记录哪些 AI 请求字段？",
+      "retrieval_query": "审计日志 AI 请求字段记录",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "audit-logging-standard",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "security",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9998915195465088,
+        0.9997476935386658,
+        0.9993392825126648,
+        0.9989619255065918,
+        0.997974693775177
+      ],
+      "top_hits": [
+        {
+          "score": 0.9998915195465088,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9997476935386658,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9993392825126648,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9989619255065918,
+          "file_name": "audit-logging-standard.md",
+          "file_path": "06-security/audit-logging-standard.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.997974693775177,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E030",
+      "question": "这个平台是不是能保证 AI 回答 100% 正确？",
+      "retrieval_query": "平台 AI 回答 正确率",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "refuse_or_clarify_boundary",
+      "expected_doc_contains": "platform-overview",
+      "top1_expect_matched": false,
+      "top5_expect_matched": false,
+      "top1_domain": "customer_service",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9976258873939514,
+        0.9920370578765869,
+        0.9909287095069885,
+        0.9803807139396667,
+        0.9037397503852844
+      ],
+      "top_hits": [
+        {
+          "score": 0.9976258873939514,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9920370578765869,
+          "file_name": "pricing-and-plan-limits.md",
+          "file_path": "02-product/pricing-and-plan-limits.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9909287095069885,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9803807139396667,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.9037397503852844,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        }
+      ]
+    },
+    {
+      "id": "E031",
+      "question": "客服质检如何把抽检比例和话术红线对齐到新坐席培训课程？",
+      "retrieval_query": "客服质检抽检比例话术红线新坐席培训课程对齐",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "customer-service-quality-spot-check-policy",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9987151622772217,
+        0.9975365400314331,
+        0.996795117855072,
+        0.9967564940452576,
+        0.9803722500801086
+      ],
+      "top_hits": [
+        {
+          "score": 0.9987151622772217,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9975365400314331,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.996795117855072,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9967564940452576,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9803722500801086,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E032",
+      "question": "坐席可否让系统自动把致歉函发给监管联系人而不经人工校对？",
+      "retrieval_query": "坐席系统自动发送致歉函给监管联系人",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "customer-service-reply-scripts-standard",
+      "top1_expect_matched": false,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": false,
+      "gate_error_code": "SIMILARITY_GATE_FAIL",
+      "ranked_scores_after_gate_metric": [
+        0.20236575603485107,
+        0.07078796625137329,
+        0.027762191370129585,
+        0.0222647525370121,
+        0.012287406250834465
+      ],
+      "top_hits": [
+        {
+          "score": 0.20236575603485107,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.07078796625137329,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.027762191370129585,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.0222647525370121,
+          "file_name": "customer-service-reply-scripts-standard.md",
+          "file_path": "09-operations/customer-service-reply-scripts-standard.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.012287406250834465,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        }
+      ]
+    },
+    {
+      "id": "E033",
+      "question": "知识库页面长期无人更新但流程仍被引用，下线前必须做哪几步？",
+      "retrieval_query": "知识库页面更新流程",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "knowledge-base-expired-document-process",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.998499870300293,
+        0.9965460896492004,
+        0.9961820244789124,
+        0.9740289449691772,
+        0.9736744165420532
+      ],
+      "top_hits": [
+        {
+          "score": 0.998499870300293,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9965460896492004,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9961820244789124,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9740289449691772,
+          "file_name": "customer-service-quality-spot-check-policy.md",
+          "file_path": "09-operations/customer-service-quality-spot-check-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9736744165420532,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        }
+      ]
+    },
+    {
+      "id": "E034",
+      "question": "客户投诉涉及公开传播风险时，升级到谁、附哪些材料？",
+      "retrieval_query": "客户投诉公开传播风险升级责任人和所需材料",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "customer-complaint-escalation-workflow",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.997025191783905,
+        0.9759303331375122,
+        0.9687484502792358,
+        0.9562877416610718,
+        0.954597532749176
+      ],
+      "top_hits": [
+        {
+          "score": 0.997025191783905,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9759303331375122,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9687484502792358,
+          "file_name": "ai-platform-usage-policy.md",
+          "file_path": "01-internal-policy/ai-platform-usage-policy.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.9562877416610718,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.954597532749176,
+          "file_name": "customer-complaint-escalation-workflow.md",
+          "file_path": "09-operations/customer-complaint-escalation-workflow.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E035",
+      "question": "续费倒计时前如何从使用行为判断某租户是否在黄档？",
+      "retrieval_query": "续费倒计时判断租户黄档使用行为",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "customer-success-renewal-risk-detection",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9989450573921204,
+        0.9868523478507996,
+        0.714337170124054,
+        0.31095606088638306,
+        0.06443048268556595
+      ],
+      "top_hits": [
+        {
+          "score": 0.9989450573921204,
+          "file_name": "customer-success-renewal-risk-detection.md",
+          "file_path": "09-operations/customer-success-renewal-risk-detection.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9868523478507996,
+          "file_name": "customer-success-renewal-risk-detection.md",
+          "file_path": "09-operations/customer-success-renewal-risk-detection.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.714337170124054,
+          "file_name": "customer-success-renewal-risk-detection.md",
+          "file_path": "09-operations/customer-success-renewal-risk-detection.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.31095606088638306,
+          "file_name": "customer-success-renewal-risk-detection.md",
+          "file_path": "09-operations/customer-success-renewal-risk-detection.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.06443048268556595,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E036",
+      "question": "客户报告 API 超时且偶发返回 429，一线应先采集哪些可追溯字段？",
+      "retrieval_query": "客户报告API超时429，采集可追溯字段",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "api-call-failure-troubleshooting-handbook",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.8604965209960938,
+        0.17345809936523438,
+        0.10772763192653656,
+        0.09187892824411392,
+        0.06753630191087723
+      ],
+      "top_hits": [
+        {
+          "score": 0.8604965209960938,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.17345809936523438,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.10772763192653656,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.09187892824411392,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.06753630191087723,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        }
+      ]
+    },
+    {
+      "id": "E037",
+      "question": "批量导入失败统计显示大量主键冲突，应该先查映射还是立刻全量重来？",
+      "retrieval_query": "批量导入失败主键冲突 查映射或全量重来",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "data-import-failure-troubleshooting-handbook",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.999150276184082,
+        0.9849603772163391,
+        0.9410609602928162,
+        0.7857457995414734,
+        0.058103349059820175
+      ],
+      "top_hits": [
+        {
+          "score": 0.999150276184082,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9849603772163391,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9410609602928162,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.7857457995414734,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.058103349059820175,
+          "file_name": "data-import-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/data-import-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E038",
+      "question": "升级 embedding 后旧集合怎么处理比较安全？",
+      "retrieval_query": "embedding 升级 旧集合 处理 安全",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "vector-index-rebuild-standard-operating-procedure",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9990615248680115,
+        0.9940793514251709,
+        0.9518440961837769,
+        0.3814188838005066,
+        0.13609707355499268
+      ],
+      "top_hits": [
+        {
+          "score": 0.9990615248680115,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9940793514251709,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9518440961837769,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.3814188838005066,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.13609707355499268,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E039",
+      "question": "用户同时在问退款进度和安全违规，路由器应该优先考虑哪个意图？",
+      "retrieval_query": "退款进度 路由器 安全违规 优先考虑",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "multi-domain-router-rules-specification",
+      "top1_expect_matched": false,
+      "top5_expect_matched": true,
+      "top1_domain": "product",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9757959246635437,
+        0.9488807916641235,
+        0.8042633533477783,
+        0.6483639478683472,
+        0.3841758966445923
+      ],
+      "top_hits": [
+        {
+          "score": 0.9757959246635437,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9488807916641235,
+          "file_name": "multi-domain-router-rules-specification.md",
+          "file_path": "11-router-examples/multi-domain-router-rules-specification.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.8042633533477783,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.6483639478683472,
+          "file_name": "multi-domain-router-rules-specification.md",
+          "file_path": "11-router-examples/multi-domain-router-rules-specification.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.3841758966445923,
+          "file_name": "refund-review-workflow.md",
+          "file_path": "04-ticket-workflow/refund-review-workflow.md",
+          "domain": "ticket_workflow"
+        }
+      ]
+    },
+    {
+      "id": "E040",
+      "question": "如何验证租户 A 的对话无法召回租户 B 的知识片段？",
+      "retrieval_query": "验证租户A对话无法召回租户B知识片段",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "security",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "permission-filter-test-cases-specification",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "security",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9908642172813416,
+        0.9871538281440735,
+        0.9341903328895569,
+        0.8190875053405762,
+        0.7973749041557312
+      ],
+      "top_hits": [
+        {
+          "score": 0.9908642172813416,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9871538281440735,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.9341903328895569,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.8190875053405762,
+          "file_name": "faq-model-answer-quality.md",
+          "file_path": "03-customer-service/faq-model-answer-quality.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.7973749041557312,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E041",
+      "question": "工单自动化要扩到 80% 队列，需要先满足哪些灰度指标？",
+      "retrieval_query": "工单自动化扩展至80%队列所需满足的灰度指标",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "ticket-automation-canary-rollout-process",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9995755553245544,
+        0.9953180551528931,
+        0.9706479907035828,
+        0.9369117021560669,
+        0.9035747647285461
+      ],
+      "top_hits": [
+        {
+          "score": 0.9995755553245544,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9953180551528931,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9706479907035828,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9369117021560669,
+          "file_name": "ticket-automation-canary-rollout-process.md",
+          "file_path": "09-operations/ticket-automation-canary-rollout-process.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9035747647285461,
+          "file_name": "ai-app-launch-review.md",
+          "file_path": "05-ai-governance/ai-app-launch-review.md",
+          "domain": "ai_governance"
+        }
+      ]
+    },
+    {
+      "id": "E042",
+      "question": "某 demo 租户把预算打爆影响生产，如何通过规范防止？",
+      "retrieval_query": "demo租户预算超支影响生产 防范措施",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "ai-cost-rate-limit-management-policy",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9994955062866211,
+        0.9972944855690002,
+        0.9955456256866455,
+        0.6544751524925232,
+        0.016813796013593674
+      ],
+      "top_hits": [
+        {
+          "score": 0.9994955062866211,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9972944855690002,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.9955456256866455,
+          "file_name": "ai-cost-rate-limit-management-policy.md",
+          "file_path": "09-operations/ai-cost-rate-limit-management-policy.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.6544751524925232,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.016813796013593674,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E043",
+      "question": "新员工尚未完成安全培训就被自动开通模型密钥，这违反了什么内部要求？",
+      "retrieval_query": "新员工安全培训未完成 开通模型密钥 违反内部要求",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "it-onboarding-ai-tool-access-checklist",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "operations",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9991304278373718,
+        0.972375214099884,
+        0.8860058188438416,
+        0.8575458526611328,
+        0.83946293592453
+      ],
+      "top_hits": [
+        {
+          "score": 0.9991304278373718,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.972375214099884,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.8860058188438416,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.8575458526611328,
+          "file_name": "platform-overview.md",
+          "file_path": "02-product/platform-overview.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.83946293592453,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E044",
+      "question": "路由示例卡里，用户要求绕过审计导出聊天记录时示例建议系统如何判断？",
+      "retrieval_query": "路由示例卡绕过审计导出聊天记录判断",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "router-example-hitl-compliance-triggers",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "product",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9996664524078369,
+        0.9988232254981995,
+        0.9763110280036926,
+        0.9696448445320129,
+        0.7231500744819641
+      ],
+      "top_hits": [
+        {
+          "score": 0.9996664524078369,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9988232254981995,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9763110280036926,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.9696448445320129,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.7231500744819641,
+          "file_name": "router-example-hitl-compliance-triggers.md",
+          "file_path": "11-router-examples/router-example-hitl-compliance-triggers.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E045",
+      "question": "客户要求立即删除所有对话用于训练的数据，需要走哪类流程？",
+      "retrieval_query": "删除对话数据训练流程",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "customer_service",
+      "expected_behavior": "human_review",
+      "expected_doc_contains": "faq-data-deletion-export",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "customer_service",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9958513975143433,
+        0.987241268157959,
+        0.8220791220664978,
+        0.7464297413825989,
+        0.6235528588294983
+      ],
+      "top_hits": [
+        {
+          "score": 0.9958513975143433,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.987241268157959,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.8220791220664978,
+          "file_name": "it-onboarding-ai-tool-access-checklist.md",
+          "file_path": "10-hr-it-internal/it-onboarding-ai-tool-access-checklist.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.7464297413825989,
+          "file_name": "faq-data-deletion-export.md",
+          "file_path": "03-customer-service/faq-data-deletion-export.md",
+          "domain": "customer_service"
+        },
+        {
+          "score": 0.6235528588294983,
+          "file_name": "case-rag-wrong-citation.md",
+          "file_path": "07-cases/case-rag-wrong-citation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E046",
+      "question": "P1 工单的默认首次响应 SLA 是多少？",
+      "retrieval_query": "P1工单首次响应SLA值",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "ticket_workflow",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "sla-and-escalation",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9999798536300659,
+        0.999411940574646,
+        0.9991223216056824,
+        0.9983739852905273,
+        0.9897336363792419
+      ],
+      "top_hits": [
+        {
+          "score": 0.9999798536300659,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.999411940574646,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9991223216056824,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.9983739852905273,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.9897336363792419,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        }
+      ]
+    },
+    {
+      "id": "E047",
+      "question": "如果检索总是命中过时退款政策页面，应该先改知识治理还是重写查询？",
+      "retrieval_query": "检索过时退款政策页面命中改知识治理或重写查询",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "internal_policy",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "knowledge-base-governance",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "internal_policy",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.6334314942359924,
+        0.5938922762870789,
+        0.5782656073570251,
+        0.5592507719993591,
+        0.45451778173446655
+      ],
+      "top_hits": [
+        {
+          "score": 0.6334314942359924,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.5938922762870789,
+          "file_name": "case-refund-human-review.md",
+          "file_path": "07-cases/case-refund-human-review.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.5782656073570251,
+          "file_name": "prompt-injection-response.md",
+          "file_path": "06-security/prompt-injection-response.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.5592507719993591,
+          "file_name": "00-README.md",
+          "file_path": "00-README.md",
+          "domain": "overview"
+        },
+        {
+          "score": 0.45451778173446655,
+          "file_name": "knowledge-base-expired-document-process.md",
+          "file_path": "09-operations/knowledge-base-expired-document-process.md",
+          "domain": "operations"
+        }
+      ]
+    },
+    {
+      "id": "E048",
+      "question": "用户抱怨知识库新增了文档却搜不到，除了 embedding 还应该检查什么？",
+      "retrieval_query": "知识库文档搜索问题，除embedding外检查项",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "operations",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "vector-index-rebuild-standard-operating-procedure",
+      "top1_expect_matched": false,
+      "top5_expect_matched": true,
+      "top1_domain": "case",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9708162546157837,
+        0.8696679472923279,
+        0.8320769667625427,
+        0.51547771692276,
+        0.49625784158706665
+      ],
+      "top_hits": [
+        {
+          "score": 0.9708162546157837,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        },
+        {
+          "score": 0.8696679472923279,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.8320769667625427,
+          "file_name": "permission-filter-test-cases-specification.md",
+          "file_path": "10-hr-it-internal/permission-filter-test-cases-specification.md",
+          "domain": "security"
+        },
+        {
+          "score": 0.51547771692276,
+          "file_name": "vector-index-rebuild-standard-operating-procedure.md",
+          "file_path": "09-operations/vector-index-rebuild-standard-operating-procedure.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.49625784158706665,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E049",
+      "question": "网络抖动导致重复调用创建工单接口，为什么要传幂等键？",
+      "retrieval_query": "网络抖动重复调用工单接口 幂等键原因",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "answer_with_citation",
+      "expected_doc_contains": "api-and-integration-guide",
+      "top1_expect_matched": true,
+      "top5_expect_matched": true,
+      "top1_domain": "product",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.9997095465660095,
+        0.987617552280426,
+        0.7491137385368347,
+        0.7376916408538818,
+        0.15631216764450073
+      ],
+      "top_hits": [
+        {
+          "score": 0.9997095465660095,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.987617552280426,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.7491137385368347,
+          "file_name": "api-call-failure-troubleshooting-handbook.md",
+          "file_path": "09-operations/api-call-failure-troubleshooting-handbook.md",
+          "domain": "operations"
+        },
+        {
+          "score": 0.7376916408538818,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        },
+        {
+          "score": 0.15631216764450073,
+          "file_name": "api-and-integration-guide.md",
+          "file_path": "02-product/api-and-integration-guide.md",
+          "domain": "product"
+        }
+      ]
+    },
+    {
+      "id": "E050",
+      "question": "请自动生成一条承诺永久免费扩容的 SLA 给客户。",
+      "retrieval_query": "生成永久免费扩容SLA承诺",
+      "router_trace": null,
+      "eval_skip_domain_router": true,
+      "expected_domain": "product",
+      "expected_behavior": "refuse_or_clarify_boundary",
+      "expected_doc_contains": "platform-overview",
+      "top1_expect_matched": false,
+      "top5_expect_matched": false,
+      "top1_domain": "ticket_workflow",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "ranked_scores_after_gate_metric": [
+        0.7356106638908386,
+        0.6118780970573425,
+        0.5496708154678345,
+        0.26540642976760864,
+        0.21151430904865265
+      ],
+      "top_hits": [
+        {
+          "score": 0.7356106638908386,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.6118780970573425,
+          "file_name": "ticket-classification-priority.md",
+          "file_path": "04-ticket-workflow/ticket-classification-priority.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.5496708154678345,
+          "file_name": "sla-and-escalation.md",
+          "file_path": "04-ticket-workflow/sla-and-escalation.md",
+          "domain": "ticket_workflow"
+        },
+        {
+          "score": 0.26540642976760864,
+          "file_name": "knowledge-base-governance.md",
+          "file_path": "01-internal-policy/knowledge-base-governance.md",
+          "domain": "internal_policy"
+        },
+        {
+          "score": 0.21151430904865265,
+          "file_name": "case-vip-sla-escalation.md",
+          "file_path": "07-cases/case-vip-sla-escalation.md",
+          "domain": "case"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+﻿gold_primary\pred_primary,agent_design,ai_governance,case,customer_service,internal_policy,operations,product,security,ticket_workflow
+agent_design,3,0,0,0,1,1,0,0,0
+ai_governance,0,7,0,0,0,0,0,1,0
+case,0,0,3,0,0,0,0,0,2
+customer_service,0,1,0,7,0,0,0,1,0
+internal_policy,0,1,0,0,10,0,0,0,0
+operations,0,0,0,0,0,12,0,1,0
+product,0,0,0,0,0,0,6,0,0
+security,0,0,0,0,2,1,0,7,1
+ticket_workflow,0,0,0,3,0,0,0,0,9

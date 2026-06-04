@@ -1,0 +1,40 @@
+# 本地可选：Qdrant 向量库（HTTP 6333）。应用默认仍使用 Chroma 持久化目录。
+# 启动 API + Qdrant：docker compose up -d --build
+# 仅 Qdrant：docker compose up -d qdrant
+# 迁移向量逻辑见 docs/QDRANT-NEXT.md。
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DOCS_DIR: data/docs/enterprise_ai_ops
+      CHROMA_COLLECTION_NAME: enterprise_ai_ops
+      BM25_CORPUS_PATH: data/bm25_enterprise_corpus.jsonl
+      VECTOR_BACKEND: chroma
+      # Qdrant 切换示例（需先 reindex 到 qdrant）：
+      # VECTOR_BACKEND: qdrant
+      # QDRANT_URL: http://qdrant:6333
+      # ZHIPUAI_API_KEY: ${ZHIPUAI_API_KEY:-}
+    volumes:
+      - chroma_data:/app/chroma_db
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+
+volumes:
+  qdrant_storage:
+  chroma_data:
