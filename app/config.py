@@ -299,6 +299,62 @@ class Settings(BaseSettings):
     agent_multi_agent_enabled: bool = Field(
         default=False,
         validation_alias=AliasChoices("AGENT_MULTI_AGENT_ENABLED"),
+    agent_grader_mode: str = Field(
+        default="auto",
+        validation_alias=AliasChoices("AGENT_GRADER_MODE"),
+        description="auto | llm | heuristic?Agent grader ??",
+    )
+    agent_grader_min_query_overlap: float = Field(
+        default=0.12,
+        ge=0.0,
+        le=1.0,
+        validation_alias=AliasChoices("AGENT_GRADER_MIN_QUERY_OVERLAP"),
+        description="??? grader?????? Top ?? n-gram ?????",
+    )
+    agent_max_draft_attempts: int = Field(
+        default=2,
+        ge=1,
+        le=5,
+        validation_alias=AliasChoices("AGENT_MAX_DRAFT_ATTEMPTS"),
+        description="? grounding ?????????????",
+    )
+    agent_rewrite_use_llm: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("AGENT_REWRITE_USE_LLM"),
+        description="????????????? query rewrite?? Key ??? grader_hint/???",
+    )
+    agent_graph_recursion_limit: int = Field(
+        default=20,
+        ge=8,
+        le=100,
+        validation_alias=AliasChoices("AGENT_GRAPH_RECURSION_LIMIT"),
+        description="LangGraph invoke recursion_limit?????????",
+    )
+    api_agent_timeout_seconds: float = Field(
+        default=120.0,
+        ge=10.0,
+        le=600.0,
+        validation_alias=AliasChoices("API_AGENT_TIMEOUT_SECONDS"),
+        description="POST /agent/ticket ??????????",
+    )
+    grounding_strip_unsupported: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("GROUNDING_STRIP_UNSUPPORTED"),
+        description="grounding ????????????? unsupported ??????",
+    )
+    llm_max_retries: int = Field(
+        default=2,
+        ge=0,
+        le=5,
+        validation_alias=AliasChoices("LLM_MAX_RETRIES"),
+    )
+    llm_timeout_seconds: float = Field(
+        default=60.0,
+        ge=5.0,
+        le=300.0,
+        validation_alias=AliasChoices("LLM_TIMEOUT_SECONDS"),
+    )
+
     )
     agent_graph_mode: Literal["linear", "multi"] = Field(
         default="linear",
@@ -336,6 +392,31 @@ class Settings(BaseSettings):
     )
 
     # 检索结果缓存（L1 精确 LRU + 可选 L2 语义；进程内，reindex 后 cache_clear）
+    # HTTP ???????????? IP ? API Key ???
+    api_auth_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("API_AUTH_ENABLED"),
+    )
+    api_keys: str = Field(
+        default="",
+        validation_alias=AliasChoices("API_KEYS"),
+        description="????????????????",
+    )
+    api_rate_limit_rpm: int = Field(
+        default=120,
+        ge=0,
+        le=10_000,
+        validation_alias=AliasChoices("API_RATE_LIMIT_RPM"),
+        description="????????????0=??",
+    )
+    api_max_body_bytes: int = Field(
+        default=65536,
+        ge=0,
+        le=10_000_000,
+        validation_alias=AliasChoices("API_MAX_BODY_BYTES"),
+        description="JSON ??? Content-Length ???0=???",
+    )
+
     cache_enabled: bool = Field(
         default=True,
         validation_alias=AliasChoices("CACHE_ENABLED"),

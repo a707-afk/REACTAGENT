@@ -282,3 +282,15 @@ def sentence_level_grounding(
         method=method,
         feedback=feedback,
     )
+
+
+def strip_unsupported_sentences(text: str, context: str, threshold: float = 0.28) -> str:
+    if not text or not context:
+        return text
+    result = verify_grounding(text, context)
+    unsupported = result.get("unsupported_sentences", [])
+    if not unsupported:
+        return text
+    for s in unsupported:
+        text = text.replace(s, "").strip()
+    return text or "(content filtered by grounding)"

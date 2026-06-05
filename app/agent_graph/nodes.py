@@ -425,8 +425,12 @@ def route_after_policy(state: TicketAgentState) -> str:
 
 
 def route_after_gate(state: TicketAgentState) -> str:
-    """gate 之后一律进入 grader（由 grader 决定是否回环 retrieve）。"""
+    """gate_passed=False 或已 final_action 时直接 finalize，否则 grader。"""
     if state.get("policy_skip_rag"):
+        return "finalize"
+    if not state.get("gate_passed", True):
+        return "finalize"
+    if state.get("final_action"):
         return "finalize"
     return "grader"
 
@@ -446,4 +450,14 @@ def route_after_grader(state: TicketAgentState) -> str:
 
 
 def route_after_hallucination(state: TicketAgentState) -> str:
+    """Grounding 失败→ draft 重试（上限 agent_max_draft_attempts）。"""
+    if state.get("final_action"):
+        return "finalize"
+    passed = state.get("hallucination_passed", True)
+    if passed is False:
+        from app.config import get_settings
+        s = get_settings()
+        max_drafts = getattr(s, "agent_max_draft_attempts", 2)
+        if state.get("draft_attempts", 0) < max_drafts:
+            return "draft"
     return "finalize"

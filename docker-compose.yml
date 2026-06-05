@@ -13,6 +13,7 @@ services:
       QDRANT_COLLECTION_NAME: enterprise_ai_ops
       BM25_CORPUS_PATH: data/bm25_enterprise_corpus.jsonl
       VECTOR_BACKEND: qdrant
+      QDRANT_PATH: /app/data/qdrant_local
       # Qdrant 切换示例（需先 reindex 到 qdrant）：
       # VECTOR_BACKEND: qdrant
       # QDRANT_URL: http://qdrant:6333
