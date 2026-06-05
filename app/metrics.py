@@ -18,6 +18,11 @@ _CACHE_HITS: Any = None
 _stub_requests: dict[tuple[str, str, str], int] = {}
 _stub_request_latency: list[tuple[str, float]] = []
 _stub_retrieve_latency: list[float] = []
+_LLM_CALLS: Any = None
+_LLM_CALLS: Any = None
+_stub_llm_calls: list[dict] = []
+_stub_agent_steps: int = 0
+_stub_rate_limit_hits: int = 0
 _stub_cache_hits: dict[str, int] = {}
 
 
@@ -51,6 +56,23 @@ def _init_prometheus() -> None:
             "rag_cache_hits_total",
             "Retrieval cache hits",
             ["level"],
+            registry=REGISTRY,
+        )
+        _LLM_CALLS = Counter(
+            "rag_llm_calls_total",
+            "LLM API calls",
+            ["model", "success"],
+            registry=REGISTRY,
+        )
+        _AGENT_STEPS = Counter(
+            "rag_agent_steps_total",
+            "Agent graph steps",
+            ["step"],
+            registry=REGISTRY,
+        )
+        _RATE_LIMIT_HITS = Counter(
+            "rag_rate_limit_hits_total",
+            "Rate limit hits (429)",
             registry=REGISTRY,
         )
         _prometheus_available = True
@@ -146,4 +168,44 @@ def metrics_text() -> str:
     for lvl, count in sorted(_stub_cache_hits.items()):
         lines.append(f'rag_cache_hits_total{{level="{lvl}"}} {count}')
 
+    lines.append("# HELP rag_llm_calls_total LLM API calls (stub)")
+    lines.append("# TYPE rag_llm_calls_total counter")
+    for d in _stub_llm_calls:
+        lines.append(f'rag_llm_calls_total{{model="{d["model"]}",success="{d["success"]}"}} 1')
+
+    lines.append("# HELP rag_agent_steps_total Agent graph steps (stub)")
+    lines.append("# TYPE rag_agent_steps_total counter")
+    lines.append(f"rag_agent_steps_total {_stub_agent_steps}")
+
+    lines.append("# HELP rag_rate_limit_hits_total Rate limit hits (stub)")
+    lines.append("# TYPE rag_rate_limit_hits_total counter")
+    lines.append(f"rag_rate_limit_hits_total {_stub_rate_limit_hits}")
+
     return "\n".join(lines) + "\n"
+
+
+def record_llm_call(*, success: bool, duration_s: float, model: str = "") -> None:
+    mdl = model or "unknown"
+    suc = "true" if success else "false"
+    if _prometheus_available and _LLM_CALLS is not None:
+        _LLM_CALLS.labels(model=mdl, success=suc).inc()
+    else:
+        _stub_llm_calls.append({"model": mdl, "success": success, "duration": duration_s})
+
+
+def record_agent_step(step: str) -> None:
+    if _prometheus_available and _AGENT_STEPS is not None:
+        _AGENT_STEPS.labels(step=step).inc()
+    else:
+        _stub_agent_steps += 1
+
+
+def record_rate_limit_hit() -> None:
+    if _prometheus_available and _RATE_LIMIT_HITS is not None:
+        _RATE_LIMIT_HITS.inc()
+    else:
+        _stub_rate_limit_hits += 1
+
+
+def _stub_metrics_line(key: str, help_text: str, value: int | float) -> str:
+    return f"# HELP {key} {help_text}\n# TYPE {key} counter\n{key} {value}\n"

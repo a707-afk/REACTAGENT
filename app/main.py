@@ -13,6 +13,7 @@ from starlette.requests import Request
 
 from app.metrics import metrics_text, record_http_request
 
+from app.api_guard import ApiGuardMiddleware
 from app.config import get_settings
 from app.logging_config import setup_logging
 from app.routes_agent import router as agent_router
@@ -39,6 +40,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
+    app.add_middleware(ApiGuardMiddleware)
 
     @app.middleware("http")
     async def trace_middleware(request: Request, call_next):

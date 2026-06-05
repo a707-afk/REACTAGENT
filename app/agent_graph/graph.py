@@ -194,6 +194,8 @@ def run_ticket_agent(
     customer_tier: str | None = None,
     settings: Settings | None = None,
 ) -> TicketAgentState:
+    settings = settings or get_settings()
+    recursion_limit = getattr(settings, "agent_graph_recursion_limit", 20)
     graph = build_ticket_agent_graph(settings=settings)
     initial = _ticket_agent_initial(
         ticket_id=ticket_id,
@@ -204,4 +206,4 @@ def run_ticket_agent(
         customer_id=customer_id,
         customer_tier=customer_tier,
     )
-    return graph.invoke(initial)
+    return graph.invoke(initial, {"recursion_limit": recursion_limit})

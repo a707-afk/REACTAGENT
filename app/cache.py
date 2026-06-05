@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import logging
 import math
 import threading
@@ -43,6 +44,8 @@ def _settings_fingerprint(settings: Settings) -> str:
         "access_safety": settings.access_post_filter_safety_net,
         "rewrite_mode": settings.query_rewrite_mode,
         "vector_backend": settings.vector_backend,
+        # kb_rev: BM25 语料 mtime ×100，变更时自动失效 L1 缓存
+        "kb_rev": int(os.path.getmtime(getattr(settings, "bm25_corpus_path", "data/bm25_corpus.jsonl")) * 100) if hasattr(settings, "bm25_corpus_path") and os.path.exists(str(getattr(settings, "bm25_corpus_path", ""))) else 0,
     }
     raw = json.dumps(parts, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]

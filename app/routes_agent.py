@@ -43,9 +43,10 @@ def _ticket_response_from_result(
 
 
 @router.post("/agent/ticket", response_model=TicketAgentResponse)
-def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgentResponse:
+async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgentResponse:
     tid = getattr(request.state, "trace_id", None)
     settings = get_settings()
+    timeout_s = getattr(settings, "api_agent_timeout_seconds", 120.0)
     try:
         uc_dict = req.user_context.model_dump() if req.user_context else {}
         result = run_ticket_agent(
