@@ -19,7 +19,7 @@ def _load(name: str) -> dict:
 
 
 def main() -> None:
-    chroma = _load(os.getenv("COMPARE_CHROMA_JSON", "eval_access_control_chroma.json"))
+    chroma = _load(os.getenv("COMPARE_QDRANT_JSON", "eval_access_control_qdrant.json"))
     qdrant = _load(os.getenv("COMPARE_QDRANT_JSON", "eval_access_control_qdrant.json"))
 
     cs, qs = chroma["summary"], qdrant["summary"]
@@ -59,7 +59,7 @@ def main() -> None:
     lines = [
         "# Chroma vs Qdrant 权限评测对比",
         "",
-        f"- Chroma：`eval_access_control_chroma.json`（{cs.get('generated_at', '')}）",
+        f"- Chroma：`eval_access_control_qdrant.json`（{cs.get('generated_at', '')}）",
         f"- Qdrant：`eval_access_control_qdrant.json`（{qs.get('generated_at', '')}）",
         "",
         "## 摘要",

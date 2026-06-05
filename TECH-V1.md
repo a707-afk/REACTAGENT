@@ -24,7 +24,7 @@
 
 | 项 | 选型 | 理由（面试可讲） |
 |----|------|------------------|
-| **向量库** | **Chroma**（持久化 `data/chroma/`） | 学习曲线低、本地可跑；规模大或要强运维时再迁 **Qdrant**（已预留演进方向）。 |
+| **向量库** | **Chroma**（持久化 `data/qdrant_local/`） | 学习曲线低、本地可跑；规模大或要强运维时再迁 **Qdrant**（已预留演进方向）。 |
 | **Embedding** | **Qwen3-Embedding-0.6B**（本地目录） | 向量不出网、成本可控；默认路径为 ModelScope 缓存目录，可通过 `QWEN_EMBEDDING_MODEL_PATH` 覆盖。 |
 | **LLM** | **智谱 `glm-4-flash`** | 延迟与成本适合开发；密钥从 **`ZHIPUAI_API_KEY`** 或 **`ZHIPU_API_KEY`** 读取。 |
 | **Rerank（K2 前置）** | **Qwen3-Reranker-0.6B**（本地 CausalLM yes/no 分）或 **CrossEncoder**（如 BGE） | 宽召回 + 可选 BM25 合并后精排；**门控阈值作用在重排分（Top-1）** 上。 |
@@ -48,7 +48,7 @@ LlamaIndex 侧：`HuggingFace Embedding` 加载上述本地目录（Sentence-Tra
 |------|------|------|
 | POST | `/retrieve` | **向量宽召回 →（可选）CrossEncoder 重排 → Top-K**；`chunk.score` 在 rerank 开启时为 **重排分**。响应含 **`gate_passed`**、**`error_code`**、**`ranked_quality_scores`**（用于对照阈值校准）。 |
 | POST | `/chat` | 同上链路；门控通过后拼上下文调智谱；**无结果或重排分低于阈值时不调用 LLM**，返回 **`refused`** + **`error_code`** + 固定拒答（默认「知识库中无相关内容」）。 |
-| 脚本 | `python scripts/reindex.py` | 读取 `data/docs` 下 `.md`，写入 `data/chroma`（脚本内 `chdir` 到项目根） |
+| 脚本 | `python scripts/reindex.py` | 读取 `data/docs` 下 `.md`，写入 `data/qdrant_local`（脚本内 `chdir` 到项目根） |
 
 开发用静态页：启动服务后访问 `http://127.0.0.1:8000/` → `/static/index.html`。
 

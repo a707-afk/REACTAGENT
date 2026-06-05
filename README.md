@@ -132,14 +132,14 @@ cd c:\Users\Lenovo\Desktop\传统文件项目\rag-kb-project
 
 # 2) 企业索引（Agent live / 带 user_context 的检索）
 $env:DOCS_DIR="data/docs/enterprise_ai_ops"
-$env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
+$env:QDRANT_COLLECTION_NAME="enterprise_ai_ops"
 $env:BM25_CORPUS_PATH="data/bm25_enterprise_corpus.jsonl"
 & "D:\conda\envs\rags\python.exe" scripts/reindex.py
 & "D:\conda\envs\rags\python.exe" scripts/run_eval_agent_ticket_live.py
 
 # 3) 启动 API + 静态页 / Agent 冒烟
 $env:DOCS_DIR="data/docs/enterprise_ai_ops"
-$env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
+$env:QDRANT_COLLECTION_NAME="enterprise_ai_ops"
 $env:BM25_CORPUS_PATH="data/bm25_enterprise_corpus.jsonl"
 Start-Process -NoNewWindow -FilePath "D:\conda\envs\rags\python.exe" -ArgumentList "-m","uvicorn","app.main:app","--host","127.0.0.1","--port","8000"
 # 另开终端：
@@ -202,12 +202,12 @@ PowerShell 显式解释器示例：
 ```powershell
 cd c:\Users\Lenovo\Desktop\传统文件项目\rag-kb-project
 $env:DOCS_DIR="data/docs/enterprise_ai_ops"
-$env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
+$env:QDRANT_COLLECTION_NAME="enterprise_ai_ops"
 $env:BM25_CORPUS_PATH="data/bm25_enterprise_corpus.jsonl"
 & "D:\conda\envs\rags\python.exe" scripts/reindex.py
 
 $env:DOCS_DIR="data/docs/enterprise_ai_ops"
-$env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
+$env:QDRANT_COLLECTION_NAME="enterprise_ai_ops"
 $env:BM25_CORPUS_PATH="data/bm25_enterprise_corpus.jsonl"
 $env:EVAL_QUESTIONS_PATH="data/eval_enterprise_questions.jsonl"
 $env:EVAL_OUTPUT_PATH="docs/eval_enterprise_retrieve.json"
@@ -219,12 +219,12 @@ $env:EVAL_OUTPUT_PATH="docs/eval_enterprise_retrieve.json"
 ```bat
 cd /d C:\Users\Lenovo\Desktop\传统文件项目\rag-kb-project
 set DOCS_DIR=data/docs/enterprise_ai_ops
-set CHROMA_COLLECTION_NAME=enterprise_ai_ops
+set QDRANT_COLLECTION_NAME=enterprise_ai_ops
 set BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
 "D:\conda\envs\rags\python.exe" scripts\reindex.py
 
 set DOCS_DIR=data/docs/enterprise_ai_ops
-set CHROMA_COLLECTION_NAME=enterprise_ai_ops
+set QDRANT_COLLECTION_NAME=enterprise_ai_ops
 set BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
 set EVAL_QUESTIONS_PATH=data/eval_enterprise_questions.jsonl
 set EVAL_OUTPUT_PATH=docs/eval_enterprise_retrieve.json
@@ -236,7 +236,7 @@ set EVAL_OUTPUT_PATH=docs/eval_enterprise_retrieve.json
 ```bat
 cd /d C:\Users\Lenovo\Desktop\传统文件项目\rag-kb-project
 set DOCS_DIR=data/docs/enterprise_ai_ops
-set CHROMA_COLLECTION_NAME=enterprise_ai_ops
+set QDRANT_COLLECTION_NAME=enterprise_ai_ops
 set BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
 "D:\conda\envs\rags\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```

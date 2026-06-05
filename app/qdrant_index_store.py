@@ -1,4 +1,4 @@
-"""Qdrant 向量索引：构建、加载（与 Chroma 共用 collection 名配置）。"""
+"""Qdrant 向量索引：构建、加载（用 qdrant_collection_name 配置）。"""
 from __future__ import annotations
 
 import logging
@@ -38,7 +38,7 @@ def _qdrant_client(settings: Settings) -> QdrantClient:
 
 
 def rebuild_index() -> int:
-    """写入 Qdrant collection（先 embed 再建库，与 Chroma 路径一致）。"""
+    """写入 Qdrant collection（先 embed 再建库，）。"""
     global _index
     settings = get_settings()
     docs_dir = Path(settings.docs_dir).resolve()
@@ -58,7 +58,7 @@ def rebuild_index() -> int:
             logger.info("embedding 进度 %s/%s", i + 1, len(nodes))
 
     client = _qdrant_client(settings)
-    coll_name = settings.chroma_collection_name
+    coll_name = settings.qdrant_collection_name
     try:
         client.delete_collection(coll_name)
     except Exception:
@@ -87,7 +87,7 @@ def get_vector_index() -> VectorStoreIndex:
         return _index
     settings = get_settings()
     client = _qdrant_client(settings)
-    coll_name = settings.chroma_collection_name
+    coll_name = settings.qdrant_collection_name
     try:
         client.get_collection(coll_name)
     except Exception as e:

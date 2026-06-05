@@ -17,7 +17,7 @@
 企业索引对齐（与 run_eval_retrieve.py 一致）::
 
     DOCS_DIR=data/docs/enterprise_ai_ops
-    CHROMA_COLLECTION_NAME=enterprise_ai_ops
+    QDRANT_COLLECTION_NAME=enterprise_ai_ops
     BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
 
 默认 **``RERANK_ENABLED=true``**（与线上一致）。若在 Windows CPU 上出现进程异常退出，设 **``ACCESS_EVAL_USE_RERANK=false``** 或 **``INFERENCE_DEVICE=cuda``**。混合召回默认 **``HYBRID_SCORE_NORMALIZE=true``**（BM25/向量分归一化后再 merge）。
@@ -59,7 +59,7 @@ def _maybe_warn_enterprise_index_alignment(settings, eval_path: Path) -> None:
     if not use_enterprise_check:
         return
     docs_resolved = str(Path(settings.docs_dir).resolve()).lower()
-    coll = (settings.chroma_collection_name or "").strip().lower()
+    coll = (settings.qdrant_collection_name or "").strip().lower()
     bm25_resolved = str(Path(settings.bm25_corpus_path).resolve()).lower()
     docs_ok = _ENTERPRISE_SLUG in docs_resolved
     coll_ok = coll == _ENTERPRISE_SLUG
@@ -71,12 +71,12 @@ def _maybe_warn_enterprise_index_alignment(settings, eval_path: Path) -> None:
         return
     print(
         "WARNING: Access-control eval expects the enterprise_ai_ops index only, but "
-        "DOCS_DIR / CHROMA_COLLECTION_NAME / BM25_CORPUS_PATH do not clearly target it. "
+        "DOCS_DIR / QDRANT_COLLECTION_NAME / BM25_CORPUS_PATH do not clearly target it. "
         "Metrics may be contaminated by learning docs (e.g. 模块6-7, LangGraph学习路线).\n"
         f"  DOCS_DIR (resolved)={Path(settings.docs_dir).resolve()}\n"
-        f"  CHROMA_COLLECTION_NAME={settings.chroma_collection_name}\n"
+        f"  QDRANT_COLLECTION_NAME={settings.qdrant_collection_name}\n"
         f"  BM25_CORPUS_PATH (resolved)={Path(settings.bm25_corpus_path).resolve()}\n"
-        "Fix: DOCS_DIR=data/docs/enterprise_ai_ops, CHROMA_COLLECTION_NAME=enterprise_ai_ops, "
+        "Fix: DOCS_DIR=data/docs/enterprise_ai_ops, QDRANT_COLLECTION_NAME=enterprise_ai_ops, "
         "BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl (or reindex with those vars).\n",
         file=sys.stderr,
     )
@@ -225,7 +225,7 @@ def main() -> None:
             else None
         ),
         "qdrant_path": settings.qdrant_path if settings.vector_backend == "qdrant" else None,
-        "chroma_collection_name": settings.chroma_collection_name,
+        "qdrant_collection_name": settings.qdrant_collection_name,
         "docs_dir": settings.docs_dir,
         "count_rows": len(rows_out),
         "forbidden_top5_checks": {

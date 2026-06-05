@@ -3,7 +3,7 @@
 用法（企业索引已 reindex 后）::
 
     $env:DOCS_DIR="data/docs/enterprise_ai_ops"
-    $env:CHROMA_COLLECTION_NAME="enterprise_ai_ops"
+    $env:QDRANT_COLLECTION_NAME="enterprise_ai_ops"
     python scripts/verify_enterprise_chunk_metadata.py
 """
 from __future__ import annotations
@@ -21,14 +21,15 @@ _REQUIRED = ("domain", "security_level", "audience", "tenant_id")
 
 
 def main() -> None:
-    import chromadb
+    # Chroma removed, use Qdrant
 
     from app.config import get_settings
 
     get_settings.cache_clear()
     settings = get_settings()
-    client = chromadb.PersistentClient(path=str(Path(settings.chroma_persist_dir)))
-    coll_name = settings.chroma_collection_name
+    from app.qdrant_index_store import get_qdrant_client
+client = get_qdrant_client(settings)
+    coll_name = settings.qdrant_collection_name
     coll = client.get_collection(coll_name)
     sample = coll.get(limit=50, include=["metadatas"])
     picked = None

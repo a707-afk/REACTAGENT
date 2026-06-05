@@ -3,7 +3,7 @@
 用法（仓库根目录，与 access eval 相同企业索引变量）::
 
     set DOCS_DIR=data/docs/enterprise_ai_ops
-    set CHROMA_COLLECTION_NAME=enterprise_ai_ops
+    set QDRANT_COLLECTION_NAME=enterprise_ai_ops
     set BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
     python scripts/run_eval_agent_ticket_live.py
 
@@ -73,11 +73,11 @@ def _preflight_index() -> str | None:
     settings = get_settings()
     if _env_truthy("EVAL_ENTERPRISE_STRICT") or _env_truthy("EVAL_STRICT_ENTERPRISE"):
         docs = str(Path(settings.docs_dir).resolve()).lower()
-        coll = (settings.chroma_collection_name or "").strip().lower()
+        coll = (settings.qdrant_collection_name or "").strip().lower()
         if _ENTERPRISE_SLUG not in docs and coll != _ENTERPRISE_SLUG:
             return (
                 "企业索引未对齐：请设置 DOCS_DIR=data/docs/enterprise_ai_ops 且 "
-                "CHROMA_COLLECTION_NAME=enterprise_ai_ops，并运行 python scripts/reindex.py"
+                "QDRANT_COLLECTION_NAME=enterprise_ai_ops，并运行 python scripts/reindex.py"
             )
     try:
         from app.vector_index import get_vector_index
@@ -155,7 +155,7 @@ def main() -> int:
             "\n前置条件:\n"
             "  1. conda activate rags（或指定 python.exe）\n"
             "  2. DOCS_DIR=data/docs/enterprise_ai_ops\n"
-            "  3. CHROMA_COLLECTION_NAME=enterprise_ai_ops\n"
+            "  3. QDRANT_COLLECTION_NAME=enterprise_ai_ops\n"
             "  4. BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl\n"
             "  5. python scripts/reindex.py\n"
             "  6. 可选 ZHIPUAI_API_KEY（draft 占位可缺 Key）",
@@ -191,7 +191,7 @@ def main() -> int:
         "golden": _relative_to_repo(golden),
         "case_ids": sorted(live_ids),
         "vector_backend": settings.vector_backend,
-        "chroma_collection": settings.chroma_collection_name,
+        "qdrant_collection": settings.qdrant_collection_name,
         "docs_dir": str(Path(settings.docs_dir).resolve()),
         "total": total,
         "passed": passed,
@@ -219,7 +219,7 @@ def main() -> int:
         "",
         "| 项 | 说明 |",
         "|----|------|",
-        "| 索引 | `DOCS_DIR` + `CHROMA_COLLECTION_NAME=enterprise_ai_ops` + `reindex.py` |",
+        "| 索引 | `DOCS_DIR` + `QDRANT_COLLECTION_NAME=enterprise_ai_ops` + `reindex.py` |",
         "| 校验 | 建议 `EVAL_ENTERPRISE_STRICT=1` |",
         "| 智谱 | 可选；无 Key 时 `draft_ready` 路径仍可有占位 `draft_reply` |",
         "",

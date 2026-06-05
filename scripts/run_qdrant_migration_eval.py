@@ -10,7 +10,7 @@
     VECTOR_BACKEND=qdrant
     QDRANT_PATH=data/qdrant_local
     DOCS_DIR=data/docs/enterprise_ai_ops
-    CHROMA_COLLECTION_NAME=enterprise_ai_ops
+    QDRANT_COLLECTION_NAME=enterprise_ai_ops
     BM25_CORPUS_PATH=data/bm25_enterprise_corpus.jsonl
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ os.chdir(ROOT)
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-CHROMA_BASELINE = ROOT / "docs" / "eval_access_control_chroma_baseline.json"
+QDRANT_BASELINE = ROOT / "docs" / "eval_access_control_qdrant_baseline.json"
 QDRANT_EVAL_JSON = ROOT / "docs" / "eval_access_control_qdrant.json"
 QDRANT_EVAL_MD = ROOT / "docs" / "ACCESS-CONTROL-EVAL-QDRANT.md"
 RETRIEVE_EVAL_JSON = ROOT / "docs" / "eval_retrieve_qdrant.json"
@@ -38,8 +38,8 @@ def _set_enterprise_qdrant_env() -> None:
     os.environ["QDRANT_PATH"] = os.getenv("QDRANT_PATH", "data/qdrant_local")
     os.environ.pop("QDRANT_URL", None)
     os.environ["DOCS_DIR"] = os.getenv("DOCS_DIR", "data/docs/enterprise_ai_ops")
-    os.environ["CHROMA_COLLECTION_NAME"] = os.getenv(
-        "CHROMA_COLLECTION_NAME", "enterprise_ai_ops"
+    os.environ["QDRANT_COLLECTION_NAME"] = os.getenv(
+        "QDRANT_COLLECTION_NAME", "enterprise_ai_ops"
     )
     os.environ["BM25_CORPUS_PATH"] = os.getenv(
         "BM25_CORPUS_PATH", "data/bm25_enterprise_corpus.jsonl"
@@ -70,14 +70,14 @@ def _compare_access(baseline: dict, qdrant: dict) -> dict:
         rows.append(
             {
                 "metric": k,
-                "chroma_passed": b.get("passed"),
-                "chroma_total": b.get("total"),
+                "qdrant_baseline_passed": b.get("passed"),
+                "qdrant_baseline_total": b.get("total"),
                 "qdrant_passed": q.get("passed"),
                 "qdrant_total": q.get("total"),
                 "delta_passed": (q.get("passed") or 0) - (b.get("passed") or 0),
             }
         )
-    return {"metrics": rows, "chroma_backend": baseline.get("vector_backend", "chroma"), "qdrant_backend": qdrant.get("vector_backend")}
+    return {"metrics": rows, "qdrant_backend": baseline.get("vector_backend", "chroma"), "qdrant_backend": qdrant.get("vector_backend")}
 
 
 def main() -> None:
@@ -99,15 +99,15 @@ def main() -> None:
         label="Access-control eval (Qdrant)",
     )
 
-    baseline = _load_summary(CHROMA_BASELINE) or _load_summary(ROOT / "docs/eval_access_control.json")
+    baseline = _load_summary(QDRANT_BASELINE) or _load_summary(ROOT / "docs/eval_access_control.json")
     qdrant_sum = _load_summary(QDRANT_EVAL_JSON)
     comparison = None
     if baseline and qdrant_sum:
         comparison = _compare_access(baseline, qdrant_sum)
-        out_cmp = ROOT / "docs" / "eval_qdrant_vs_chroma_access.json"
+        out_cmp = ROOT / "docs" / "eval_qdrant_vs_qdrant_access.json"
         out_cmp.write_text(
             json.dumps(
-                {"comparison": comparison, "chroma_summary": baseline, "qdrant_summary": qdrant_sum},
+                {"comparison": comparison, "baseline_summary": baseline, "qdrant_summary": qdrant_sum},
                 ensure_ascii=False,
                 indent=2,
             ),

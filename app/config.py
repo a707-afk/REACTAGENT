@@ -40,12 +40,11 @@ class Settings(BaseSettings):
 
     # 知识库与向量库（相对运行 cwd，一般为 rag-kb-project）
     docs_dir: str = Field(default="data/docs")
-    chroma_persist_dir: str = Field(default="data/chroma")
-    chroma_collection_name: str = Field(default="rag_kb")
-    vector_backend: Literal["auto", "chroma", "qdrant"] = Field(
-        default="auto",
+    qdrant_collection_name: str = Field(default="rag_kb")
+    vector_backend: Literal["qdrant"] = Field(
+        default="qdrant",
         validation_alias=AliasChoices("VECTOR_BACKEND"),
-        description="auto=有 Qdrant 数据则用 qdrant，否则 chroma；显式 chroma/qdrant 强制指定",
+        description="向量后端（仅 qdrant 可用）",
     )
     qdrant_url: str = Field(
         default="http://localhost:6333",

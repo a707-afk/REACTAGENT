@@ -10,15 +10,15 @@ services:
       - "8000:8000"
     environment:
       DOCS_DIR: data/docs/enterprise_ai_ops
-      CHROMA_COLLECTION_NAME: enterprise_ai_ops
+      QDRANT_COLLECTION_NAME: enterprise_ai_ops
       BM25_CORPUS_PATH: data/bm25_enterprise_corpus.jsonl
-      VECTOR_BACKEND: chroma
+      VECTOR_BACKEND: qdrant
       # Qdrant 切换示例（需先 reindex 到 qdrant）：
       # VECTOR_BACKEND: qdrant
       # QDRANT_URL: http://qdrant:6333
       # ZHIPUAI_API_KEY: ${ZHIPUAI_API_KEY:-}
     volumes:
-      - chroma_data:/app/chroma_db
+      - qdrant_data:/app/chroma_db
     depends_on:
       - qdrant
     restart: unless-stopped
@@ -37,4 +37,4 @@ services:
 
 volumes:
   qdrant_storage:
-  chroma_data:
+  qdrant_data:

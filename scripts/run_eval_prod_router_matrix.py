@@ -78,7 +78,7 @@ def main() -> None:
     env_base.update(
         {
             "DOCS_DIR": "data/docs/enterprise_ai_ops",
-            "CHROMA_COLLECTION_NAME": "enterprise_ai_ops",
+            "QDRANT_COLLECTION_NAME": "enterprise_ai_ops",
             "BM25_CORPUS_PATH": "data/bm25_enterprise_corpus.jsonl",
             "EVAL_QUESTIONS_PATH": "data/eval_enterprise_questions.jsonl",
             "DOMAIN_ROUTER_HARD_FILTER": "false",

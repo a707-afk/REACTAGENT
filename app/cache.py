@@ -43,7 +43,6 @@ def _settings_fingerprint(settings: Settings) -> str:
         "access_safety": settings.access_post_filter_safety_net,
         "rewrite_mode": settings.query_rewrite_mode,
         "vector_backend": settings.vector_backend,
-        "chroma_coll": settings.chroma_collection_name,
     }
     raw = json.dumps(parts, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]

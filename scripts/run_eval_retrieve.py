@@ -13,7 +13,7 @@
     python scripts/run_eval_retrieve.py
 
 当问题集文件名为 ``eval_enterprise_questions.jsonl`` 或设置 ``EVAL_ENTERPRISE_STRICT=1`` 时，
-脚本会校验 ``DOCS_DIR``（解析路径含 ``enterprise_ai_ops``）或 ``CHROMA_COLLECTION_NAME`` 为
+脚本会校验 ``DOCS_DIR``（解析路径含 ``enterprise_ai_ops``）或 ``QDRANT_COLLECTION_NAME`` 为
 ``enterprise_ai_ops``，若均未对齐则向 stderr 打印 **WARNING**（避免误用默认 ``rag_kb`` / 学习库索引）。
 若再设置 ``EVAL_STRICT_ENTERPRISE=1``（或 ``true``），校验失败时 **退出码 2**。
 
@@ -54,18 +54,18 @@ def _maybe_warn_enterprise_index_alignment(settings, eval_path: Path) -> None:
     if not use_enterprise_check:
         return
     docs_resolved = str(Path(settings.docs_dir).resolve()).lower()
-    coll = (settings.chroma_collection_name or "").strip().lower()
+    coll = (settings.qdrant_collection_name or "").strip().lower()
     aligned = _ENTERPRISE_SLUG in docs_resolved or coll == _ENTERPRISE_SLUG
     if aligned:
         return
     print(
-        "WARNING: Enterprise eval is active but DOCS_DIR / CHROMA_COLLECTION_NAME do not "
+        "WARNING: Enterprise eval is active but DOCS_DIR / QDRANT_COLLECTION_NAME do not "
         "clearly target the enterprise_ai_ops index. Running against the default rag_kb or "
         "learning-docs corpus will **contaminate** metrics.\n"
         f"  DOCS_DIR (resolved)={Path(settings.docs_dir).resolve()}\n"
-        f"  CHROMA_COLLECTION_NAME={settings.chroma_collection_name}\n"
+        f"  QDRANT_COLLECTION_NAME={settings.qdrant_collection_name}\n"
         "Fix: set DOCS_DIR to a path containing 'enterprise_ai_ops' and/or "
-        "CHROMA_COLLECTION_NAME=enterprise_ai_ops (and align BM25_CORPUS_PATH when using BM25).\n",
+        "QDRANT_COLLECTION_NAME=enterprise_ai_ops (and align BM25_CORPUS_PATH when using BM25).\n",
         file=sys.stderr,
     )
     if _env_truthy("EVAL_STRICT_ENTERPRISE"):
