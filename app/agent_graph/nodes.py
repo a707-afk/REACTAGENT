@@ -386,6 +386,15 @@ def node_hallucination(state: TicketAgentState, *, settings: Settings | None = N
         if not passed:
             out["human_review_required"] = True
             out["ticket_note"] = "幻觉检测未通过，需人工复核草稿"
+            # Grounding strip: remove unsupported sentences for human review
+            try:
+                from app.citation_verify import strip_unsupported_sentences
+                ctx = "\n".join(c.get("text", "") for c in chunks)
+                stripped = strip_unsupported_sentences(draft, ctx)
+                if stripped != draft:
+                    out["draft_reply"] = stripped
+            except Exception:
+                pass
         return out
     except Exception as e:
         logger.warning("hallucination 检测异常，降级放行并标记人工: %s", e)
