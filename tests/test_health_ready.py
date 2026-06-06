@@ -1,6 +1,7 @@
 """Health/ready endpoint test."""
 import pytest
-from app.main import app
+from app.main import create_app
+app = create_app()
 from fastapi.testclient import TestClient
 
 @pytest.fixture
