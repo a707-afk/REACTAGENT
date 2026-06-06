@@ -15,7 +15,7 @@ _tracer: Any = None
 _langfuse: Any = None
 
 
-def setup_telemetry(settings: Settings) -> None:
+def setup_telemetry(settings: Settings | None = None) -> None:
     """应用启动时调用；依赖缺失或开关关闭时静默 no-op。"""
     global _telemetry_initialized, _missing_deps_logged, _tracer, _langfuse
 

@@ -23,6 +23,17 @@ def chat_completion(system_prompt: str, user_prompt: str) -> str:
     t0 = time.perf_counter()
     for attempt in range(max_retries + 1):
         try:
+            # Langfuse trace (disabled by default; set LANGFUSE_ENABLED=true)
+            _langfuse_generation = None
+            lf_client = None
+            if getattr(settings, "langfuse_enabled", False):
+                try:
+                    from app.telemetry import _langfuse
+                    if _langfuse is not None:
+                        lf_client = _langfuse
+                except Exception:
+                    pass
+
             resp = client.chat.completions.create(
                 model=settings.zhipu_chat_model,
                 messages=[
@@ -32,6 +43,17 @@ def chat_completion(system_prompt: str, user_prompt: str) -> str:
                 temperature=0.2,
                 timeout=timeout_s,
             )
+            if lf_client is not None:
+                try:
+                    lf_client.generation(
+                        name="chat_completion",
+                        model=settings.zhipu_chat_model,
+                        input=f"sys:{system_prompt[:200]}\nuser:{user_prompt[:500]}",
+                        output=(choice.content or "")[:1000],
+                        metadata={"model": settings.zhipu_chat_model, "attempt": attempt},
+                    )
+                except Exception:
+                    pass
             choice = resp.choices[0].message
             result = (choice.content or "").strip()
             record_llm_call(success=True, duration_s=time.perf_counter() - t0, model=settings.zhipu_chat_model)

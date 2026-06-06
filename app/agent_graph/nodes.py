@@ -336,7 +336,9 @@ def node_rewrite_query(state: TicketAgentState, *, settings: Settings | None = N
 
 
 def node_hallucination(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
-    """草稿句级 grounding：调用 citation_verify.sentence_level_grounding。"""
+    from app.telemetry import trace_span
+    with trace_span("node_hallucination", ticket_id=state.get("ticket_id", "")[:32]):
+        """草稿句级 grounding：调用 citation_verify.sentence_level_grounding。"""
     _ = settings
     if state.get("policy_skip_rag") or not state.get("grader_passed"):
         return {"audit_trace": _append_audit(state, "hallucination", {"skipped": True})}

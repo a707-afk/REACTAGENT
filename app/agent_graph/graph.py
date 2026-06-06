@@ -195,15 +195,18 @@ def run_ticket_agent(
     settings: Settings | None = None,
 ) -> TicketAgentState:
     settings = settings or get_settings()
-    recursion_limit = getattr(settings, "agent_graph_recursion_limit", 20)
-    graph = build_ticket_agent_graph(settings=settings)
-    initial = _ticket_agent_initial(
-        ticket_id=ticket_id,
-        user_query=user_query,
-        user_context=user_context,
-        trace_id=trace_id,
-        top_k=top_k,
-        customer_id=customer_id,
-        customer_tier=customer_tier,
-    )
-    return graph.invoke(initial, {"recursion_limit": recursion_limit})
+    from app.telemetry import trace_span, setup_telemetry
+    setup_telemetry(settings)
+    with trace_span("run_ticket_agent", ticket_id=ticket_id, trace_id=trace_id or ""):
+            recursion_limit = getattr(settings, "agent_graph_recursion_limit", 20)
+            graph = build_ticket_agent_graph(settings=settings)
+            initial = _ticket_agent_initial(
+                ticket_id=ticket_id,
+                user_query=user_query,
+                user_context=user_context,
+                trace_id=trace_id,
+                top_k=top_k,
+                customer_id=customer_id,
+                customer_tier=customer_tier,
+            )
+            return graph.invoke(initial, {"recursion_limit": recursion_limit})
