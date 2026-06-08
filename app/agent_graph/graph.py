@@ -1,6 +1,8 @@
 """编译 LangGraph 工单工作流。"""
 from __future__ import annotations
 
+import logging
+
 from typing import Any, Iterator
 
 from langgraph.graph import END, START, StateGraph
@@ -128,6 +130,8 @@ def _ticket_agent_initial(
         "loop_detected": False,
         "tool_calls": [],
         "tool_results": [],
+        "_transition_count": 0,
+        "_llm_failures": 0,
     }
 
 

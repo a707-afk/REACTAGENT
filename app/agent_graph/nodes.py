@@ -205,11 +205,22 @@ def node_evidence_gate(state: TicketAgentState, *, settings: Settings | None = N
 
 
 def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """Generate draft reply with LLM circuit breaker protection."""
     settings = settings or get_settings()
     if state.get("policy_skip_rag") or not state.get("gate_passed") or not state.get("grader_passed"):
         return {"audit_trace": _append_audit(state, "draft", {"skipped": True})}
 
+    from app.agent_graph.fault_tolerance import check_circuit_breaker, record_llm_failure, record_llm_success
+
     chunks = state.get("retrieved_chunks") or []
+    if not chunks:
+        return {
+            "draft_reply": settings.refusal_no_results,
+            "human_review_required": True,
+            "audit_trace": _append_audit(state, "draft", {"skipped": True, "reason": "no_chunks"}),
+        }
+
+    # Build prompt from top chunks
     parts: list[str] = []
     for i, c in enumerate(chunks[:5]):
         parts.append(
@@ -220,23 +231,43 @@ def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> 
         f"知识片段：\n{''.join(parts)}\n"
         "请给出建议回复要点（条列即可）。"
     )
+
+    # Circuit breaker: if LLM already failed 3 times, skip and use fallback
+    if check_circuit_breaker(state):
+        logger.warning("draft: LLM circuit breaker open, using fallback")
+        top = chunks[0]
+        draft = (
+            "【自动回复 — LLM 暂不可用】\n"
+            f"相关知识：{top.get('file_name') or '未知'}\n"
+            f"{(top.get('text') or '')[:500]}"
+        )
+        return {
+            "draft_reply": draft,
+            "human_review_required": True,
+            "ticket_note": "LLM circuit breaker open",
+            "audit_trace": _append_audit(state, "draft", {"chars": len(draft), "fallback": "circuit_breaker"}),
+        }
+
     draft: str
     try:
         from app.llm_zhipu import chat_completion
-
         draft = chat_completion(_CHAT_SYSTEM, user_prompt)
+        state["_llm_failures"] = record_llm_success(state)
     except Exception as e:
-        logger.warning("draft LLM 不可用，使用摘录占位: %s", e)
+        state["_llm_failures"] = record_llm_failure(state)
+        logger.warning("draft LLM 不可用 (failures=%s): %s", state.get("_llm_failures", 0), e)
         top = chunks[0] if chunks else {}
         draft = (
-            "【占位草稿：未配置智谱 Key 或调用失败】\n"
+            "【自动回复 — LLM 调用失败】\n"
             f"最相关片段来自 {top.get('file_name') or '未知'}：\n"
-            f"{(top.get('text') or '')[:600]}"
+            f"{(top.get('text') or '')[:600]}\n\n"
+            "如需进一步帮助，请回复「转人工」。"
         )
 
     return {
         "draft_reply": draft,
-        "audit_trace": _append_audit(state, "draft", {"chars": len(draft)}),
+        "human_review_required": state.get("_llm_failures", 0) > 0,
+        "audit_trace": _append_audit(state, "draft", {"chars": len(draft), "llm_failures": state.get("_llm_failures", 0)}),
     }
 
 
@@ -510,7 +541,14 @@ def node_reason(state: TicketAgentState, *, settings: Settings | None = None) ->
                 "audit_trace": _append_audit(state, "reason", {"method": "heuristic", "action": "create_ticket"}),
             }
 
-    # Try LLM-based reasoning if API key is configured
+    # Try LLM-based reasoning if API key is configured and circuit not open
+    if check_circuit_breaker(state):
+        logger.debug("reason: LLM circuit breaker open, skipping LLM call")
+        return {
+            "tool_calls": [],
+            "audit_trace": _append_audit(state, "reason", {"method": "default", "action": "retrieve", "circuit_open": True}),
+        }
+
     try:
         from app.llm_zhipu import chat_completion
 
@@ -542,7 +580,8 @@ def node_reason(state: TicketAgentState, *, settings: Settings | None = None) ->
                     "audit_trace": _append_audit(state, "reason", {"method": "llm", "action": action}),
                 }
     except Exception as e:
-        logger.debug("reason LLM fallback: %s", e)
+        state["_llm_failures"] = record_llm_failure(state)
+        logger.debug("reason LLM fallback (failures=%s): %s", state.get("_llm_failures", 0), e)
 
     # Default: retrieve knowledge base
     return {
