@@ -166,6 +166,7 @@ class TicketAgentRequest(BaseModel):
     user_context: UserContext | None = None
     customer_id: str | None = None
     customer_tier: str | None = None
+    session_id: str | None = None
 
 
 class TicketAgentResponse(BaseModel):
@@ -184,3 +185,5 @@ class TicketAgentResponse(BaseModel):
     policy_result: dict[str, Any] | None = None
     audit_trace: list[dict[str, Any]] = Field(default_factory=list)
     trace_id: str | None = None
+    tool_calls: list[dict[str, Any]] | None = None
+    tool_results: list[dict[str, Any]] | None = None

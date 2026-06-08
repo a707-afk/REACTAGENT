@@ -1,41 +1,44 @@
-# 本地可选：Qdrant 向量库（HTTP 6333）。应用默认仍使用 Chroma 持久化目录。
-# 启动 API + Qdrant：docker compose up -d --build
-# 仅 Qdrant：docker compose up -d qdrant
-# 迁移向量逻辑见 docs/QDRANT-NEXT.md。
+# CS Agent Backend — Docker Compose (dev)
+# Start: docker compose up -d
+# Includes: App server, PostgreSQL, Qdrant (embedded mode)
 
 services:
-  api:
+  app:
     build: .
     ports:
       - "8000:8000"
     environment:
-      DOCS_DIR: data/docs/enterprise_ai_ops
-      QDRANT_COLLECTION_NAME: enterprise_ai_ops
-      BM25_CORPUS_PATH: data/bm25_enterprise_corpus.jsonl
-      VECTOR_BACKEND: qdrant
-      QDRANT_PATH: /app/data/qdrant_local
-      # Qdrant 切换示例（需先 reindex 到 qdrant）：
-      # VECTOR_BACKEND: qdrant
-      # QDRANT_URL: http://qdrant:6333
-      # ZHIPUAI_API_KEY: ${ZHIPUAI_API_KEY:-}
+      - DATABASE_URL=postgresql+asyncpg://csagent:csagent@postgres:5432/csagent
+      - QDRANT_PATH=/data/qdrant_local
+      - ZHIPUAI_API_KEY=${ZHIPUAI_API_KEY:-}
+      - QWEN_EMBEDDING_MODEL_PATH=/models/qwen3-embedding
+      - INFERENCE_DEVICE=cpu
+      - DEBUG=false
     volumes:
-      - qdrant_data:/app/chroma_db
+      - ./data:/data
+      - qdrant_data:/data/qdrant_local
     depends_on:
-      - qdrant
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
-  qdrant:
-    image: qdrant/qdrant:v1.12.5
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_USER=csagent
+      - POSTGRES_PASSWORD=csagent
+      - POSTGRES_DB=csagent
     ports:
-      - "6333:6333"
+      - "5432:5432"
     volumes:
-      - qdrant_storage:/qdrant/storage
-
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U csagent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  qdrant_storage:
+  pgdata:
   qdrant_data:

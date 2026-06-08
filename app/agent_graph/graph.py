@@ -11,7 +11,11 @@ from app.config import Settings, get_settings
 
 
 def build_ticket_agent_graph(*, settings: Settings | None = None):
-    """返回已 compile 的图（可 invoke）。"""
+    """返回已 compile 的图（可 invoke）。
+
+    流程: START → policy → reason → [tool_exec] → retrieve → gate → grader
+              → [rewrite loop] → draft → hallucination → finalize → END
+    """
     settings = settings or get_settings()
     if getattr(settings, "agent_multi_agent_enabled", False) or (
         getattr(settings, "agent_graph_mode", "linear") == "multi"
@@ -22,6 +26,12 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
 
     def _policy(s: TicketAgentState) -> dict[str, Any]:
         return nodes.node_policy(s, settings=settings)
+
+    def _reason(s: TicketAgentState) -> dict[str, Any]:
+        return nodes.node_reason(s, settings=settings)
+
+    def _tool_exec(s: TicketAgentState) -> dict[str, Any]:
+        return nodes.node_tool_exec(s, settings=settings)
 
     def _retrieve(s: TicketAgentState) -> dict[str, Any]:
         return nodes.node_retrieve(s, settings=settings)
@@ -43,6 +53,8 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
 
     g: StateGraph = StateGraph(TicketAgentState)
     g.add_node("policy", _policy)
+    g.add_node("reason", _reason)
+    g.add_node("tool_exec", _tool_exec)
     g.add_node("retrieve", _retrieve)
     g.add_node("gate", _gate)
     g.add_node("grader", _grader)
@@ -51,8 +63,18 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g.add_node("hallucination", _hallucination)
     g.add_node("finalize", nodes.node_finalize)
 
+    # Edges
     g.add_edge(START, "policy")
     g.add_conditional_edges("policy", nodes.route_after_policy, {
+        "retrieve": "reason",
+        "finalize": "finalize",
+    })
+    g.add_conditional_edges("reason", nodes.route_after_reason, {
+        "tool_exec": "tool_exec",
+        "retrieve": "retrieve",
+        "finalize": "finalize",
+    })
+    g.add_conditional_edges("tool_exec", nodes.route_after_tool_exec, {
         "retrieve": "retrieve",
         "finalize": "finalize",
     })
@@ -84,6 +106,8 @@ def _ticket_agent_initial(
     top_k: int = 5,
     customer_id: str | None = None,
     customer_tier: str | None = None,
+    session_id: str | None = None,
+    conversation_history: str | None = None,
 ) -> TicketAgentState:
     return {
         "ticket_id": ticket_id,
@@ -93,6 +117,8 @@ def _ticket_agent_initial(
         "top_k": top_k,
         "customer_id": customer_id,
         "customer_tier": customer_tier,
+        "session_id": session_id,
+        "conversation_history": conversation_history,
         "audit_trace": [],
         "human_review_required": False,
         "gate_passed": True,
@@ -100,6 +126,8 @@ def _ticket_agent_initial(
         "max_iterations": nodes.MAX_AGENT_ITERATIONS,
         "rewrite_history": [],
         "loop_detected": False,
+        "tool_calls": [],
+        "tool_results": [],
     }
 
 
@@ -125,6 +153,8 @@ def state_to_ticket_response_dict(
         "gate_error_code": state.get("gate_error_code"),
         "router_trace": state.get("router_trace"),
         "policy_result": state.get("policy_result"),
+        "tool_calls": state.get("tool_calls"),
+        "tool_results": state.get("tool_results"),
         "audit_trace": list(state.get("audit_trace") or []),
         "trace_id": trace_id,
     }
@@ -139,6 +169,8 @@ def iter_ticket_agent_sse(
     top_k: int = 5,
     customer_id: str | None = None,
     customer_tier: str | None = None,
+    session_id: str | None = None,
+    conversation_history: str | None = None,
     settings: Settings | None = None,
 ) -> Iterator[tuple[str, Any]]:
     """按 LangGraph 节点更新 yield (event_type, payload)。"""
@@ -151,6 +183,8 @@ def iter_ticket_agent_sse(
         top_k=top_k,
         customer_id=customer_id,
         customer_tier=customer_tier,
+        session_id=session_id,
+        conversation_history=conversation_history,
     )
     final_state: TicketAgentState = dict(initial)
     seen_steps = 0
@@ -192,21 +226,25 @@ def run_ticket_agent(
     top_k: int = 5,
     customer_id: str | None = None,
     customer_tier: str | None = None,
+    session_id: str | None = None,
+    conversation_history: str | None = None,
     settings: Settings | None = None,
 ) -> TicketAgentState:
     settings = settings or get_settings()
     from app.telemetry import trace_span, setup_telemetry
     setup_telemetry(settings)
     with trace_span("run_ticket_agent", ticket_id=ticket_id, trace_id=trace_id or ""):
-            recursion_limit = getattr(settings, "agent_graph_recursion_limit", 20)
-            graph = build_ticket_agent_graph(settings=settings)
-            initial = _ticket_agent_initial(
-                ticket_id=ticket_id,
-                user_query=user_query,
-                user_context=user_context,
-                trace_id=trace_id,
-                top_k=top_k,
-                customer_id=customer_id,
-                customer_tier=customer_tier,
-            )
-            return graph.invoke(initial, {"recursion_limit": recursion_limit})
+        recursion_limit = getattr(settings, "agent_graph_recursion_limit", 20)
+        graph = build_ticket_agent_graph(settings=settings)
+        initial = _ticket_agent_initial(
+            ticket_id=ticket_id,
+            user_query=user_query,
+            user_context=user_context,
+            trace_id=trace_id,
+            top_k=top_k,
+            customer_id=customer_id,
+            customer_tier=customer_tier,
+            session_id=session_id,
+            conversation_history=conversation_history,
+        )
+        return graph.invoke(initial, {"recursion_limit": recursion_limit})

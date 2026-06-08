@@ -49,16 +49,7 @@ async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgent
     timeout_s = getattr(settings, "api_agent_timeout_seconds", 120.0)
     try:
         uc_dict = req.user_context.model_dump() if req.user_context else {}
-        result = run_ticket_agent(
-            ticket_id=req.ticket_id,
-            user_query=req.user_query,
-            user_context=uc_dict,
-            trace_id=tid,
-            top_k=req.top_k,
-            customer_id=req.customer_id,
-            customer_tier=req.customer_tier,
-            settings=settings,
-        )
+        result = run_ticket_agent(\n            ticket_id=req.ticket_id,\n            user_query=req.user_query,\n            user_context=uc_dict,\n            trace_id=tid,\n            top_k=req.top_k,\n            customer_id=req.customer_id,\n            customer_tier=req.customer_tier,\n            session_id=req.session_id,\n            settings=settings,\n        )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e
 
@@ -82,16 +73,7 @@ def _agent_ticket_stream_events(req: TicketAgentRequest, tid: str | None) -> Ite
     settings = get_settings()
     uc_dict = req.user_context.model_dump() if req.user_context else {}
     try:
-        for event_type, payload in iter_ticket_agent_sse(
-            ticket_id=req.ticket_id,
-            user_query=req.user_query,
-            user_context=uc_dict,
-            trace_id=tid,
-            top_k=req.top_k,
-            customer_id=req.customer_id,
-            customer_tier=req.customer_tier,
-            settings=settings,
-        ):
+        for event_type, payload in iter_ticket_agent_sse(\n            ticket_id=req.ticket_id,\n            user_query=req.user_query,\n            user_context=uc_dict,\n            trace_id=tid,\n            top_k=req.top_k,\n            customer_id=req.customer_id,\n            customer_tier=req.customer_tier,\n            session_id=req.session_id,\n            settings=settings,\n        ):
             yield format_sse_event(event_type, payload)
     except RuntimeError as e:
         yield format_sse_event("error", {"message": str(e), "status_code": 503})

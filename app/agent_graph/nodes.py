@@ -472,3 +472,141 @@ def route_after_hallucination(state: TicketAgentState) -> str:
         if state.get("draft_attempts", 0) < max_drafts:
             return "draft"
     return "finalize"
+
+
+# ── Agent Tool Reasoning Nodes (Phase: tools integration) ──
+
+REASON_SYSTEM = (
+    "你是企业客服 AI Agent。分析用户问题，决定下一步行动。"
+    "输出严格 JSON：{\"action\": \"retrieve|create_ticket|escalate|direct_answer\", \"reason\": \"...\", \"tool_args\": {...}}"
+)
+
+
+def node_reason(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """Agent reasoning: classify intent and decide which tools to call."""
+    settings = settings or get_settings()
+    q = (state.get("user_query") or "").strip()
+    if state.get("policy_skip_rag"):
+        return {"audit_trace": _append_audit(state, "reason", {"skipped": True})}
+
+    # Heuristic pre-filter: fast pattern matching before LLM call
+    q_lower = q.lower()
+    escalate_keywords = ["人工", "转人工", "找经理", "投诉", "投诉你们", "叫你们领导", "human agent", "speak to manager", "supervisor"]
+    ticket_keywords = ["建工单", "创建工单", "提交工单", "上报", "create ticket", "open ticket", "file a ticket"]
+
+    history = state.get("conversation_history") or ""
+
+    for kw in escalate_keywords:
+        if kw in q_lower:
+            return {
+                "tool_calls": [{"name": "escalate", "args": {"reason": q[:200], "urgency": "immediate"}}],
+                "audit_trace": _append_audit(state, "reason", {"method": "heuristic", "action": "escalate"}),
+            }
+
+    for kw in ticket_keywords:
+        if kw in q_lower:
+            return {
+                "tool_calls": [{"name": "create_ticket", "args": {"title": q[:200], "description": q, "priority": "p2_medium"}}],
+                "audit_trace": _append_audit(state, "reason", {"method": "heuristic", "action": "create_ticket"}),
+            }
+
+    # Try LLM-based reasoning if API key is configured
+    try:
+        from app.llm_zhipu import chat_completion
+
+        user_prompt = (
+            f"对话历史：{history or '无'}\n"
+            f"用户问题：{q}\n"
+            "可用的工具：retrieve_kb（搜索知识库）、create_ticket（建工单）、escalate（转人工）。"
+        )
+        raw = chat_completion(REASON_SYSTEM, user_prompt)
+        import json, re
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if m:
+            obj = json.loads(m.group())
+            action = obj.get("action", "retrieve")
+            tool_name = None
+            if action == "escalate":
+                tool_name = "escalate"
+            elif action == "create_ticket":
+                tool_name = "create_ticket"
+            elif action == "retrieve":
+                tool_name = "retrieve_kb"
+
+            tool_args = obj.get("tool_args", {})
+            if not isinstance(tool_args, dict):
+                tool_args = {}
+            if tool_name and tool_name != "retrieve_kb":
+                return {
+                    "tool_calls": [{"name": tool_name, "args": tool_args}],
+                    "audit_trace": _append_audit(state, "reason", {"method": "llm", "action": action}),
+                }
+    except Exception as e:
+        logger.debug("reason LLM fallback: %s", e)
+
+    # Default: retrieve knowledge base
+    return {
+        "tool_calls": [],
+        "audit_trace": _append_audit(state, "reason", {"method": "default", "action": "retrieve"}),
+    }
+
+
+def node_tool_exec(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """Execute tool calls decided by the reasoning node."""
+    _ = settings
+    tool_calls = list(state.get("tool_calls") or [])
+    if not tool_calls:
+        return {"audit_trace": _append_audit(state, "tool_exec", {"skipped": True})}
+
+    from app.agent.tools import execute_tool
+
+    results: list[dict[str, Any]] = []
+    escalated = False
+    ticket_created = False
+
+    for tc in tool_calls:
+        name = str(tc.get("name", ""))
+        args = dict(tc.get("args", {}))
+        tr = execute_tool(name, state, args)
+        results.append({"name": name, "success": tr.success, "data": tr.data, "error": tr.error})
+        if name == "escalate" and tr.success:
+            escalated = True
+        if name == "create_ticket" and tr.success:
+            ticket_created = True
+
+    out: dict[str, Any] = {
+        "tool_results": results,
+        "audit_trace": _append_audit(state, "tool_exec", {
+            "calls": len(tool_calls), "ok": sum(1 for r in results if r["success"])
+        }),
+    }
+
+    if escalated:
+        out["final_action"] = "escalated"
+        out["human_review_required"] = True
+        out["ticket_note"] = "已转人工二线处理"
+        out["draft_reply"] = "已为您转接人工客服，请稍候。"
+    elif ticket_created:
+        out["final_action"] = "ticket_created"
+        out["ticket_note"] = "已创建工单"
+
+    return out
+
+
+def route_after_reason(state: TicketAgentState) -> str:
+    """After reasoning: go to tool_exec if tool calls exist, otherwise retrieve."""
+    if state.get("policy_skip_rag"):
+        return "finalize"
+    tool_calls = state.get("tool_calls") or []
+    non_retrieve = [tc for tc in tool_calls if tc.get("name") != "retrieve_kb"]
+    if non_retrieve:
+        return "tool_exec"
+    return "retrieve"
+
+
+def route_after_tool_exec(state: TicketAgentState) -> str:
+    """After tool execution: if escalated/ticketed, finalize; otherwise retrieve."""
+    if state.get("final_action") in ("escalated", "ticket_created"):
+        return "finalize"
+    # Still need to search knowledge base
+    return "retrieve"

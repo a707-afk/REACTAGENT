@@ -46,3 +46,9 @@ class TicketAgentState(TypedDict, total=False):
     ticket_note: str | None
 
     audit_trace: list[dict[str, Any]]
+
+    # Agent Tools (Phase: tools integration)
+    tool_calls: list[dict[str, Any]]       # LLM-decided tool invocations
+    tool_results: list[dict[str, Any]]     # tool execution results
+    session_id: str | None                 # multi-turn session binding
+    conversation_history: str | None       # injected context for LLM prompt
