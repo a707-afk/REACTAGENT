@@ -16,6 +16,8 @@ from app.metrics import metrics_text, record_http_request
 from app.api_guard import ApiGuardMiddleware
 from app.config import get_settings
 from app.logging_config import setup_logging
+from app.api.chat import router as api_chat_router
+from app.api.tickets import router as api_tickets_router
 from app.routes_agent import router as agent_router
 from app.routes_rag import router as rag_router
 
@@ -67,6 +69,8 @@ def create_app() -> FastAPI:
         return response
 
     app.include_router(rag_router)
+    app.include_router(api_chat_router)
+    app.include_router(api_tickets_router)
     app.include_router(agent_router)
 
     @app.get("/health")
