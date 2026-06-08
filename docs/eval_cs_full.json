@@ -1,0 +1,201 @@
+{
+  "config": {
+    "collection": "cs_agent",
+    "size": "full"
+  },
+  "summary": {
+    "total_queries": 20,
+    "failed": 0,
+    "precision_at_3": 0.5,
+    "precision_at_5": 0.52,
+    "recall_at_5": 0.8667,
+    "mrr": 0.5792,
+    "domain_accuracy": 0.1,
+    "latency_p50": 2.784,
+    "latency_p95": 47.296,
+    "latency_p99": 47.296,
+    "throughput_qps": 0.183
+  },
+  "detail": [
+    {
+      "query": "How do I cancel my order?",
+      "expected_domain": "order",
+      "routed_domain": "customer_service",
+      "hits": 5,
+      "top_score": 0.98583984375,
+      "precision_at_5": 1.0,
+      "latency_s": 47.296
+    },
+    {
+      "query": "I want to return a defective product and get a refund",
+      "expected_domain": "returns",
+      "routed_domain": "customer_service",
+      "hits": 5,
+      "top_score": 0.455078125,
+      "precision_at_5": 1.0,
+      "latency_s": 2.769
+    },
+    {
+      "query": "Where is my package? I haven't received it yet",
+      "expected_domain": "delivery",
+      "routed_domain": "internal_policy",
+      "hits": 5,
+      "top_score": 0.98291015625,
+      "precision_at_5": 0.2,
+      "latency_s": 2.026
+    },
+    {
+      "query": "Can I change my shipping address after placing the order?",
+      "expected_domain": "delivery",
+      "routed_domain": "delivery",
+      "hits": 5,
+      "top_score": 0.91064453125,
+      "precision_at_5": 1.0,
+      "latency_s": 2.369
+    },
+    {
+      "query": "I was charged twice for the same subscription this month",
+      "expected_domain": "billing",
+      "routed_domain": "customer_service",
+      "hits": 5,
+      "top_score": 1.0,
+      "precision_at_5": 0.8,
+      "latency_s": 2.471
+    },
+    {
+      "query": "How do I update my payment method for the monthly plan?",
+      "expected_domain": "billing",
+      "routed_domain": "customer_service",
+      "hits": 5,
+      "top_score": 0.93408203125,
+      "precision_at_5": 0.8,
+      "latency_s": 2.301
+    },
+    {
+      "query": "What is the price difference between Basic and Enterprise plans?",
+      "expected_domain": "sales",
+      "routed_domain": "product",
+      "hits": 5,
+      "top_score": 0.90576171875,
+      "precision_at_5": 0.4,
+      "latency_s": 3.031
+    },
+    {
+      "query": "I forgot my password and can't log in to my account",
+      "expected_domain": "account",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.98828125,
+      "precision_at_5": 1.0,
+      "latency_s": 2.893
+    },
+    {
+      "query": "How do I delete my account permanently?",
+      "expected_domain": "account",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.92822265625,
+      "precision_at_5": 1.0,
+      "latency_s": 2.751
+    },
+    {
+      "query": "The application keeps crashing when I try to open reports",
+      "expected_domain": "tech_support",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.9990234375,
+      "precision_at_5": 0.0,
+      "latency_s": 2.986
+    },
+    {
+      "query": "VPN connection drops every few minutes after the latest update",
+      "expected_domain": "tech_support",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.9990234375,
+      "precision_at_5": 0.2,
+      "latency_s": 2.784
+    },
+    {
+      "query": "My printer is not recognized by the new workstation",
+      "expected_domain": "it_support",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.89111328125,
+      "precision_at_5": 0.0,
+      "latency_s": 8.184
+    },
+    {
+      "query": "Is the service down right now? I can't access anything",
+      "expected_domain": "outages",
+      "routed_domain": "product",
+      "hits": 5,
+      "top_score": 0.99951171875,
+      "precision_at_5": 0.0,
+      "latency_s": 2.146
+    },
+    {
+      "query": "I want to file a complaint about the rude customer service agent",
+      "expected_domain": "feedback",
+      "routed_domain": "ai_governance",
+      "hits": 5,
+      "top_score": 0.8955078125,
+      "precision_at_5": 1.0,
+      "latency_s": 3.684
+    },
+    {
+      "query": "How do I request time off through the HR portal?",
+      "expected_domain": "hr",
+      "routed_domain": "ticket_workflow",
+      "hits": 5,
+      "top_score": 0.96826171875,
+      "precision_at_5": 0.0,
+      "latency_s": 2.917
+    },
+    {
+      "query": "How do I set up two-factor authentication on my account?",
+      "expected_domain": "product_support",
+      "routed_domain": "security",
+      "hits": 5,
+      "top_score": 0.94189453125,
+      "precision_at_5": 0.0,
+      "latency_s": 3.478
+    },
+    {
+      "query": "What are the system requirements for installing the desktop client?",
+      "expected_domain": "product_support",
+      "routed_domain": "product",
+      "hits": 5,
+      "top_score": 0.10809326171875,
+      "precision_at_5": 0.0,
+      "latency_s": 3.648
+    },
+    {
+      "query": "I need to speak to a human agent, this is urgent",
+      "expected_domain": "customer_service",
+      "routed_domain": "ai_governance",
+      "hits": 5,
+      "top_score": 0.75634765625,
+      "precision_at_5": 1.0,
+      "latency_s": 2.443
+    },
+    {
+      "query": "Can I get a callback from your support team?",
+      "expected_domain": "customer_service",
+      "routed_domain": "customer_service",
+      "hits": 5,
+      "top_score": 0.9375,
+      "precision_at_5": 1.0,
+      "latency_s": 2.649
+    },
+    {
+      "query": "Do you offer discounts for non-profit organizations?",
+      "expected_domain": "sales",
+      "routed_domain": "product",
+      "hits": 5,
+      "top_score": 0.002712249755859375,
+      "precision_at_5": 0.0,
+      "latency_s": 2.688
+    }
+  ]
+}
