@@ -24,6 +24,33 @@ _DOMAIN_KEYWORDS: dict[str, tuple[str, ...]] = {
     "operations": ("导入", "索引", "向量", "重建", "成本", "限流", "路由"),
     "agent_design": ("LangGraph", "节点", "工作流"),
     "case": ("案例", "复盘", "bad case"),
+
+    # Customer Service Agent domains (added for cs_agent corpus)
+    "tech_support": ("error", "bug", "crash", "not working", "not turning on", "driver", "update",
+                    "firmware", "connectivity", "connection", "vpn", "troubleshoot"),
+    "billing": ("invoice", "charge", "charged", "payment", "billing", "billed",
+               "credit card", "subscription", "overcharge", "price", "pricing"),
+    "account": ("login", "password", "credential", "reset", "sign in", "unlock",
+               "recover account", "create account", "delete account", "profile"),
+    "order": ("order", "purchase", "cancel order", "cancel purchase", "cart",
+             "checkout", "track order", "order number"),
+    "returns": ("return", "refund", "exchange", "refund policy", "warranty",
+               "money back", "return shipping"),
+    "delivery": ("shipping", "delivery", "tracking", "package", "delivered",
+               "not received", "lost package", "delivery address"),
+    "outages": ("down", "outage", "offline", "disruption", "not accessible",
+              "service disruption", "maintenance", "degradation"),
+    "sales": ("pricing", "quote", "enterprise", "discount", "license",
+            "demo", "trial", "sales inquiry", "procurement"),
+    "feedback": ("complaint", "feedback", "review", "unhappy", "dissatisfied",
+               "suggestion", "newsletter", "unsubscribe"),
+    "hr": ("onboarding", "employee", "benefits", "payroll", "leave",
+          "hr issue", "termination", "new hire"),
+    "it_support": ("workstation", "laptop", "printer", "projector", "asset",
+                 "office", "license activation", "deploy", "software install"),
+    "product_support": ("setup", "install", "configuration", "compatibility",
+                      "feature", "how to use", "user manual"),
+    "general": ("generic", "miscellaneous"),
 }
 
 _KNOWN_DOMAINS = tuple(sorted(_DOMAIN_KEYWORDS.keys()))

@@ -1,7 +1,13 @@
 """智谱 GLM（OpenAI 兼容端点）。"""
 from __future__ import annotations
 
+import logging
+import time
+
 from app.config import get_settings
+from app.metrics import record_llm_call
+
+logger = logging.getLogger(__name__)
 
 
 def chat_completion(system_prompt: str, user_prompt: str) -> str:
