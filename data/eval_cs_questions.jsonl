@@ -1,0 +1,30 @@
+{"id":"CS-001","question":"How do I cancel my recent order? I no longer need it.","expected_domain":"order","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-002","question":"My credit card was charged twice for the same invoice, what should I do?","expected_domain":"billing","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-003","question":"The VPN stopped working after the latest macOS update, all remote employees are affected.","expected_domain":"tech_support","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-004","question":"I need to return a defective product I received yesterday. What is the return policy?","expected_domain":"returns","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-005","question":"Can I change the shipping address on an order that hasn't shipped yet?","expected_domain":"delivery","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-006","question":"I forgot my password and the reset email never arrives. How do I recover my account?","expected_domain":"account","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-007","question":"My laptop from IT keeps crashing when I open Excel, and I have a deadline today.","expected_domain":"it_support","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-008","question":"Is there a way to set up automatic payments for my monthly subscription?","expected_domain":"billing","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-009","question":"The entire platform is down and none of our customers can access it, we need this fixed immediately.","expected_domain":"outages","expected_behavior":"escalate","risk_level":"critical"}
+{"id":"CS-010","question":"I want to speak to a human agent, not a chatbot.","expected_domain":"customer_service","expected_behavior":"escalate","risk_level":"medium"}
+{"id":"CS-011","question":"What are the system requirements to run your software on my workstation?","expected_domain":"product_support","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-012","question":"There's a serious security breach in our EMR system, we need immediate assistance.","expected_domain":"tech_support","expected_behavior":"escalate","risk_level":"critical"}
+{"id":"CS-013","question":"How do I unsubscribe from the newsletter? I keep getting too many emails.","expected_domain":"feedback","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-014","question":"Can you give me a discount for purchasing multiple licenses for my team of 50?","expected_domain":"sales","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-015","question":"My printer stopped working after the firmware update, and I need to print documents for a meeting.","expected_domain":"tech_support","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-016","question":"How do I create a new account for my department?","expected_domain":"account","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-017","question":"The invoice shows $500 but I was told it would be $450. Please explain this discrepancy.","expected_domain":"billing","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-018","question":"I need to update my billing information because my company changed banks.","expected_domain":"billing","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-019","question":"The tracking number says delivered but I never received the package.","expected_domain":"delivery","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-020","question":"Can I get a refund for the defective product? It stopped working after 2 days.","expected_domain":"returns","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-021","question":"I'm getting an error message 'invalid credentials' even though my login is correct.","expected_domain":"account","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-022","question":"The new employee onboarding system is not accepting any submissions today.","expected_domain":"hr","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-023","question":"I accidentally deleted important data from my cloud storage, can you help recover it?","expected_domain":"tech_support","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-024","question":"What payment methods do you accept for international customers?","expected_domain":"billing","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-025","question":"All our conference room projectors stopped connecting after the network upgrade.","expected_domain":"it_support","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-026","question":"I'm unable to access the centralized account management portal, it appears to be offline.","expected_domain":"account","expected_behavior":"answer_with_citation","risk_level":"high"}
+{"id":"CS-027","question":"Can you tell me about the features and pricing of your enterprise plan?","expected_domain":"sales","expected_behavior":"answer_with_citation","risk_level":"low"}
+{"id":"CS-028","question":"I received someone else's invoice document, this is a serious privacy concern.","expected_domain":"billing","expected_behavior":"escalate","risk_level":"high"}
+{"id":"CS-029","question":"When will the scheduled maintenance be completed? Our team is blocked.","expected_domain":"outages","expected_behavior":"answer_with_citation","risk_level":"medium"}
+{"id":"CS-030","question":"I want to file a formal complaint about the way my case was handled.","expected_domain":"feedback","expected_behavior":"answer_with_citation","risk_level":"medium"}

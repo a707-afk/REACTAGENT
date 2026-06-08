@@ -19,3 +19,8 @@ frontend/dist/
 logs/
 
 .pytest_last_run.txt
+
+data/qdrant_cs_local/
+data/bm25_cs_corpus.jsonl
+data/raw/
+*.db

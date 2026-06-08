@@ -1,0 +1,27 @@
+{
+  "config": {
+    "query_rewrite_mode": "auto",
+    "device": "cuda",
+    "hybrid": "max/k60",
+    "rerank": true,
+    "domain_router": true,
+    "collection": "cs_agent"
+  },
+  "metrics": {
+    "total_questions": 30,
+    "gate_pass_rate": 0.8667,
+    "expect_top1_hits": 0,
+    "expect_top1_total": 0,
+    "expect_top1_accuracy": null,
+    "expect_top5_hits": 0,
+    "expect_top5_total": 0,
+    "expect_top5_accuracy": null,
+    "domain_top1_hits": 15,
+    "domain_top1_total": 30,
+    "domain_accuracy": 0.5,
+    "latency_p50": 3.427,
+    "latency_p95": 6.093,
+    "latency_p99": 60.723,
+    "latency_mean": 5.413
+  }
+}

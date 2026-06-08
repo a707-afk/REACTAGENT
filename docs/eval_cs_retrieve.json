@@ -1,0 +1,1823 @@
+{
+  "summary": {
+    "config": {
+      "query_rewrite_mode": "auto",
+      "device": "cuda",
+      "hybrid": "max/k60",
+      "rerank": true,
+      "domain_router": true,
+      "collection": "cs_agent"
+    },
+    "metrics": {
+      "total_questions": 30,
+      "gate_pass_rate": 0.8667,
+      "expect_top1_hits": 0,
+      "expect_top1_total": 0,
+      "expect_top1_accuracy": null,
+      "expect_top5_hits": 0,
+      "expect_top5_total": 0,
+      "expect_top5_accuracy": null,
+      "domain_top1_hits": 15,
+      "domain_top1_total": 30,
+      "domain_accuracy": 0.5,
+      "latency_p50": 3.427,
+      "latency_p95": 6.093,
+      "latency_p99": 60.723,
+      "latency_mean": 5.413
+    }
+  },
+  "results": [
+    {
+      "id": "CS-001",
+      "question": "How do I cancel my recent order? I no longer need it.",
+      "retrieval_query": "How do I cancel my recent order? I no longer need it.",
+      "router_trace": {
+        "allowed_domains": [
+          "order"
+        ],
+        "primary_domain": "order",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "order",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "order",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 60.7228,
+      "top_hits": [
+        {
+          "score": 0.9985,
+          "domain": "order",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ORDER: cancel_order)\n\nI no longer want order {{Order Number}}, how do I cancel it?"
+        },
+        {
+          "score": 0.998,
+          "domain": "order",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ORDER: cancel_order)\n\nI no longer want order {{Order Number}}, I would like to cancel it"
+        },
+        {
+          "score": 0.9961,
+          "domain": "order",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ORDER: cancel_order)\n\nI ordered some items, need help cancelling the last purchase"
+        },
+        {
+          "score": 0.9956,
+          "domain": "order",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ORDER: cancel_order)\n\nI no longer want purchase {{Order Number}}, can you cancel it?"
+        },
+        {
+          "score": 0.9956,
+          "domain": "order",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ORDER: cancel_order)\n\ni no longer want order {{Order Number}}"
+        }
+      ]
+    },
+    {
+      "id": "CS-002",
+      "question": "My credit card was charged twice for the same invoice, what should I do?",
+      "retrieval_query": "My credit card was charged twice for the same invoice, what should I do?",
+      "router_trace": {
+        "allowed_domains": [
+          "billing"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.3701,
+      "top_hits": [
+        {
+          "score": 0.9858,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Support for Billing Error\n\nThere was an error in billing that resulted in duplicate charges on my account. This might "
+        },
+        {
+          "score": 0.9771,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Double Charge Issue\n\nThe customer was billed twice for the monthly subscription fee, possibly due to an issue with the"
+        },
+        {
+          "score": 0.9712,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Billing Invoice Discrepancy with Incorrect Charges\n\nThe billing invoice reflected inaccurate charges, likely due to a "
+        },
+        {
+          "score": 0.9556,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "There seems to have been a double charge during my subscription period, which might be due to a billing system error. I'"
+        },
+        {
+          "score": 0.9551,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Problems with Double Billing\n\nThe customer was charged twice for the monthly subscription, which might be due to a bil"
+        }
+      ]
+    },
+    {
+      "id": "CS-003",
+      "question": "The VPN stopped working after the latest macOS update, all remote employees are affected.",
+      "retrieval_query": "The VPN stopped working after the latest macOS update, all remote employees are affected.",
+      "router_trace": {
+        "allowed_domains": [
+          "tech_support",
+          "hr"
+        ],
+        "primary_domain": "tech_support",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "tech_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "customer_service",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 4.0371,
+      "top_hits": [
+        {
+          "score": 0.9951,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Several Integrations Encountered Errors Following the System Upgrade\n\nAfter the latest macOS update, several integrati"
+        },
+        {
+          "score": 0.9946,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Network Infrastructure",
+          "text_preview": "# Anfrage zur Fehlerbehebung bei der VPN-Konnektivität\n\nSupport-Team,\\nich melde ein zeitweises Problem mit der VPN-Konn"
+        },
+        {
+          "score": 0.9941,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Network Infrastructure",
+          "text_preview": "# Betreff VPN: Probleme mit zeitweiliger Konnektivität\n\nSehr geehrtes Support-Team,\\n\\nich melde ein Problem mit unzuver"
+        },
+        {
+          "score": 0.9937,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Several Integrations Failing Following Latest macOS Update\n\nFollowing the recent macOS update, multiple integrations h"
+        },
+        {
+          "score": 0.9893,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Network Infrastructure",
+          "text_preview": "# Bezüglich VPN-Verbindungsprobleme\n\nSehr geehrte Support-Mitarbeiter,\\n\\nich schreibe Ihnen, um Sie über VPN-Verbindung"
+        }
+      ]
+    },
+    {
+      "id": "CS-004",
+      "question": "I need to return a defective product I received yesterday. What is the return policy?",
+      "retrieval_query": "I need to return a defective product I received yesterday. What is the return policy?",
+      "router_trace": {
+        "allowed_domains": [
+          "returns"
+        ],
+        "primary_domain": "returns",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "returns",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "returns",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.2341,
+      "top_hits": [
+        {
+          "score": 0.9932,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Return Authorization Request\n\nDear Customer Support Team,\\n\\nI hope this message reaches you well. I am reaching out t"
+        },
+        {
+          "score": 0.9893,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Anfrage zur Rückerstattung\n\nSehr geehrtes Support-Team,\\n\\nich hoffe, diese Nachricht erreicht Sie wohl. Ich schreibe,"
+        },
+        {
+          "score": 0.874,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Guidelines for Returns and Replacements\n\nDear Customer Support Team,\\n\\nI hope this message reaches you well. I am rea"
+        },
+        {
+          "score": 0.8682,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Request to Return Electronic Hardware Items\n\nDear Customer Support Team,\\n\\nI am reaching out to request the return of"
+        },
+        {
+          "score": 0.7373,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Problem with Returning Products\n\nDear Customer Support,\\n\\nI hope this message reaches you well. I am writing to repor"
+        }
+      ]
+    },
+    {
+      "id": "CS-005",
+      "question": "Can I change the shipping address on an order that hasn't shipped yet?",
+      "retrieval_query": "Can I change the shipping address on an order that hasn't shipped yet?",
+      "router_trace": {
+        "allowed_domains": [
+          "delivery",
+          "order"
+        ],
+        "primary_domain": "delivery",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "delivery",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.0059,
+      "top_hits": [
+        {
+          "score": 0.9937,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SHIPPING: change_shipping_address)\n\nhow can I change my shipping address?"
+        },
+        {
+          "score": 0.9883,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SHIPPING: change_shipping_address)\n\nI don't know how to change the shipping address"
+        },
+        {
+          "score": 0.9863,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SHIPPING: change_shipping_address)\n\nI want assistance trying to change my shipping address"
+        },
+        {
+          "score": 0.9854,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SHIPPING: change_shipping_address)\n\ncan ya tell me more about changing the shipping address"
+        },
+        {
+          "score": 0.9844,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SHIPPING: change_shipping_address)\n\nI chose a wrong shipping address, can I correct it?"
+        }
+      ]
+    },
+    {
+      "id": "CS-006",
+      "question": "I forgot my password and the reset email never arrives. How do I recover my account?",
+      "retrieval_query": "I forgot my password and the reset email never arrives. How do I recover my account?",
+      "router_trace": {
+        "allowed_domains": [
+          "account"
+        ],
+        "primary_domain": "account",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "account",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "account",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.233,
+      "top_hits": [
+        {
+          "score": 0.8398,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI forgot my account password, how t reset it?"
+        },
+        {
+          "score": 0.7646,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI forgot my user password, help me to reset it"
+        },
+        {
+          "score": 0.7007,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI have lost my user account password, how can I reset it?"
+        },
+        {
+          "score": 0.6929,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI can't remember my account password, where to reset it?"
+        },
+        {
+          "score": 0.6929,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI don't know what I need to do to reset my account password"
+        }
+      ]
+    },
+    {
+      "id": "CS-007",
+      "question": "My laptop from IT keeps crashing when I open Excel, and I have a deadline today.",
+      "retrieval_query": "My laptop from IT keeps crashing when I open Excel, and I have a deadline today.",
+      "router_trace": {
+        "allowed_domains": [
+          "tech_support",
+          "it_support"
+        ],
+        "primary_domain": "tech_support",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "it_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "tech_support",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.1892,
+      "top_hits": [
+        {
+          "score": 0.9971,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "Hello Customer Support, I am facing problems with Excel 2021 crashing while performing data analysis. This issue could b"
+        },
+        {
+          "score": 0.9961,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Problem with Excel 2021 Crashing During Data Analysis\n\nHello Customer Support, I am encountering difficulties with Exc"
+        },
+        {
+          "score": 0.9941,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Concern with Excel 2021 Crashing During Data Analysis\n\nHello Customer Support, I have been encountering problems with "
+        },
+        {
+          "score": 0.9927,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Excel Performance Lag and Memory Surge\n\nDear Support Team, Excel becomes unresponsive during analytics processes, prob"
+        },
+        {
+          "score": 0.9194,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Excel's Memory Spike Causing Sluggishness\n\nDear Support Team, I have noticed that my Excel analysis workflows have bec"
+        }
+      ]
+    },
+    {
+      "id": "CS-008",
+      "question": "Is there a way to set up automatic payments for my monthly subscription?",
+      "retrieval_query": "Is there a way to set up automatic payments for my monthly subscription?",
+      "router_trace": {
+        "allowed_domains": [
+          "billing"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 4.0346,
+      "top_hits": [
+        {
+          "score": 0.9966,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Upgrade Billing System for Annual Subscription Invoicing\n\nThe task is to update the billing system to support the auto"
+        },
+        {
+          "score": 0.9897,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request to Update Payment Preferences for Marketing\n\nDear customer support, I am writing to request an update to my bi"
+        },
+        {
+          "score": 0.9863,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request to Update Billing Information for Marketing\n\nHello Customer Support, I am writing to request an update to my b"
+        },
+        {
+          "score": 0.6958,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Options for Paying Yearly Subscriptions\n\nCould you provide details on the payment options for yearly subscriptions?"
+        },
+        {
+          "score": 0.5352,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Update Billing Details for Marketing\n\nDear Customer Service, I am writing to request the update of billing details inc"
+        }
+      ]
+    },
+    {
+      "id": "CS-009",
+      "question": "The entire platform is down and none of our customers can access it, we need this fixed immediately.",
+      "retrieval_query": "The entire platform is down and none of our customers can access it, we need this fixed immediately.",
+      "router_trace": {
+        "allowed_domains": [
+          "outages"
+        ],
+        "primary_domain": "outages",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "outages",
+      "expected_behavior": "escalate",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "it_support",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.1922,
+      "top_hits": [
+        {
+          "score": 0.999,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Urgent: SaaS Project Management Platform Facing Severe System Failure\n\nOur SaaS project management platform is current"
+        },
+        {
+          "score": 0.998,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Incident Affecting Multiple SaaS Platform Products\n\nWe are experiencing an incident impacting several of our SaaS plat"
+        },
+        {
+          "score": 0.998,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "Online Communities/Social Networks",
+          "text_preview": "# Aktuelle API-Zugriffsprobleme verursachen Unterbrechungen\n\nTeam, wir haben derzeit mit API-Fehlern zu kämpfen. Diese F"
+        },
+        {
+          "score": 0.9946,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Critical Outage in SaaS Service\n\nThe SaaS platform encountered a significant downtime."
+        },
+        {
+          "score": 0.9946,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Immediate Support Required for Cloud-First System Outage\n\nSupport Team, encountering an issue with the cloud-based Saa"
+        }
+      ]
+    },
+    {
+      "id": "CS-010",
+      "question": "I want to speak to a human agent, not a chatbot.",
+      "retrieval_query": "I want to speak to a human agent, not a chatbot.",
+      "router_trace": {
+        "allowed_domains": [
+          "customer_service",
+          "sales",
+          "general"
+        ],
+        "primary_domain": "customer_service",
+        "method": "fused",
+        "confidence": 0.4635
+      },
+      "expected_domain": "customer_service",
+      "expected_behavior": "escalate",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 2.989,
+      "top_hits": [
+        {
+          "score": 0.998,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (CONTACT: contact_human_agent)\n\nI don't want a chatbot, direct to me a bloody agent"
+        },
+        {
+          "score": 0.9976,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (CONTACT: contact_human_agent)\n\nI don't want to talk to a bot, direct to me a human agent"
+        },
+        {
+          "score": 0.9956,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (CONTACT: contact_human_agent)\n\ni want help to speak with a human agent"
+        },
+        {
+          "score": 0.9956,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (CONTACT: contact_human_agent)\n\nI want assistance to speak with a human agent"
+        },
+        {
+          "score": 0.9907,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (CONTACT: contact_human_agent)\n\nI want assistance to speak to a fucking live agent"
+        }
+      ]
+    },
+    {
+      "id": "CS-011",
+      "question": "What are the system requirements to run your software on my workstation?",
+      "retrieval_query": "What are the system requirements to run your software on my workstation?",
+      "router_trace": {
+        "allowed_domains": [
+          "it_support"
+        ],
+        "primary_domain": "it_support",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "product_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "it_support",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 2.7602,
+      "top_hits": [
+        {
+          "score": 0.9287,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# System Requirements for Optimal ClickUp Performance\n\nDear Customer Support, I am writing to inquire about the system r"
+        },
+        {
+          "score": 0.9189,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "I am reaching out to inquire about the system requirements needed for optimal performance of your project management Saa"
+        },
+        {
+          "score": 0.8896,
+          "domain": "sales",
+          "source": "tobi_bueck",
+          "queue": "Sales and Pre-Sales",
+          "text_preview": "# Details on System Requirements for Project Management SaaS\n\nI am keen on utilizing your project management software-as"
+        },
+        {
+          "score": 0.8872,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Request for System Requirements\n\nI am contacting you to seek information on the necessary system configurations for th"
+        },
+        {
+          "score": 0.8472,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Minimum and Recommended System Specifications for Running Laravel 8 on MacBook Air\n\nHello customer support, I am writi"
+        }
+      ]
+    },
+    {
+      "id": "CS-012",
+      "question": "There's a serious security breach in our EMR system, we need immediate assistance.",
+      "retrieval_query": "There's a serious security breach in our EMR system, we need immediate assistance.",
+      "router_trace": {
+        "allowed_domains": [
+          "outages",
+          "it_support",
+          "tech_support"
+        ],
+        "primary_domain": "outages",
+        "method": "fused",
+        "confidence": 0.47629809814006924
+      },
+      "expected_domain": "tech_support",
+      "expected_behavior": "escalate",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "outages",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.6659,
+      "top_hits": [
+        {
+          "score": 0.9995,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Severe Service Disruption Detected in EMR Platform\n\nDear Support Team,\\n\\nWe have discovered a severe disruption affec"
+        },
+        {
+          "score": 0.9995,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Critical Security Breach Impacting EMR Connectivity\n\nDear Customer Support Team,\\n\\nI am submitting a report regarding"
+        },
+        {
+          "score": 0.9985,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "Healthcare provider's system experienced a data breach, posing a risk to the security of patient medical information. Ur"
+        },
+        {
+          "score": 0.9985,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Alert on Data Breach\n\nCustomer Support, we are reporting a serious issue involving a detected data breach in our hospi"
+        },
+        {
+          "score": 0.9985,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "Healthcare provider system experiencing a data breach, posing a risk to the security of patient medical data. Urgent ass"
+        }
+      ]
+    },
+    {
+      "id": "CS-013",
+      "question": "How do I unsubscribe from the newsletter? I keep getting too many emails.",
+      "retrieval_query": "How do I unsubscribe from the newsletter? I keep getting too many emails.",
+      "router_trace": {
+        "allowed_domains": [
+          "feedback",
+          "customer_service",
+          "account"
+        ],
+        "primary_domain": "feedback",
+        "method": "fused",
+        "confidence": 0.9684102847409289
+      },
+      "expected_domain": "feedback",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 2.569,
+      "top_hits": [
+        {
+          "score": 0.999,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SUBSCRIPTION: newsletter_subscription)\n\nhow to unsubscribe to the newsletter?"
+        },
+        {
+          "score": 0.9985,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SUBSCRIPTION: newsletter_subscription)\n\nhow can I unsubscribe to the newsletter?"
+        },
+        {
+          "score": 0.9985,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SUBSCRIPTION: newsletter_subscription)\n\nI have got to unsubscribe to the newsletter, how do I do it"
+        },
+        {
+          "score": 0.9985,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SUBSCRIPTION: newsletter_subscription)\n\nhow to unsubscribe from your newsletter?"
+        },
+        {
+          "score": 0.998,
+          "domain": "general",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (SUBSCRIPTION: newsletter_subscription)\n\nwhere to unsubscribe to your bloody newsletter?"
+        }
+      ]
+    },
+    {
+      "id": "CS-014",
+      "question": "Can you give me a discount for purchasing multiple licenses for my team of 50?",
+      "retrieval_query": "Can you give me a discount for purchasing multiple licenses for my team of 50?",
+      "router_trace": {
+        "allowed_domains": [
+          "sales"
+        ],
+        "primary_domain": "sales",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "sales",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.7072,
+      "top_hits": [
+        {
+          "score": 0.9521,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "Books & Literature/Non-Fiction",
+          "text_preview": "# Frage zu Mengenlizenzoptionen\n\nGuten Tag, Support-Team.\\n\\nich schreibe Ihnen, um mich nach Mengenlizenzoptionen für a"
+        },
+        {
+          "score": 0.8398,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Support Request for Software Licensing Details\n\nCan you supply comprehensive billing details and payment methods for P"
+        },
+        {
+          "score": 0.8091,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Preisangebote für Teams\n\nIch würde gerne mehr Informationen zu Preisen erhalten, die für Teams gelten, die mehrere Sof"
+        },
+        {
+          "score": 0.2847,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Inquiry into Pricing Plans for Large Teams\n\nI am contacting you to seek detailed information regarding the pricing pla"
+        },
+        {
+          "score": 0.1151,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Pricing Details for Team Integrations\n\nI require pricing information for teams utilizing several software integrations"
+        }
+      ]
+    },
+    {
+      "id": "CS-015",
+      "question": "My printer stopped working after the firmware update, and I need to print documents for a meeting.",
+      "retrieval_query": "My printer stopped working after the firmware update, and I need to print documents for a meeting.",
+      "router_trace": {
+        "allowed_domains": [
+          "tech_support",
+          "it_support"
+        ],
+        "primary_domain": "tech_support",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "tech_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.3528,
+      "top_hits": [
+        {
+          "score": 0.999,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Hardware Support",
+          "text_preview": "# Druckerfunktionsstörungen nach aktuellem OS-Upgrade\n\nHallo Support-Team,\\n\\nich schreibe Ihnen, um intermittierende Fe"
+        },
+        {
+          "score": 0.999,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Hardware Support",
+          "text_preview": "# Probleme mit dem Druckertreiber nach dem letzten OS-Upgrade\n\nHallo Support-Team,\\n\\nich schreibe Ihnen, um intermittie"
+        },
+        {
+          "score": 0.999,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Hardware Support",
+          "text_preview": "# Probleme mit dem Druckertreiber nach OS-Update\n\nHallo, Support-Team.\\n\\nIch habe Probleme mit Druckertreibern, die nac"
+        },
+        {
+          "score": 0.999,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "IT & Technology/Hardware Support",
+          "text_preview": "# Druckertreiber fällt zeitweise aus\n\nHallo Support,\\n\\nnach einem kürzlichen Update des Betriebssystems treten bei mir "
+        },
+        {
+          "score": 0.9976,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Medical Scanner Malfunction Issue\n\nThe scanner stopped working properly because of old firmware, and I attempted to fi"
+        }
+      ]
+    },
+    {
+      "id": "CS-016",
+      "question": "How do I create a new account for my department?",
+      "retrieval_query": "How do I create a new account for my department?",
+      "router_trace": {
+        "allowed_domains": [
+          "account",
+          "hr",
+          "customer_service"
+        ],
+        "primary_domain": "account",
+        "method": "fused",
+        "confidence": 0.44999999999999996
+      },
+      "expected_domain": "account",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "account",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.005,
+      "top_hits": [
+        {
+          "score": 0.9956,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: create_account)\n\nhow do I create a standard account for my daughter?"
+        },
+        {
+          "score": 0.9932,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: create_account)\n\nhow can I create a standard account for my fiance?"
+        },
+        {
+          "score": 0.9932,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: create_account)\n\nhow could I create a standard account for my fiance?"
+        },
+        {
+          "score": 0.9902,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: create_account)\n\nhow do I create a bloody {{Account Category}} account for my father?"
+        },
+        {
+          "score": 0.9897,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: create_account)\n\nwhere to create a standard account for my dad"
+        }
+      ]
+    },
+    {
+      "id": "CS-017",
+      "question": "The invoice shows $500 but I was told it would be $450. Please explain this discrepancy.",
+      "retrieval_query": "The invoice shows $500 but I was told it would be $450. Please explain this discrepancy.",
+      "router_trace": {
+        "allowed_domains": [
+          "billing"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.9282,
+      "top_hits": [
+        {
+          "score": 0.999,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Billing Invoice Discrepancy with Incorrect Charges\n\nThe billing invoice reflected inaccurate charges, likely due to a "
+        },
+        {
+          "score": 0.9976,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request for Resolution of Invoice Discrepancy\n\nDear Customer Support Team,<br>We have noticed a discrepancy in our rec"
+        },
+        {
+          "score": 0.9956,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Issues with Invoice\n\nUnexpected invoice discrepancies for multiple products due to a technical error following system "
+        },
+        {
+          "score": 0.9941,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Problem with Billing Discrepancy on Invoice\n\nA billing discrepancy has been noted on the latest invoice, possibly due "
+        },
+        {
+          "score": 0.9907,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Incorrect Billing Charges Invoice\n\nThe invoicing may have displayed incorrect charges due to a system error."
+        }
+      ]
+    },
+    {
+      "id": "CS-018",
+      "question": "I need to update my billing information because my company changed banks.",
+      "retrieval_query": "I need to update my billing information because my company changed banks.",
+      "router_trace": {
+        "allowed_domains": [
+          "billing",
+          "tech_support"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 6.0929,
+      "top_hits": [
+        {
+          "score": 0.9985,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request for Billing Information Update\n\nI would like to update my billing details for the multiple software and hardwa"
+        },
+        {
+          "score": 0.9966,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Update Billing Details for Digital Strategy Services\n\nI hope this message finds you well. We are writing to request an"
+        },
+        {
+          "score": 0.9966,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Revise Billing Information\n\nRequesting an update to the billing details for our optimized investment data analytics se"
+        },
+        {
+          "score": 0.9956,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request to Update Billing Details for Digital Strategy Tools and Services\n\nWe are writing to request the update of our"
+        },
+        {
+          "score": 0.9956,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Request for Updating Details\n\nI am writing to request an update to my billing details and data analytics subscription."
+        }
+      ]
+    },
+    {
+      "id": "CS-019",
+      "question": "The tracking number says delivered but I never received the package.",
+      "retrieval_query": "The tracking number says delivered but I never received the package.",
+      "router_trace": {
+        "allowed_domains": [
+          "delivery"
+        ],
+        "primary_domain": "delivery",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "delivery",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "delivery",
+      "domain_top1_match": true,
+      "gate_passed": false,
+      "gate_error_code": "SIMILARITY_GATE_FAIL",
+      "latency_seconds": 3.2513,
+      "top_hits": [
+        {
+          "score": 0.0298,
+          "domain": "delivery",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (DELIVERY: delivery_period)\n\ncan I check when my package is going to arrive?"
+        },
+        {
+          "score": 0.0291,
+          "domain": "delivery",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (DELIVERY: delivery_period)\n\nhow could I check when my package is going to arrive?"
+        },
+        {
+          "score": 0.0278,
+          "domain": "delivery",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (DELIVERY: delivery_period)\n\ncan i see when my package is gonna arirve"
+        },
+        {
+          "score": 0.0266,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Incomplete Product Bundle Delivered by Your Organization\n\nGreeting customer support team, I have just received a produ"
+        },
+        {
+          "score": 0.025,
+          "domain": "delivery",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (DELIVERY: delivery_period)\n\nwhere do I check when my package is going to arrive?"
+        }
+      ]
+    },
+    {
+      "id": "CS-020",
+      "question": "Can I get a refund for the defective product? It stopped working after 2 days.",
+      "retrieval_query": "Can I get a refund for the defective product? It stopped working after 2 days.",
+      "router_trace": {
+        "allowed_domains": [
+          "returns"
+        ],
+        "primary_domain": "returns",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "returns",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": false,
+      "gate_passed": false,
+      "gate_error_code": "SIMILARITY_GATE_FAIL",
+      "latency_seconds": 3.6035,
+      "top_hits": [
+        {
+          "score": 0.3904,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (REFUND: get_refund)\n\nI paid {{Currency Symbol}}{{Refund Amount}} for a product, is it possible to g"
+        },
+        {
+          "score": 0.1038,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (REFUND: get_refund)\n\nwhen can I expect a refund"
+        },
+        {
+          "score": 0.0927,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (REFUND: get_refund)\n\nwhere can I demand a refund?"
+        },
+        {
+          "score": 0.0641,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (REFUND: check_refund_policy)\n\nneed to see how long refunds take can i get somehelp"
+        },
+        {
+          "score": 0.0471,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (REFUND: get_refund)\n\nI paid {{Currency Symbol}}{{Refund Amount}} for this product, how doI get a re"
+        }
+      ]
+    },
+    {
+      "id": "CS-021",
+      "question": "I'm getting an error message 'invalid credentials' even though my login is correct.",
+      "retrieval_query": "I'm getting an error message 'invalid credentials' even though my login is correct.",
+      "router_trace": {
+        "allowed_domains": [
+          "account",
+          "tech_support"
+        ],
+        "primary_domain": "account",
+        "method": "fused",
+        "confidence": 0.9840961307776955
+      },
+      "expected_domain": "account",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "tech_support",
+      "domain_top1_match": false,
+      "gate_passed": false,
+      "gate_error_code": "SIMILARITY_GATE_FAIL",
+      "latency_seconds": 4.3615,
+      "top_hits": [
+        {
+          "score": 0.5659,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "There has been an error during login, which is hindering access. This might be due to recent system updates. After clear"
+        },
+        {
+          "score": 0.5273,
+          "domain": "product_support",
+          "source": "tobi_bueck",
+          "queue": "Product Support",
+          "text_preview": "# Login unsuccessful attributed to server problem\n\nA login error happened, likely because of a server-related issue."
+        },
+        {
+          "score": 0.4131,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Encountered Login Problems\n\nThere have been login difficulties. It might be due to outdated login details. Already res"
+        },
+        {
+          "score": 0.2705,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Challenge with Login Credentials\n\nDear Support Team, I am encountering a login obstacle with my account and am unable "
+        },
+        {
+          "score": 0.2598,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "An error has occurred during login, which is hindering access. It might be due to recent system updates. Despite clearin"
+        }
+      ]
+    },
+    {
+      "id": "CS-022",
+      "question": "The new employee onboarding system is not accepting any submissions today.",
+      "retrieval_query": "The new employee onboarding system is not accepting any submissions today.",
+      "router_trace": {
+        "allowed_domains": [
+          "hr"
+        ],
+        "primary_domain": "hr",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "hr",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "general",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.6162,
+      "top_hits": [
+        {
+          "score": 0.998,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "Jobs & Education/Recruitment",
+          "text_preview": "# Ausfall des Angebotsschreibensystems gemeldet\n\nAn das Support-Team,\\n\\nich schreibe Ihnen, um Sie über ein schwerwiege"
+        },
+        {
+          "score": 0.9956,
+          "domain": "hr",
+          "source": "tobi_bueck",
+          "queue": "Human Resources",
+          "text_preview": "# Support Delay\n\nThere was a delay in processing employee onboarding requests during the past week due to a backlog in t"
+        },
+        {
+          "score": 0.9932,
+          "domain": "hr",
+          "source": "tobi_bueck",
+          "queue": "Human Resources",
+          "text_preview": "# Delay in Support\n\nThere was a delay in processing employee onboarding requests during the week due to a backlog in doc"
+        },
+        {
+          "score": 0.9927,
+          "domain": "hr",
+          "source": "tobi_bueck",
+          "queue": "Human Resources",
+          "text_preview": "# Support Processing Delays\n\nThere was a delay in processing employee onboarding requests during the past week due to a "
+        },
+        {
+          "score": 0.9927,
+          "domain": "general",
+          "source": "tobi_bueck",
+          "queue": "Jobs & Education/Recruitment",
+          "text_preview": "# Ausfall des Angebotsbriefsystems\n\nSehr geehrtes Support-Team,\\n\\nich melde mich, um ein kritisches Problem zu melden, "
+        }
+      ]
+    },
+    {
+      "id": "CS-023",
+      "question": "I accidentally deleted important data from my cloud storage, can you help recover it?",
+      "retrieval_query": "I accidentally deleted important data from my cloud storage, can you help recover it?",
+      "router_trace": {
+        "allowed_domains": [
+          "outages",
+          "customer_service",
+          "tech_support"
+        ],
+        "primary_domain": "outages",
+        "method": "fused",
+        "confidence": 0.486
+      },
+      "expected_domain": "tech_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "tech_support",
+      "domain_top1_match": true,
+      "gate_passed": false,
+      "gate_error_code": "SIMILARITY_GATE_FAIL",
+      "latency_seconds": 3.9731,
+      "top_hits": [
+        {
+          "score": 0.028,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Event of Data Loss Impacting Medical Data Security Procedures\n\nNeed support for data loss event."
+        },
+        {
+          "score": 0.0047,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\ncan you help me to restore my damn user account access key?"
+        },
+        {
+          "score": 0.0043,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\nI want to recover my user profile key, can you help me?"
+        },
+        {
+          "score": 0.0042,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\ni have lost my account access key where can i recover it"
+        },
+        {
+          "score": 0.0037,
+          "domain": "account",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (ACCOUNT: recover_password)\n\ncan you help me to restore my access key?"
+        }
+      ]
+    },
+    {
+      "id": "CS-024",
+      "question": "What payment methods do you accept for international customers?",
+      "retrieval_query": "What payment methods do you accept for international customers?",
+      "router_trace": {
+        "allowed_domains": [
+          "billing"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.8209,
+      "top_hits": [
+        {
+          "score": 0.9717,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (PAYMENT: check_payment_methods)\n\nwhat payment methods are accepted"
+        },
+        {
+          "score": 0.9702,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (PAYMENT: check_payment_methods)\n\ncan you tell me what payment methods you accept?"
+        },
+        {
+          "score": 0.9673,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (PAYMENT: check_payment_methods)\n\nwhat payment options do you accept?"
+        },
+        {
+          "score": 0.9619,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (PAYMENT: check_payment_methods)\n\nwhat payment methods are accepted?"
+        },
+        {
+          "score": 0.96,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (PAYMENT: check_payment_methods)\n\nI have to se what payment methods you accept, I need help"
+        }
+      ]
+    },
+    {
+      "id": "CS-025",
+      "question": "All our conference room projectors stopped connecting after the network upgrade.",
+      "retrieval_query": "All our conference room projectors stopped connecting after the network upgrade.",
+      "router_trace": {
+        "allowed_domains": [
+          "it_support",
+          "tech_support",
+          "outages"
+        ],
+        "primary_domain": "it_support",
+        "method": "fused",
+        "confidence": 0.9231198577071552
+      },
+      "expected_domain": "it_support",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "it_support",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.5245,
+      "top_hits": [
+        {
+          "score": 0.981,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Issue with Projector Connection During VR Meeting\n\nThere was a failure in connecting the projector during the VR meeti"
+        },
+        {
+          "score": 0.9614,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Problem with the Project Management System\n\nUsers are experiencing sporadic connectivity problems. Recent updates to t"
+        },
+        {
+          "score": 0.959,
+          "domain": "hr",
+          "source": "tobi_bueck",
+          "queue": "Human Resources",
+          "text_preview": "# Failed Connection to Projector\n\nThe projector experienced a connection issue during the presentation. The problem seem"
+        },
+        {
+          "score": 0.9541,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Probleme mit der Verbindung zum Projektor während der Präsentation\n\nWährend der Präsentation werden Probleme mit der V"
+        },
+        {
+          "score": 0.9419,
+          "domain": "it_support",
+          "source": "tobi_bueck",
+          "queue": "IT Support",
+          "text_preview": "# Probleme mit der Verbindung des Projektors während Präsentationen\n\nBeim Präsentieren treten Probleme mit der Verbindun"
+        }
+      ]
+    },
+    {
+      "id": "CS-026",
+      "question": "I'm unable to access the centralized account management portal, it appears to be offline.",
+      "retrieval_query": "I'm unable to access the centralized account management portal, it appears to be offline.",
+      "router_trace": {
+        "allowed_domains": [
+          "outages",
+          "tech_support",
+          "account"
+        ],
+        "primary_domain": "outages",
+        "method": "fused",
+        "confidence": 0.9801789028006689
+      },
+      "expected_domain": "account",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "tech_support",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.7639,
+      "top_hits": [
+        {
+          "score": 1.0,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Account Disruption\n\nDear Customer Support Team,\\n\\nI am writing to report a significant problem with the centralized a"
+        },
+        {
+          "score": 1.0,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Account Downtime\n\nDear Customer Support Team,\\n\\nI am submitting a report regarding a major problem with the centraliz"
+        },
+        {
+          "score": 1.0,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Immediate Attention Needed: Centralized Account Management System Out of Service\n\nDear Customer Support Team,\\n\\nI am "
+        },
+        {
+          "score": 1.0,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Immediate Attention Needed: Centralized Account Management System Outage\n\nDear Customer Support Team,\\n\\nI am reaching"
+        },
+        {
+          "score": 0.9995,
+          "domain": "tech_support",
+          "source": "tobi_bueck",
+          "queue": "Technical Support",
+          "text_preview": "# Unable to Access the Account Management Portal\n\nDear Customer Support Team,\\n\\nI am reaching out to report a problem w"
+        }
+      ]
+    },
+    {
+      "id": "CS-027",
+      "question": "Can you tell me about the features and pricing of your enterprise plan?",
+      "retrieval_query": "Can you tell me about the features and pricing of your enterprise plan?",
+      "router_trace": {
+        "allowed_domains": [
+          "sales",
+          "product_support",
+          "billing"
+        ],
+        "primary_domain": "sales",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "sales",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "returns",
+      "domain_top1_match": false,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.3836,
+      "top_hits": [
+        {
+          "score": 0.9971,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Inquiries About SaaS Features and Pricing\n\nHello Customer Support, I am reaching out to inquire about the SaaS feature"
+        },
+        {
+          "score": 0.9888,
+          "domain": "returns",
+          "source": "tobi_bueck",
+          "queue": "Returns and Exchanges",
+          "text_preview": "# Assistance with SaaS Features and Pricing\n\nHello, I am reaching out to the customer support team to inquire about the "
+        },
+        {
+          "score": 0.9531,
+          "domain": "customer_service",
+          "source": "tobi_bueck",
+          "queue": "Customer Service",
+          "text_preview": "# Details about Project Management SaaS Plans\n\nCould you please share details on the pricing plans and the features incl"
+        },
+        {
+          "score": 0.939,
+          "domain": "sales",
+          "source": "tobi_bueck",
+          "queue": "Sales and Pre-Sales",
+          "text_preview": "Dear Customer Support, I am contacting you to learn more about your enterprise project management solutions and their pr"
+        },
+        {
+          "score": 0.8726,
+          "domain": "product_support",
+          "source": "tobi_bueck",
+          "queue": "Product Support",
+          "text_preview": "# Information on Pricing Plans\n\nI am interested in learning about the project management SaaS offerings. Could you provi"
+        }
+      ]
+    },
+    {
+      "id": "CS-028",
+      "question": "I received someone else's invoice document, this is a serious privacy concern.",
+      "retrieval_query": "I received someone else's invoice document, this is a serious privacy concern.",
+      "router_trace": {
+        "allowed_domains": [
+          "billing"
+        ],
+        "primary_domain": "billing",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "billing",
+      "expected_behavior": "escalate",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "billing",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 3.4274,
+      "top_hits": [
+        {
+          "score": 0.8604,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (INVOICE: check_invoice)\n\nassistance seeing the invoice from {{Person Name}}"
+        },
+        {
+          "score": 0.7969,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (INVOICE: check_invoice)\n\nassistance giving an quick look at my invoice from {{Person Name}}"
+        },
+        {
+          "score": 0.7944,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (INVOICE: check_invoice)\n\nI lost my invoice from {{Person Name}}, find it for me"
+        },
+        {
+          "score": 0.6152,
+          "domain": "billing",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (INVOICE: check_invoice)\n\nwant assistance to fid my invoice from {{Person Name}}"
+        },
+        {
+          "score": 0.5737,
+          "domain": "billing",
+          "source": "tobi_bueck",
+          "queue": "Billing and Payments",
+          "text_preview": "# Concern About Absent Invoice\n\nEsteemed Customer Support, I am correspondence to highlight that I have not received an "
+        }
+      ]
+    },
+    {
+      "id": "CS-029",
+      "question": "When will the scheduled maintenance be completed? Our team is blocked.",
+      "retrieval_query": "When will the scheduled maintenance be completed? Our team is blocked.",
+      "router_trace": {
+        "allowed_domains": [
+          "outages"
+        ],
+        "primary_domain": "outages",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "outages",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "outages",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 2.6991,
+      "top_hits": [
+        {
+          "score": 0.9912,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Urgent Service Request Update\n\nDear Support Team, I am writing to request timely updates on the restoration of service"
+        },
+        {
+          "score": 0.9863,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Query About Service Downtime Maintenance Progress\n\nDear Customer Support Team,\\n\\nI hope this message reaches you well"
+        },
+        {
+          "score": 0.9736,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Scheduled Uptime Maintenance Procedures\n\nDear Customer Support, I am seeking guidance on best practices for maintainin"
+        },
+        {
+          "score": 0.9663,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Urgent Request for Immediate System Maintenance Today\n\nCustomer Support, I am submitting an urgent request for system "
+        },
+        {
+          "score": 0.9331,
+          "domain": "outages",
+          "source": "tobi_bueck",
+          "queue": "Service Outages and Maintenance",
+          "text_preview": "# Request to Improve Maintenance Schedule for Enhanced Performance\n\nDear Customer Support, I am writing to request an up"
+        }
+      ]
+    },
+    {
+      "id": "CS-030",
+      "question": "I want to file a formal complaint about the way my case was handled.",
+      "retrieval_query": "I want to file a formal complaint about the way my case was handled.",
+      "router_trace": {
+        "allowed_domains": [
+          "feedback"
+        ],
+        "primary_domain": "feedback",
+        "method": "fused",
+        "confidence": 0.999999
+      },
+      "expected_domain": "feedback",
+      "expected_behavior": "answer_with_citation",
+      "top1_expect_matched": null,
+      "top5_expect_matched": null,
+      "top1_domain": "feedback",
+      "domain_top1_match": true,
+      "gate_passed": true,
+      "gate_error_code": null,
+      "latency_seconds": 2.8859,
+      "top_hits": [
+        {
+          "score": 0.9775,
+          "domain": "feedback",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (FEEDBACK: complaint)\n\nI want help to file a complaint against your organization"
+        },
+        {
+          "score": 0.9351,
+          "domain": "feedback",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (FEEDBACK: complaint)\n\nmy experience with your company was awful, file a complaint"
+        },
+        {
+          "score": 0.9141,
+          "domain": "feedback",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (FEEDBACK: complaint)\n\nhow to file a customer claim against your organization?"
+        },
+        {
+          "score": 0.9106,
+          "domain": "feedback",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (FEEDBACK: complaint)\n\nwant assistance to file a complaint against ur company"
+        },
+        {
+          "score": 0.8857,
+          "domain": "feedback",
+          "source": "bitext",
+          "queue": null,
+          "text_preview": "# Customer Question (FEEDBACK: complaint)\n\nhow to file a claim against your organization?"
+        }
+      ]
+    }
+  ]
+}
