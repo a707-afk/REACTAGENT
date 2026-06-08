@@ -23,6 +23,15 @@ class Settings(BaseSettings):
     app_name: str = "enterprise-rag-kb"
     debug: bool = False
 
+    # Database
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./data/cs_agent.db",
+        validation_alias=AliasChoices("DATABASE_URL"),
+        description="Async DB URL: sqlite+aiosqlite:///... or postgresql+asyncpg://...",
+    )
+    db_pool_size: int = Field(default=5, ge=1, le=50)
+    db_max_overflow: int = Field(default=10, ge=0, le=100)
+
     zhipuai_api_key: str | None = Field(
         default=None,
         validation_alias=AliasChoices("ZHIPUAI_API_KEY", "ZHIPU_API_KEY"),
