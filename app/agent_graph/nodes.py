@@ -516,6 +516,7 @@ REASON_SYSTEM = (
 def node_reason(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
     """Agent reasoning: classify intent and decide which tools to call."""
     settings = settings or get_settings()
+    from app.agent_graph.fault_tolerance import check_circuit_breaker, record_llm_failure, record_llm_success
     q = (state.get("user_query") or "").strip()
     if state.get("policy_skip_rag"):
         return {"audit_trace": _append_audit(state, "reason", {"skipped": True})}
