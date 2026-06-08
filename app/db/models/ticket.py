@@ -85,6 +85,9 @@ class Ticket(UUIDMixin, TimestampMixin, Base):
     resolved_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     tags_json: Mapped[str | None] = mapped_column(Text)  # JSON list
 
+    # Multi-tenant
+    tenant_id: Mapped[str] = mapped_column(String(100), default="default", index=True, nullable=False)
+
     # Relationships
     customer = relationship("Customer", back_populates="tickets", lazy="selectin")
 

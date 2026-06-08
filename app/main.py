@@ -16,6 +16,7 @@ from app.metrics import metrics_text, record_http_request
 from app.api_guard import ApiGuardMiddleware
 from app.config import get_settings
 from app.logging_config import setup_logging
+from app.multi_tenant import tenant_middleware
 from app.api.chat import router as api_chat_router
 from app.api.tickets import router as api_tickets_router
 from app.routes_agent import router as agent_router
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
     app.add_middleware(ApiGuardMiddleware)
+    app.add_middleware(tenant_middleware)
 
     @app.middleware("http")
     async def trace_middleware(request: Request, call_next):

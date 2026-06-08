@@ -38,6 +38,9 @@ class ChatSession(UUIDMixin, TimestampMixin, Base):
     )
     context_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
+    # Multi-tenant
+    tenant_id: Mapped[str] = mapped_column(String(100), default="default", index=True, nullable=False)
+
     # Relationships
     messages = relationship(
         "Message", back_populates="session", lazy="selectin",
