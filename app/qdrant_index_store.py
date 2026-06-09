@@ -16,6 +16,7 @@ from app.bm25_store import persist_bm25_corpus
 logger = logging.getLogger(__name__)
 
 _index: VectorStoreIndex | None = None
+_index_cn: VectorStoreIndex | None = None
 _client: QdrantClient | None = None
 _client_key: str | None = None
 
@@ -38,7 +39,7 @@ def _qdrant_client(settings: Settings) -> QdrantClient:
 
 
 def rebuild_index() -> int:
-    """写入 Qdrant collection（先 embed 再建库，）。"""
+    """写入 Qdrant collection（先 embed 再建库）。"""
     global _index
     settings = get_settings()
     docs_dir = Path(settings.docs_dir).resolve()
@@ -109,9 +110,40 @@ def get_vector_index() -> VectorStoreIndex:
     return _index
 
 
+def get_vector_index_cn() -> VectorStoreIndex:
+    """获取中文知识库向量索引（kb_cn_general Collection）。"""
+    global _index_cn
+    if _index_cn is not None:
+        return _index_cn
+    settings = get_settings()
+    client = _qdrant_client(settings)
+    coll_name = getattr(settings, "qdrant_collection_name_cn", "kb_cn_general")
+    try:
+        client.get_collection(coll_name)
+    except Exception as e:
+        raise RuntimeError(
+            f"Qdrant 中文集合 {coll_name!r} 不存在，请先运行 python scripts/build_cn_index.py"
+        ) from e
+
+    embed_model = get_embedding_model()
+    vector_store = QdrantVectorStore(
+        client=client,
+        collection_name=coll_name,
+    )
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    _index_cn = VectorStoreIndex.from_vector_store(
+        vector_store,
+        storage_context=storage_context,
+        embed_model=embed_model,
+    )
+    logger.info("中文索引加载完成: %s", coll_name)
+    return _index_cn
+
+
 def clear_index_memory_cache() -> None:
-    global _index, _client, _client_key
+    global _index, _index_cn, _client, _client_key
     _index = None
+    _index_cn = None
     if _client is not None:
         try:
             _client.close()

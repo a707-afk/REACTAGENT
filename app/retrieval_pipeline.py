@@ -1,4 +1,4 @@
-"""向量 + BM25 混合召回，再 Rerank；有 user_context 时检索前 Pre-filter + 领域路由。"""
+"""向量 + BM25 混合召回，再 Rerank；支持中/英/德三语双知识库路由。"""
 from __future__ import annotations
 
 import logging
@@ -22,6 +22,8 @@ class ScoredRetrieval:
     nodes: list[NodeWithScore]
     retrieval_query: str
     router_result: RouterResult | None = None
+    language: str | None = None  # "zh" | "en" | "de" | "other"
+    collection_used: str | None = None
 
 
 def _normalize_scores_minmax(nodes: list[NodeWithScore]) -> list[NodeWithScore]:
@@ -197,6 +199,9 @@ def _retrieve_scored_nodes_impl(
     skip_domain_router: bool = False,
     trace_id: str | None = None,
 ) -> ScoredRetrieval:
+    # ── 语言检测 + 双索引路由 ──
+    from app.language_router import detect_language, get_collection_for_lang
+
     rq = resolve_retrieval_query(
         user_query,
         settings,
@@ -204,6 +209,23 @@ def _retrieve_scored_nodes_impl(
         trace_id=trace_id,
     )
 
+    lang = detect_language(rq)
+    lang_route = get_collection_for_lang(lang, settings)
+    logger.info("语言路由: %s → collection=%s", lang, lang_route.collection_name)
+
+    # 选择对应语言的索引
+    if lang == "zh":
+        from app.vector_index import get_vector_index_cn
+
+        try:
+            idx = get_vector_index_cn()
+        except RuntimeError:
+            logger.warning("中文索引不存在，回退到英文索引")
+            idx = index
+    else:
+        idx = index
+
+    rr: RouterResult | None = None
     rr: RouterResult | None = None
     if getattr(settings, "domain_router_enabled", True) and not skip_domain_router:
         rr = route_domains(rq, settings)
@@ -226,13 +248,16 @@ def _retrieve_scored_nodes_impl(
         )
         if not allowed_ids:
             _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)
-            return ScoredRetrieval(nodes=[], retrieval_query=rq, router_result=rr)
+            return ScoredRetrieval(
+                nodes=[], retrieval_query=rq, router_result=rr,
+                language=lang, collection_used=lang_route.collection_name,
+            )
 
     if allowed_ids is not None:
         from app.access_prefilter import vector_retrieve_access_filtered
 
         vector_scored = vector_retrieve_access_filtered(
-            index,
+            idx,
             rq,
             candidate_k,
             settings,
@@ -242,7 +267,7 @@ def _retrieve_scored_nodes_impl(
             allowed_ids=allowed_ids,
         )
     else:
-        retriever = index.as_retriever(similarity_top_k=candidate_k)
+        retriever = idx.as_retriever(similarity_top_k=candidate_k)
         vector_scored = retriever.retrieve(rq)
 
     merged: list[NodeWithScore] = list(vector_scored)
@@ -250,13 +275,16 @@ def _retrieve_scored_nodes_impl(
         try:
             from app.bm25_store import bm25_search, node_with_score_from_bm25, _get_bm25
 
+            # 使用语言对应的 BM25 语料
+            bm25_path = getattr(settings, "bm25_corpus_path_cn", "data/bm25_cn_corpus.jsonl") if lang == "zh" else settings.bm25_corpus_path
             bm25_hits = bm25_search(
                 settings,
                 rq,
                 settings.bm25_candidate_top_k,
                 allowed_ids=allowed_ids,
+                corpus_path=bm25_path,
             )
-            _, _, meta_lookup = _get_bm25(settings)
+            _, _, meta_lookup = _get_bm25(settings, corpus_path=bm25_path)
             bm25_nodes: list[NodeWithScore] = []
             for nid, bsc in bm25_hits:
                 nws = node_with_score_from_bm25(nid, bsc, meta_lookup)
@@ -270,22 +298,26 @@ def _retrieve_scored_nodes_impl(
                 rrf_k=getattr(settings, "hybrid_rrf_k", 60),
             )
             logger.debug(
-                "hybrid: vec=%s bm25=%s merged=%s prefilter=%s fusion=%s",
+                "hybrid: vec=%s bm25=%s merged=%s prefilter=%s fusion=%s lang=%s",
                 len(vector_scored),
                 len(bm25_nodes),
                 len(merged),
                 allowed_ids is not None,
                 getattr(settings, "hybrid_fusion", "max"),
+                lang,
             )
         except FileNotFoundError:
-            logger.warning("BM25 语料未找到，仅使用向量召回（请运行 python scripts/reindex.py）")
+            logger.warning("BM25 语料未找到，仅使用向量召回（请运行 reindex.py / build_cn_index.py）")
         except Exception:
             logger.exception("BM25 分支失败，回退为纯向量候选")
             merged = list(vector_scored)
 
     if not merged:
         _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)
-        return ScoredRetrieval(nodes=[], retrieval_query=rq, router_result=rr)
+        return ScoredRetrieval(
+            nodes=[], retrieval_query=rq, router_result=rr,
+            language=lang, collection_used=lang_route.collection_name,
+        )
 
     if (
         user_context is not None
@@ -301,7 +333,10 @@ def _retrieve_scored_nodes_impl(
         )
         if not merged:
             _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)
-            return ScoredRetrieval(nodes=[], retrieval_query=rq, router_result=rr)
+            return ScoredRetrieval(
+                nodes=[], retrieval_query=rq, router_result=rr,
+                language=lang, collection_used=lang_route.collection_name,
+            )
 
     from app.retrieval_intent_boost import apply_retrieval_intent_boost
 
@@ -330,20 +365,27 @@ def _retrieve_scored_nodes_impl(
 
     if not merged:
         _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)
-        return ScoredRetrieval(nodes=[], retrieval_query=rq, router_result=rr)
+        return ScoredRetrieval(
+            nodes=[], retrieval_query=rq, router_result=rr,
+            language=lang, collection_used=lang_route.collection_name,
+        )
 
     if settings.rerank_enabled:
         from app.rerank import rerank_nodes
 
         nodes = rerank_nodes(rq, merged, top_n=top_k, settings=settings)
         nodes = apply_retrieval_intent_boost(nodes, rq, settings)
-        out = ScoredRetrieval(nodes=nodes, retrieval_query=rq, router_result=rr)
+        out = ScoredRetrieval(
+            nodes=nodes, retrieval_query=rq, router_result=rr,
+            language=lang, collection_used=lang_route.collection_name,
+        )
         _log_retrieve_event(
             trace_id, hits=len(out.nodes), retrieval_query=rq, router_result=rr
         )
         return out
     out = ScoredRetrieval(
-        nodes=merged[:top_k], retrieval_query=rq, router_result=rr
+        nodes=merged[:top_k], retrieval_query=rq, router_result=rr,
+        language=lang, collection_used=lang_route.collection_name,
     )
     _log_retrieve_event(
         trace_id, hits=len(out.nodes), retrieval_query=rq, router_result=rr

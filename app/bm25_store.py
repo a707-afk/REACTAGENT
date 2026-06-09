@@ -1,4 +1,4 @@
-"""BM25 词法检索：与向量候选合并；语料在 reindex 时落盘。"""
+"""BM25 词法检索：与向量候选合并；语料在 reindex 时落盘。支持中英文双 BM25 语料。"""
 from __future__ import annotations
 
 import json
@@ -18,17 +18,26 @@ _bm25: BM25Okapi | None = None
 _bm25_ids: list[str] | None = None
 _bm25_meta: dict[str, dict] | None = None
 
+# 中文 BM25 独立缓存
+_bm25_cn: BM25Okapi | None = None
+_bm25_ids_cn: list[str] | None = None
+_bm25_meta_cn: dict[str, dict] | None = None
+
 
 def clear_bm25_memory_cache() -> None:
     global _bm25, _bm25_ids, _bm25_meta
+    global _bm25_cn, _bm25_ids_cn, _bm25_meta_cn
     _bm25 = None
     _bm25_ids = None
     _bm25_meta = None
+    _bm25_cn = None
+    _bm25_ids_cn = None
+    _bm25_meta_cn = None
 
 
-def persist_bm25_corpus(nodes: list[BaseNode], settings: Settings) -> Path:
+def persist_bm25_corpus(nodes: list[BaseNode], settings: Settings, *, corpus_path: str | None = None) -> Path:
     """将节点写入 JSONL，供 BM25 加载。"""
-    path = Path(settings.bm25_corpus_path).resolve()
+    path = Path(corpus_path or settings.bm25_corpus_path).resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = []
     for n in nodes:
@@ -51,7 +60,6 @@ def _tokenize_zh(text: str) -> list[str]:
     import jieba
 
     text = text.lower()
-    # jieba + 英文/数字连续片段，兼顾 Markdown
     raw = list(jieba.cut(text, cut_all=False))
     out: list[str] = []
     for t in raw:
@@ -88,11 +96,29 @@ def _load_corpus_disk(corpus_path: str) -> tuple[BM25Okapi, list[str], dict[str,
     return BM25Okapi(tokenized_corpus), ids, meta
 
 
-def _get_bm25(settings: Settings) -> tuple[BM25Okapi, list[str], dict[str, dict]]:
+def _get_bm25(settings: Settings, *, corpus_path: str | None = None) -> tuple[BM25Okapi, list[str], dict[str, dict]]:
+    """获取 BM25 索引。支持指定 corpus_path 用于中文/英文分离。"""
     global _bm25, _bm25_ids, _bm25_meta
+    global _bm25_cn, _bm25_ids_cn, _bm25_meta_cn
+
+    # 判断是否使用中文语料
+    cn_path = getattr(settings, "bm25_corpus_path_cn", "data/bm25_cn_corpus.jsonl")
+    if corpus_path:
+        path = str(Path(corpus_path).resolve())
+    else:
+        path = str(Path(settings.bm25_corpus_path).resolve())
+
+    # 中文路径使用独立缓存
+    if cn_path in path or "_cn_" in path:
+        if _bm25_cn is not None and _bm25_ids_cn is not None and _bm25_meta_cn is not None:
+            return _bm25_cn, _bm25_ids_cn, _bm25_meta_cn
+        _bm25_cn, _bm25_ids_cn, _bm25_meta_cn = _load_corpus_disk(path)
+        logger.info("BM25(CN) 已加载: %s 条文档", len(_bm25_ids_cn))
+        return _bm25_cn, _bm25_ids_cn, _bm25_meta_cn
+
+    # 英文路径使用原缓存
     if _bm25 is not None and _bm25_ids is not None and _bm25_meta is not None:
         return _bm25, _bm25_ids, _bm25_meta
-    path = str(Path(settings.bm25_corpus_path).resolve())
     _bm25, _bm25_ids, _bm25_meta = _load_corpus_disk(path)
     logger.info("BM25 已加载: %s 条文档", len(_bm25_ids))
     return _bm25, _bm25_ids, _bm25_meta
@@ -104,12 +130,13 @@ def bm25_search(
     top_k: int,
     *,
     allowed_ids: frozenset[str] | None = None,
+    corpus_path: str | None = None,
 ) -> list[tuple[str, float]]:
-    """返回 (node_id, bm25_raw_score) 降序。``allowed_ids`` 非空时仅在可访问子集上排序。"""
+    """返回 (node_id, bm25_raw_score) 降序。支持指定 corpus_path。"""
     if top_k < 1:
         return []
     try:
-        bm25, ids, _ = _get_bm25(settings)
+        bm25, ids, _ = _get_bm25(settings, corpus_path=corpus_path)
     except FileNotFoundError:
         logger.warning("BM25 语料缺失，跳过 BM25 分支")
         return []

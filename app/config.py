@@ -69,6 +69,23 @@ class Settings(BaseSettings):
         description="本地嵌入式 Qdrant 目录（设此项则不用 Docker / qdrant_url）；未设时默认 data/qdrant_local",
     )
 
+    # 中文知识库 Collection（双 Collection 架构）
+    qdrant_collection_name_cn: str = Field(
+        default="kb_cn_general",
+        validation_alias=AliasChoices("QDRANT_COLLECTION_NAME_CN"),
+        description="中文通用售后 FAQ 知识库 Collection",
+    )
+    docs_dir_cn: str = Field(
+        default="data/docs_cn",
+        validation_alias=AliasChoices("DOCS_DIR_CN"),
+        description="中文 FAQ 知识库文档目录",
+    )
+    bm25_corpus_path_cn: str = Field(
+        default="data/bm25_cn_corpus.jsonl",
+        validation_alias=AliasChoices("BM25_CORPUS_PATH_CN"),
+        description="中文 BM25 语料路径",
+    )
+
     # 切片：P0 = markdown_heading_overlap；heading_only = 仅按标题不切二次
     chunk_strategy: str = Field(default="markdown_heading_overlap")
     chunk_size_tokens: int = Field(default=512, ge=64)
