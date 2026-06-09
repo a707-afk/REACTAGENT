@@ -39,7 +39,6 @@ def _settings_fingerprint(settings: Settings) -> str:
         "rerank_top": settings.rerank_candidate_top_k,
         "domain_router": settings.domain_router_enabled,
         "domain_hard": settings.domain_router_hard_filter,
-        "domain_soft": settings.domain_router_soft_boost_enabled,
         "intent_boost": settings.retrieval_intent_boost_enabled,
         "access_safety": settings.access_post_filter_safety_net,
         "rewrite_mode": settings.query_rewrite_mode,

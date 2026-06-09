@@ -1,1 +1,1 @@
-"""企业知识库 RAG API 应用包。"""
+"""AI 客服 Agent 后端应用包 — RAG + Agent 工单。"""

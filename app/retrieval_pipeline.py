@@ -114,46 +114,6 @@ def _merge_hybrid_by_rrf(
     return merged
 
 
-def _domain_soft_boost_nodes(
-    merged: list[NodeWithScore],
-    rr: RouterResult | None,
-    settings: Settings,
-) -> list[NodeWithScore]:
-    """对匹配路由允许域的前若干个候选在原 score 上加小增量（rerank 前）。"""
-    if (
-        not rr
-        or not getattr(settings, "domain_router_soft_boost_enabled", False)
-        or not merged
-    ):
-        return merged
-    allowed_raw = tuple(
-        str(d).strip().lower()
-        for d in (rr.allowed_domains or ())
-        if str(d).strip()
-    )
-    pd = rr.primary_domain
-    if pd:
-        allowed_raw = allowed_raw + (str(pd).strip().lower(),)
-    allowed = {x for x in allowed_raw if x}
-    if not allowed:
-        return merged
-    delta = float(getattr(settings, "domain_router_soft_boost_delta", 0.07) or 0.0)
-    max_boost = max(1, int(getattr(settings, "domain_router_soft_boost_top_chunks", 3) or 3))
-    out: list[NodeWithScore] = []
-    boosted = 0
-    for sn in merged:
-        if boosted >= max_boost:
-            out.append(sn)
-            continue
-        dom = str((sn.node.metadata or {}).get("domain") or "").strip().lower()
-        score = sn.score
-        if dom and dom in allowed and score is not None and delta != 0.0:
-            out.append(NodeWithScore(node=sn.node, score=float(score) + delta))
-            boosted += 1
-        else:
-            out.append(sn)
-    return out
-
 
 def _log_retrieve_event(
     trace_id: str | None,
@@ -346,7 +306,6 @@ def _retrieve_scored_nodes_impl(
     from app.retrieval_intent_boost import apply_retrieval_intent_boost
 
     merged = apply_retrieval_intent_boost(merged, rq, settings)
-    merged = _domain_soft_boost_nodes(merged, rr, settings)
 
     if (
         rr

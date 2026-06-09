@@ -6,15 +6,15 @@
   "summary": {
     "total_queries": 20,
     "failed": 0,
-    "precision_at_3": 0.5,
-    "precision_at_5": 0.52,
-    "recall_at_5": 0.8667,
-    "mrr": 0.5792,
+    "precision_at_3": 0.5333,
+    "precision_at_5": 0.53,
+    "recall_at_5": 0.8833,
+    "mrr": 0.6167,
     "domain_accuracy": 0.1,
-    "latency_p50": 2.784,
-    "latency_p95": 47.296,
-    "latency_p99": 47.296,
-    "throughput_qps": 0.183
+    "latency_p50": 3.612,
+    "latency_p95": 83.284,
+    "latency_p99": 83.284,
+    "throughput_qps": 0.126
   },
   "detail": [
     {
@@ -24,7 +24,7 @@
       "hits": 5,
       "top_score": 0.98583984375,
       "precision_at_5": 1.0,
-      "latency_s": 47.296
+      "latency_s": 83.284
     },
     {
       "query": "I want to return a defective product and get a refund",
@@ -33,16 +33,16 @@
       "hits": 5,
       "top_score": 0.455078125,
       "precision_at_5": 1.0,
-      "latency_s": 2.769
+      "latency_s": 3.772
     },
     {
       "query": "Where is my package? I haven't received it yet",
       "expected_domain": "delivery",
       "routed_domain": "internal_policy",
       "hits": 5,
-      "top_score": 0.98291015625,
-      "precision_at_5": 0.2,
-      "latency_s": 2.026
+      "top_score": 0.9619140625,
+      "precision_at_5": 0.4,
+      "latency_s": 3.612
     },
     {
       "query": "Can I change my shipping address after placing the order?",
@@ -51,7 +51,7 @@
       "hits": 5,
       "top_score": 0.91064453125,
       "precision_at_5": 1.0,
-      "latency_s": 2.369
+      "latency_s": 3.43
     },
     {
       "query": "I was charged twice for the same subscription this month",
@@ -60,7 +60,7 @@
       "hits": 5,
       "top_score": 1.0,
       "precision_at_5": 0.8,
-      "latency_s": 2.471
+      "latency_s": 4.663
     },
     {
       "query": "How do I update my payment method for the monthly plan?",
@@ -69,7 +69,7 @@
       "hits": 5,
       "top_score": 0.93408203125,
       "precision_at_5": 0.8,
-      "latency_s": 2.301
+      "latency_s": 4.38
     },
     {
       "query": "What is the price difference between Basic and Enterprise plans?",
@@ -78,7 +78,7 @@
       "hits": 5,
       "top_score": 0.90576171875,
       "precision_at_5": 0.4,
-      "latency_s": 3.031
+      "latency_s": 5.231
     },
     {
       "query": "I forgot my password and can't log in to my account",
@@ -87,16 +87,16 @@
       "hits": 5,
       "top_score": 0.98828125,
       "precision_at_5": 1.0,
-      "latency_s": 2.893
+      "latency_s": 6.581
     },
     {
       "query": "How do I delete my account permanently?",
       "expected_domain": "account",
       "routed_domain": "security",
       "hits": 5,
-      "top_score": 0.92822265625,
+      "top_score": 0.6318359375,
       "precision_at_5": 1.0,
-      "latency_s": 2.751
+      "latency_s": 5.489
     },
     {
       "query": "The application keeps crashing when I try to open reports",
@@ -105,7 +105,7 @@
       "hits": 5,
       "top_score": 0.9990234375,
       "precision_at_5": 0.0,
-      "latency_s": 2.986
+      "latency_s": 4.437
     },
     {
       "query": "VPN connection drops every few minutes after the latest update",
@@ -114,7 +114,7 @@
       "hits": 5,
       "top_score": 0.9990234375,
       "precision_at_5": 0.2,
-      "latency_s": 2.784
+      "latency_s": 3.89
     },
     {
       "query": "My printer is not recognized by the new workstation",
@@ -123,7 +123,7 @@
       "hits": 5,
       "top_score": 0.89111328125,
       "precision_at_5": 0.0,
-      "latency_s": 8.184
+      "latency_s": 3.482
     },
     {
       "query": "Is the service down right now? I can't access anything",
@@ -132,7 +132,7 @@
       "hits": 5,
       "top_score": 0.99951171875,
       "precision_at_5": 0.0,
-      "latency_s": 2.146
+      "latency_s": 2.98
     },
     {
       "query": "I want to file a complaint about the rude customer service agent",
@@ -141,7 +141,7 @@
       "hits": 5,
       "top_score": 0.8955078125,
       "precision_at_5": 1.0,
-      "latency_s": 3.684
+      "latency_s": 3.054
     },
     {
       "query": "How do I request time off through the HR portal?",
@@ -150,25 +150,25 @@
       "hits": 5,
       "top_score": 0.96826171875,
       "precision_at_5": 0.0,
-      "latency_s": 2.917
+      "latency_s": 3.115
     },
     {
       "query": "How do I set up two-factor authentication on my account?",
       "expected_domain": "product_support",
       "routed_domain": "security",
       "hits": 5,
-      "top_score": 0.94189453125,
+      "top_score": 0.97216796875,
       "precision_at_5": 0.0,
-      "latency_s": 3.478
+      "latency_s": 2.914
     },
     {
       "query": "What are the system requirements for installing the desktop client?",
       "expected_domain": "product_support",
       "routed_domain": "product",
       "hits": 5,
-      "top_score": 0.10809326171875,
+      "top_score": 0.155029296875,
       "precision_at_5": 0.0,
-      "latency_s": 3.648
+      "latency_s": 2.198
     },
     {
       "query": "I need to speak to a human agent, this is urgent",
@@ -177,7 +177,7 @@
       "hits": 5,
       "top_score": 0.75634765625,
       "precision_at_5": 1.0,
-      "latency_s": 2.443
+      "latency_s": 2.112
     },
     {
       "query": "Can I get a callback from your support team?",
@@ -186,7 +186,7 @@
       "hits": 5,
       "top_score": 0.9375,
       "precision_at_5": 1.0,
-      "latency_s": 2.649
+      "latency_s": 1.776
     },
     {
       "query": "Do you offer discounts for non-profit organizations?",
@@ -195,7 +195,7 @@
       "hits": 5,
       "top_score": 0.002712249755859375,
       "precision_at_5": 0.0,
-      "latency_s": 2.688
+      "latency_s": 2.082
     }
   ]
 }

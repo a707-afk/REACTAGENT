@@ -1,4 +1,10 @@
-"""检索前 Query Rewrite：口语/指代 → 适合向量与 BM25 的独立检索句（智谱）。"""
+"""检索前 Query Rewrite：口语/指代消解 → 适合向量与 BM25 检索的独立短句。
+
+语言策略：
+  中文输入 → 中文输出
+  英文输入 → 英文输出
+  保持原文语言，不强制翻译
+"""
 from __future__ import annotations
 
 import logging
@@ -11,12 +17,13 @@ from app.observability import log_structured_event
 logger = logging.getLogger(__name__)
 
 _REWRITE_SYS = (
-    "你是检索查询改写器。将用户输入改写成一条适合在企业知识库中检索的独立中文短句。\n"
+    "你是检索查询改写器。将用户输入改写成一条适合在客服知识库中检索的独立短句。\n"
     "规则：\n"
     "1) 保留核心意图与实体名；\n"
-    "2) 去掉寒暄、口语填充词；\n"
-    "3) 不要回答用户问题，不要解释原因；\n"
-    "4) 只输出一行改写后的检索查询，不要加引号或「改写：」等前缀。"
+    "2) 去掉寒暄、口语填充词、语气词；\n"
+    "3) 不回答用户问题，不解释原因；\n"
+    "4) 保持原文语言：中文输入输出中文，英文输入输出英文；\n"
+    "5) 只输出一行改写后的检索查询，不加引号或前缀。"
 )
 
 
@@ -54,7 +61,7 @@ def should_use_llm_rewrite(user_query: str) -> bool:
         return True
     if len(s) > 42:
         return True
-    # 短且无问号、无口语：更像制度名/关键词，直接检索
+    # 短且无问号、无口语：更像关键词，直接检索
     if len(s) <= 24 and _KEYWORDISH.match(s):
         return False
     return True

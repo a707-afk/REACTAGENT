@@ -20,7 +20,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "enterprise-rag-kb"
+    app_name: str = "cs-agent-backend"
     debug: bool = False
 
     # Database
@@ -97,7 +97,7 @@ class Settings(BaseSettings):
         description="RRF 融合公式中的 k：score += 1 / (k + rank)",
     )
     bm25_candidate_top_k: int = Field(default=20, ge=1, le=200)
-    bm25_corpus_path: str = Field(default="data/bm25_corpus.jsonl")
+    bm25_corpus_path: str = Field(default="data/bm25_cs_corpus.jsonl")
 
     # 访问控制：有 user_context 时在向量/BM25 检索前按元数据预筛候选 ID（默认开启）
     access_post_filter_safety_net: bool = Field(
@@ -121,7 +121,7 @@ class Settings(BaseSettings):
         description="可选；与 Qwen 官方 Instruct 一致时不填则用默认英文 instruction",
     )
 
-    # 领域路由（规则 + 可选智谱）：默认仅推断 domain 写入 router_trace，不收窄候选
+    # 领域路由：关键词优先 + LLM fallback（见 app/domain_router.py）
     domain_router_enabled: bool = Field(
         default=True,
         validation_alias=AliasChoices("DOMAIN_ROUTER_ENABLED"),
@@ -130,94 +130,22 @@ class Settings(BaseSettings):
     domain_router_hard_filter: bool = Field(
         default=False,
         validation_alias=AliasChoices("DOMAIN_ROUTER_HARD_FILTER"),
-        description=(
-            "True 时在 rerank 前按 allowed_domains 淘汰候选（历史行为，易伤召回）；"
-            "默认 False：路由结果仅作 trace / prior，不参与 elimination"
-        ),
+        description="True 时在 rerank 前按 allowed_domains 淘汰候选；默认 False：路由结果仅作 trace",
     )
     domain_router_strict: bool = Field(
         default=False,
-        description=(
-            "仅当 domain_router_hard_filter=True：按域收窄时丢弃无 domain 元数据的 chunk"
-        ),
+        description="仅当 domain_router_hard_filter=True：按域收窄时丢弃无 domain 元数据的 chunk",
     )
     domain_router_fallback_all: bool = Field(
         default=True,
-        description=(
-            "仅当 domain_router_hard_filter=True：按域过滤若无候选是否回退为全库候选"
-        ),
+        description="仅当 domain_router_hard_filter=True：按域过滤若无候选是否回退为全库候选",
     )
     domain_router_profiles_path: str = Field(
         default="data/domain_router_profiles.json",
-        description="各域加权与原型短文本路径（relative cwd）",
-    )
-    domain_router_calibration_path: str | None = Field(
-        default=None,
-        validation_alias=AliasChoices("ROUTER_CALIBRATION_PATH", "DOMAIN_ROUTER_CALIBRATION_PATH"),
-        description="校准 JSON（temperature + Platt 系数）；空则读 data/router_calibration.default.json",
-    )
-    domain_router_enhanced: bool = Field(
-        default=True,
-        validation_alias=AliasChoices("DOMAIN_ROUTER_ENHANCED"),
-        description=(
-            "True：多域 fused（规则 embedding 融合）；False：沿用旧版单路径 legacy_rules / legacy_llm"
-        ),
-    )
-    domain_router_embedding_enabled: bool = Field(
-        default=True,
-        validation_alias=AliasChoices("DOMAIN_ROUTER_USE_EMBEDDING"),
-        description="Enhanced 模式下是否调用 Embedding Router（离线评测可临时 false）",
-    )
-    domain_router_fusion_rule_weight: float = Field(
-        default=0.55, ge=0.0, le=1.0, description="与 embedding 融合的 rule 分项权重"
-    )
-    domain_router_fusion_embedding_weight: float = Field(
-        default=0.45, ge=0.0, le=1.0
-    )
-    domain_router_multidomain_secondary_ratio: float = Field(
-        default=0.45,
-        ge=0.1,
-        le=1.0,
-        description="相对 primary fused 分值保留次域下限比例",
-    )
-    domain_router_top_domains_k: int = Field(default=3, ge=1, le=12)
-    domain_router_embedding_fallback_llm_max_sim: float = Field(
-        default=0.38,
-        ge=0.0,
-        le=1.0,
-        description="embedding 最大值低于此后且 fused 偏弱时更倾向于 LLM 兜底（需 Key）",
-    )
-    domain_router_fused_fallback_llm_threshold: float = Field(
-        default=0.22,
-        ge=0.0,
-        le=1.0,
-        description="fused peak 低于此且非强关键词时尝试 LLM 多域兜底",
-    )
-    domain_router_llm_fallback_enabled: bool = Field(
-        default=True,
-        description="是否允许智谱在多域结构中兜底（需 Key）",
-    )
-    domain_router_soft_boost_enabled: bool = Field(
-        default=False,
-        validation_alias=AliasChoices(
-            "DOMAIN_ROUTER_SOFT_BOOST", "DOMAIN_ROUTER_SOFT_BOOST_ENABLED"
-        ),
-        description="True：在 rerank 前对候选分做小幅域加权 bump（不改变硬过滤语义）",
-    )
-    domain_router_soft_boost_top_chunks: int = Field(
-        default=3,
-        ge=1,
-        le=20,
-        description="最多对前若干个匹配 allowed_domains 的候选加分",
-    )
-    domain_router_soft_boost_delta: float = Field(
-        default=0.07,
-        ge=0.0,
-        le=0.5,
-        description="加在全库相似度/score 上的增量（LlamaIndex 分数越大越相关时直接相加）",
+        description="客服领域路由配置文件路径（relative cwd）",
     )
 
-    # 检索意图加权：case vs workflow / runbook vs 案例 / 话术 vs 抽检（rerank 前）
+# 检索意图加权：case vs workflow / runbook vs 案例 / 话术 vs 抽检（rerank 前）
     retrieval_intent_boost_enabled: bool = Field(
         default=True,
         validation_alias=AliasChoices("RETRIEVAL_INTENT_BOOST_ENABLED"),
@@ -376,7 +304,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("OTEL_ENABLED"),
     )
     otel_service_name: str = Field(
-        default="enterprise-rag-kb",
+        default="cs-agent-backend",
         validation_alias=AliasChoices("OTEL_SERVICE_NAME"),
     )
     otel_exporter_endpoint: str | None = Field(
