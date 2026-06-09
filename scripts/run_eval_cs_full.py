@@ -61,6 +61,18 @@ EVAL_QUESTIONS: list[dict[str, Any]] = [
     {"query": "I need to speak to a human agent, this is urgent", "domain": "customer_service", "relevant_terms": ["human", "agent", "urgent"]},
     {"query": "Can I get a callback from your support team?", "domain": "customer_service", "relevant_terms": ["callback", "support"]},
     {"query": "Do you offer discounts for non-profit organizations?", "domain": "sales", "relevant_terms": ["discount", "non-profit"]},
+    # ── 中文评测问题 ──
+    {"query": "我的包裹到哪了？怎么查物流？", "domain": "delivery", "relevant_terms": ["物流", "包裹", "delivery", "tracking"]},
+    {"query": "我忘记密码了，登不上账号怎么办？", "domain": "account", "relevant_terms": ["密码", "登录", "password", "account"]},
+    {"query": "软件一直闪退，根本用不了！", "domain": "tech_support", "relevant_terms": ["闪退", "crash", "报错"]},
+    {"query": "怎么取消订单？我不想要了", "domain": "order", "relevant_terms": ["取消", "订单", "cancel", "order"]},
+    {"query": "我要退货退款，收到的东西是坏的", "domain": "returns", "relevant_terms": ["退货", "退款", "return", "refund"]},
+    {"query": "为什么自动扣了我两笔钱？", "domain": "billing", "relevant_terms": ["扣费", "billing", "charge"]},
+    {"query": "你们系统是不是崩了？打不开网页", "domain": "outages", "relevant_terms": ["崩", "打不开", "down", "outage"]},
+    {"query": "打印机连不上新电脑，驱动装不上", "domain": "it_support", "relevant_terms": ["打印机", "驱动", "printer", "driver"]},
+    {"query": "我要投诉你们的客服态度极差", "domain": "feedback", "relevant_terms": ["投诉", "complaint", "态度"]},
+    {"query": "有没有企业版优惠？多少钱一年？", "domain": "sales", "relevant_terms": ["企业版", "优惠", "多少钱", "pricing"]},
+
 ]
 
 
