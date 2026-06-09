@@ -172,18 +172,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-@app.get("/health/ready", include_in_schema=False)
-async def health_ready():
-    """就绪探针：检查 BM25 语料和向量索引是否可用。"""
-    try:
-        from app.bm25_store import _get_bm25
-        _get_bm25(get_settings())
-        from app.vector_index import get_vector_index
-        idx = get_vector_index()
-        if idx is None:
-            return {"status": "unhealthy", "reason": "vector index not loaded"}
-        return {"status": "ok"}
-    except Exception as e:
-        return {"status": "unhealthy", "reason": str(e)}

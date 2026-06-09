@@ -1,9 +1,11 @@
 """LLM 客户端：SenseNova (DeepSeek-V4) + 智谱 fallback。
 
 OpenAI 兼容端点。通过 app.config.Settings 配置。
+API keys 通过环境变量 SENSENOVA_API_KEYS 配置（逗号分隔多个 key 用于轮转）。
 """
 from __future__ import annotations
 
+import os
 import logging
 import time
 
@@ -15,17 +17,27 @@ logger = logging.getLogger(__name__)
 # SenseNova API 配置
 _SENSENOVA_BASE = "https://token.sensenova.cn/v1"
 _SENSENOVA_MODEL = "deepseek-v4-flash"
-# 双 key 轮转
-_SENSENOVA_KEYS = [
-    "REDACTED_KEY",
-    "REDACTED_KEY",
-    "REDACTED_KEY",  # key3
-]
+
+# API keys — 从环境变量读取，不硬编码
+_SENSENOVA_KEYS: list[str] = []
 _key_idx = 0
 
 
+def _load_keys() -> list[str]:
+    """从环境变量加载 SenseNova API keys（逗号分隔多 key 轮转）。"""
+    raw = os.getenv("SENSENOVA_API_KEYS", "").strip()
+    return [k.strip() for k in raw.split(",") if k.strip()] if raw else []
+
+
 def _next_key() -> str:
-    global _key_idx
+    global _key_idx, _SENSENOVA_KEYS
+    if not _SENSENOVA_KEYS:
+        _SENSENOVA_KEYS = _load_keys()
+    if not _SENSENOVA_KEYS:
+        raise RuntimeError(
+            "未配置 SENSENOVA_API_KEYS 环境变量，无法调用 LLM。"
+            "请设置：export SENSENOVA_API_KEYS='sk-xxx,sk-yyy'"
+        )
     key = _SENSENOVA_KEYS[_key_idx]
     _key_idx = (_key_idx + 1) % len(_SENSENOVA_KEYS)
     return key
@@ -35,9 +47,6 @@ def _get_client():
     """获取 OpenAI 兼容客户端，优先 SenseNova，fallback 智谱。"""
     from openai import OpenAI
 
-    settings = get_settings()
-
-    # 优先 SenseNova
     api_key = _next_key()
     return OpenAI(api_key=api_key, base_url=_SENSENOVA_BASE), _SENSENOVA_MODEL
 

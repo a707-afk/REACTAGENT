@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 默认指向本机 ModelScope 缓存路径；其他机器请设置环境变量 QWEN_EMBEDDING_MODEL_PATH
 _DEFAULT_QWEN_EMBED_PATH = (
-    r"C:\Users\Lenovo\.cache\modelscope\hub\models\Qwen\Qwen3-Embedding-0___6B"
+    "models/Qwen/Qwen3-Embedding-0___6B"
 )
 _DEFAULT_QWEN_RERANK_PATH = (
     r"C:\Users\Lenovo\.cache\modelscope\hub\models\Qwen\Qwen3-Reranker-0___6B"
@@ -114,7 +114,7 @@ class Settings(BaseSettings):
         description="RRF 融合公式中的 k：score += 1 / (k + rank)",
     )
     bm25_candidate_top_k: int = Field(default=20, ge=1, le=200)
-    bm25_corpus_path: str = Field(default="data/bm25_cs_corpus.jsonl")
+    bm25_corpus_path: str = Field(default="data/bm25_corpus.jsonl")
 
     # 访问控制：有 user_context 时在向量/BM25 检索前按元数据预筛候选 ID（默认开启）
     access_post_filter_safety_net: bool = Field(
@@ -257,45 +257,45 @@ class Settings(BaseSettings):
     agent_grader_mode: str = Field(
         default="auto",
         validation_alias=AliasChoices("AGENT_GRADER_MODE"),
-        description="auto | llm | heuristic?Agent grader ?",
+        description="auto | llm | heuristic：Agent grader 模式",
     )
     agent_grader_min_query_overlap: float = Field(
         default=0.12,
         ge=0.0,
         le=1.0,
         validation_alias=AliasChoices("AGENT_GRADER_MIN_QUERY_OVERLAP"),
-        description="??? grader?????? Top ?? n-gram ????",
+        description="grader 通过的最小 query-chunk n-gram 重叠率",
     )
     agent_max_draft_attempts: int = Field(
         default=2,
         ge=1,
         le=5,
         validation_alias=AliasChoices("AGENT_MAX_DRAFT_ATTEMPTS"),
-        description="? grounding ????????????",
+        description="grounding 失败后重试 draft 的最大次数",
     )
     agent_rewrite_use_llm: bool = Field(
         default=True,
         validation_alias=AliasChoices("AGENT_REWRITE_USE_LLM"),
-        description="????????????? query rewrite?? Key ??? grader_hint/??",
+        description="Agent 回环中是否使用 LLM 做 query rewrite",
     )
     agent_graph_recursion_limit: int = Field(
         default=20,
         ge=8,
         le=100,
         validation_alias=AliasChoices("AGENT_GRAPH_RECURSION_LIMIT"),
-        description="LangGraph invoke recursion_limit????????",
+        description="LangGraph invoke recursion_limit 最大步数",
     )
     api_agent_timeout_seconds: float = Field(
         default=120.0,
         ge=10.0,
         le=600.0,
         validation_alias=AliasChoices("API_AGENT_TIMEOUT_SECONDS"),
-        description="POST /agent/ticket ?????????",
+        description="POST /agent/ticket 的最大等待时间（秒）",
     )
     grounding_strip_unsupported: bool = Field(
         default=True,
         validation_alias=AliasChoices("GROUNDING_STRIP_UNSUPPORTED"),
-        description="grounding ????????????? unsupported ?????",
+        description="grounding 检测后是否自动删除无支撑的句子",
     )
     llm_max_retries: int = Field(
         default=2,
@@ -354,21 +354,21 @@ class Settings(BaseSettings):
     api_keys: str = Field(
         default="",
         validation_alias=AliasChoices("API_KEYS"),
-        description="???????????????",
+        description="API 认证密钥，逗号分隔多个 key",
     )
     api_rate_limit_rpm: int = Field(
         default=120,
         ge=0,
         le=10_000,
         validation_alias=AliasChoices("API_RATE_LIMIT_RPM"),
-        description="????????????0=?",
+        description="API 速率限制（每分钟请求数），0=不限制",
     )
     api_max_body_bytes: int = Field(
         default=65536,
         ge=0,
         le=10_000_000,
         validation_alias=AliasChoices("API_MAX_BODY_BYTES"),
-        description="JSON ??? Content-Length ???0=??",
+        description="JSON 请求体最大字节数（Content-Length），0=不限制",
     )
 
     cache_enabled: bool = Field(
