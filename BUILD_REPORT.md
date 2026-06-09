@@ -50,7 +50,7 @@
 | Nodes indexed | 17,792 |
 | Build time | 531.9s (8.9 min) |
 | Throughput | 33.4 nodes/sec |
-| Qdrant path | `data/qdrant_cn_local/` |
+| Qdrant path | `data/qdrant_local/` |
 | BM25 corpus | `data/bm25_cn_corpus.jsonl` (6.9 MB) |
 
 ## 3. Architecture
@@ -131,7 +131,7 @@ User Query
 
 ```bash
 export QWEN_EMBEDDING_MODEL_PATH=/mnt/workspace/rag-kb-project/models/Qwen/Qwen3-Embedding-0___6B
-export QDRANT_PATH=/mnt/workspace/rag-kb-project/data/qdrant_cn_local
+export QDRANT_PATH=/mnt/workspace/rag-kb-project/data/qdrant_local
 export QDRANT_COLLECTION_NAME_CN=kb_cn_general
 export BM25_CORPUS_PATH_CN=data/bm25_cn_corpus.jsonl
 export DOCS_DIR_CN=data/docs_cn
@@ -157,3 +157,20 @@ f8a1838 Phase 3: fix 'set up' keyword gap, 95% domain accuracy
 cb00b43 Phase 2: add Chinese eval questions, language-aware query rewrite
 dbb4567 Phase 1: remove all enterprise domain code, simplify to CS keywords-first router
 ```
+
+## 9. E2E Validation Results (2026-06-09 Final)
+
+| Check | Result |
+|-------|--------|
+| rag_kb (EN) | 78,023 points |
+| kb_cn_general (CN) | 17,792 points |
+| Language routing (EN→rag_kb) | PASS |
+| Language routing (CN→kb_cn_general) | PASS |
+| EN vector retrieval | PASS (score 0.707) |
+| CN vector retrieval | PASS (score 0.747, relevant results) |
+| EN BM25 | PASS (3 hits) |
+| CN BM25 | PASS (3 hits) |
+| API server startup | PASS (23 routes) |
+| Domain router (CN) | PASS |
+
+**Both Qdrant collections now share a single directory** (`data/qdrant_local/`) to avoid local-mode locking issues.
