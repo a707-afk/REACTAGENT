@@ -144,7 +144,7 @@ _DOMAIN_KEYWORDS: dict[str, tuple[str, ...]] = {
         "使用说明", "手册", "帮助文档", "教程", "新手",
         "入门", "操作指南", "常见问题",
         # 英文
-        "setup", "install", "configuration", "compatibility",
+        "setup", "set up", "install", "configuration", "compatibility",
         "feature", "how to use", "user manual", "guide",
         "documentation", "tutorial", "faq",
     ),
