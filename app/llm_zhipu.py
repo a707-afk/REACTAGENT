@@ -19,6 +19,7 @@ _SENSENOVA_MODEL = "deepseek-v4-flash"
 _SENSENOVA_KEYS = [
     "REDACTED_KEY",
     "REDACTED_KEY",
+    "REDACTED_KEY",  # key3
 ]
 _key_idx = 0
 

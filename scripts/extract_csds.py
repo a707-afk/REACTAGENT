@@ -219,6 +219,7 @@ def classify_domains(input_dir: str, output_dir: str, batch_size: int = 20) -> i
     SENSENOVA_KEYS = [
         "REDACTED_KEY",
         "REDACTED_KEY",
+        "REDACTED_KEY",
     ]
     key_idx = 0
 
