@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Iterator
+from typing import Any, AsyncIterator
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -79,11 +79,12 @@ async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgent
     return _ticket_response_from_result(req, result, tid)
 
 
-def _agent_ticket_stream_events(req: TicketAgentRequest, tid: str | None) -> Iterator[str]:
+async def _agent_ticket_stream_events(req: TicketAgentRequest, tid: str | None) -> AsyncIterator[str]:
+    """SSE 事件流（async 生成器，支持 async 图节点）。"""
     settings = get_settings()
     uc_dict = req.user_context.model_dump() if req.user_context else {}
     try:
-        for event_type, payload in iter_ticket_agent_sse(
+        async for event_type, payload in iter_ticket_agent_sse(
             ticket_id=req.ticket_id,
             user_query=req.user_query,
             user_context=uc_dict,
@@ -100,16 +101,14 @@ def _agent_ticket_stream_events(req: TicketAgentRequest, tid: str | None) -> Ite
     except Exception as e:
         logger.exception("agent/ticket/stream 失败")
         yield format_sse_event("error", {"message": str(e)})
-
-
 @router.post("/agent/ticket/stream")
 async def agent_ticket_stream(req: TicketAgentRequest, request: Request) -> StreamingResponse:
     """SSE 流式工单 Agent：step（audit 步骤）+ token（草稿增量）+ done。"""
     tid = getattr(request.state, "trace_id", None)
 
     async def _gen():
-        for chunk in _agent_ticket_stream_events(req, tid):
-            yield chunk
+            async for chunk in _agent_ticket_stream_events(req, tid):
+                yield chunk
             await asyncio.sleep(0)
 
     return StreamingResponse(

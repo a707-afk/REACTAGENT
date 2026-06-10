@@ -11,7 +11,7 @@ type AgentDone = {
 };
 
 export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
-  const [ticketId, setTicketId] = useState("T-DEMO-001");
+  const [ticketId, setTicketId] = useState(() => `T-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`);
   const [query, setQuery] = useState(presetQuery?.trim() || "输入电商售后问题...");
   const [steps, setSteps] = useState<AuditStep[]>([]);
   const [draft, setDraft] = useState("");
@@ -54,7 +54,8 @@ export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
             } else if (event === "done") {
               const d = data as AgentDone;
               setDone(d);
-              if (d.draft_reply) setDraft(d.draft_reply);
+              // draft_reply already streamed via token events
+              if (d.draft_reply && !draft) setDraft(d.draft_reply);
               if (d.audit_trace?.length) setSteps(d.audit_trace);
             } else if (event === "error") {
               setError((data as { message?: string }).message ?? "未知错误");

@@ -22,6 +22,7 @@ INVENTORY: dict[str, dict[str, dict[str, int]]] = {
 
 def query_inventory(sku: str, size: str, color: str = "") -> dict:
     """Query inventory for a specific SKU and size."""
+    # color is embedded in SKU (e.g. TEE-WHITE), so we pass it through for downstream routing
     sku_data = INVENTORY.get(sku.upper(), {})
     size_data = sku_data.get(size, {})
 
@@ -43,5 +44,6 @@ def query_inventory(sku: str, size: str, color: str = "") -> dict:
         "stock": total,
         "warehouse": primary_warehouse,
         "warehouses": warehouses,
+        "requested_color": color,
         "estimated_delivery": "1-2天" if primary_warehouse == "上海仓" else "3-5天",
     }

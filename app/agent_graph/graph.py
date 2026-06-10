@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from typing import Any, Iterator
+from typing import Any, AsyncIterator
 
 from langgraph.graph import END, START, StateGraph
 
@@ -163,7 +163,7 @@ def state_to_ticket_response_dict(
     }
 
 
-def iter_ticket_agent_sse(
+async def iter_ticket_agent_sse(
     *,
     ticket_id: str,
     user_query: str,
@@ -175,8 +175,8 @@ def iter_ticket_agent_sse(
     session_id: str | None = None,
     conversation_history: str | None = None,
     settings: Settings | None = None,
-) -> Iterator[tuple[str, Any]]:
-    """按 LangGraph 节点更新 yield (event_type, payload)。"""
+) -> AsyncIterator[tuple[str, Any]]:
+    """按 LangGraph 节点更新 yield (event_type, payload)，支持 async 节点。"""
     graph = build_ticket_agent_graph(settings=settings)
     initial = _ticket_agent_initial(
         ticket_id=ticket_id,
@@ -191,8 +191,7 @@ def iter_ticket_agent_sse(
     )
     final_state: TicketAgentState = dict(initial)
     seen_steps = 0
-
-    for chunk in graph.stream(initial, stream_mode="updates"):
+    async for chunk in graph.astream(initial, stream_mode="updates"):
         for _node_name, update in chunk.items():
             if not isinstance(update, dict):
                 continue
@@ -201,14 +200,12 @@ def iter_ticket_agent_sse(
             while seen_steps < len(trace):
                 yield ("step", trace[seen_steps])
                 seen_steps += 1
-
             draft = update.get("draft_reply")
             if draft and isinstance(draft, str):
                 prev = final_state.get("_streamed_draft") or ""
                 if len(draft) > len(prev):
-                    yield ("token", {"text": draft[len(prev) :]})
+                    yield ("token", {"text": draft[len(prev):]})
                     final_state["_streamed_draft"] = draft
-
     yield (
         "done",
         state_to_ticket_response_dict(
@@ -218,6 +215,7 @@ def iter_ticket_agent_sse(
             trace_id=trace_id,
         ),
     )
+
 
 
 async def run_ticket_agent(
