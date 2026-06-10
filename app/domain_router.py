@@ -1,12 +1,12 @@
-"""客服领域路由：中英双语关键词优先 + LLM fallback。
+"""EcomAgent domain router: e-commerce after-sales keyword matching + LLM fallback.
 
-策略（由简到繁，逐级升级）：
-1. 关键词直接命中 ≥2 个 → 立即返回，confidence 0.90+
-2. 关键词命中 1 个且唯一 → 返回，confidence 0.75
-3. 无关键词命中 / 多域竞争 → LLM 分类（如有 API key）
-4. 全部失败 → 返回 None，走全库检索
+Strategy (simple to complex, progressive upgrade):
+1. >=2 keyword hits in one domain -> immediate return, confidence 0.90+
+2. 1 keyword hit, unique domain -> return, confidence 0.75
+3. No hits / multi-domain competition -> LLM classification
+4. All fails -> return None, full-search fallback
 
-不再使用 embedding fusion —— profiles 缺失域导致准确率 10% 的根因。
+EcomAgent: changed from 14 generic CS domains to 5 e-commerce after-sales domains.
 """
 
 from __future__ import annotations
@@ -21,138 +21,33 @@ from app.config import Settings
 
 logger = logging.getLogger(__name__)
 
-# ── 14 个客服领域，中文关键词在前（主用户群），英文在后 ──
-
 _DOMAIN_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "customer_service": (
-        # 中文
-        "客服", "人工", "转人工", "热线", "投诉电话", "联系你们",
-        # 英文
-        "customer service", "support team", "human agent", "callback",
-        "speak to", "talk to", "representative", "call me",
+    "return_policy": (
+        "退货政策", "退换政策", "七天无理由", "无理由退货", "退货条件",
+        "退换规则", "退货运费", "退款政策", "部分退款", "全额退款",
+        "折旧费", "二次销售", "不支持退换", "超过退货期",
+        "return policy", "no reason return", "refund policy",
     ),
-    "tech_support": (
-        # 中文
-        "崩溃", "闪退", "报错", "打不开", "连不上", "无法连接",
-        "驱动", "固件", "卡顿", "死机", "蓝屏", "bug", "故障排查",
-        "更新失败", "安装失败", "不兼容", "黑屏", "重启",
-        # 英文
-        "error", "crash", "not working", "bug", "freeze", "driver",
-        "firmware", "connectivity", "connection", "troubleshoot",
-        "won't start", "keeps crashing", "broken", "glitch",
+    "exchange": (
+        "换货", "交换", "换尺码", "换颜色", "换型号", "尺寸不合适",
+        "大小不合适", "换一个", "调换", "更换",
+        "exchange", "swap", "wrong size",
     ),
-    "billing": (
-        # 中文
-        "扣费", "扣款", "账单", "发票", "收费", "多扣", "乱扣",
-        "支付", "付款", "订阅", "信用卡", "花呗", "微信支付",
-        "支付宝", "退款", "费用", "价格", "涨价", "自动续费",
-        "取消订阅", "余额", "充值",
-        # 英文
-        "invoice", "charge", "charged", "payment", "billing", "billed",
-        "credit card", "subscription", "overcharge", "pricing", "price",
-        "auto renew", "cancel subscription", "refund",
+    "refund": (
+        "退款", "退钱", "退货", "退款到账", "退款时间", "退款金额",
+        "原路返回", "优惠券退回", "退款流程", "退",
+        "refund", "money back", "return money",
     ),
-    "account": (
-        # 中文
-        "登录", "登入", "密码", "忘记密码", "重置密码", "验证码",
-        "注册", "注销", "销户", "账号", "账户", "个人资料",
-        "实名认证", "绑定手机", "绑定邮箱", "解锁", "找回账号",
-        "修改密码", "安全设置",
-        # 英文
-        "login", "password", "credential", "reset", "sign in",
-        "unlock", "recover account", "create account", "delete account",
-        "profile", "2fa", "two factor", "verification",
+    "complaint": (
+        "投诉", "举报", "不满", "差评", "态度差", "质量差", "欺骗",
+        "投诉商家", "投诉客服", "我要投诉", "气死", "垃圾",
+        "complaint", "report", "unhappy", "dissatisfied",
     ),
-    "order": (
-        # 中文
-        "订单", "下单", "购买", "购物车", "结账", "取消订单",
-        "订单号", "查订单", "订单状态", "待付款", "待发货",
-        "修改订单", "加购",
-        # 英文
-        "order", "purchase", "cancel order", "cart", "checkout",
-        "track order", "order number", "order status",
-    ),
-    "returns": (
-        # 中文
-        "退货", "退款", "换货", "保修", "退钱", "退货运费",
-        "退款政策", "七天无理由", "质量有问题", "收到坏",
-        "商品破损", "发错货",
-        # 英文
-        "return", "refund", "exchange", "warranty", "money back",
-        "return shipping", "defective", "damaged", "wrong item",
-        "refund policy",
-    ),
-    "delivery": (
-        # 中文
-        "发货", "配送", "快递", "物流", "包裹", "收货",
-        "收货地址", "没收到", "丢件", "送错", "快递单号",
-        "查物流", "催发货", "预计到达", "延误", "签收",
-        # 英文
-        "shipping", "delivery", "tracking", "package", "delivered",
-        "not received", "lost package", "delivery address",
-        "where is my", "eta", "estimated",
-    ),
-    "outages": (
-        # 中文
-        "宕机", "挂了", "故障", "维护", "服务中断", "无法访问",
-        "打不开网页", "不能用了", "系统崩了", "降级",
-        "服务器", "down",
-        # 英文
-        "down", "outage", "offline", "disruption", "not accessible",
-        "service disruption", "maintenance", "degradation",
-        "unavailable", "not responding",
-    ),
-    "sales": (
-        # 中文
-        "报价", "询价", "企业版", "折扣", "优惠", "许可证",
-        "演示", "试用", "销售", "采购", "多少钱", "怎么收费",
-        "套餐", "方案", "合作",
-        # 英文
-        "pricing", "quote", "enterprise", "discount", "license",
-        "demo", "trial", "sales inquiry", "procurement",
-        "how much", "cost",
-    ),
-    "feedback": (
-        # 中文
-        "投诉", "反馈", "评价", "不满", "不满意", "建议",
-        "退订", "取消订阅邮件", "差评",
-        # 英文
-        "complaint", "feedback", "review", "unhappy", "dissatisfied",
-        "suggestion", "unsubscribe",
-    ),
-    "hr": (
-        # 中文
-        "入职", "员工", "福利", "工资", "请假", "休假",
-        "HR", "离职", "新人", "社保", "公积金", "考勤",
-        # 英文
-        "onboarding", "employee", "benefits", "payroll", "leave",
-        "hr issue", "termination", "new hire",
-    ),
-    "it_support": (
-        # 中文
-        "工作站", "笔记本", "打印机", "投影仪", "资产",
-        "办公", "激活", "部署", "安装软件", "公司电脑",
-        "设备", "硬件", "网络",
-        # 英文
-        "workstation", "laptop", "printer", "projector", "asset",
-        "office", "license activation", "deploy", "software install",
-        "hardware", "network",
-    ),
-    "product_support": (
-        # 中文
-        "设置", "安装", "配置", "兼容性", "功能", "怎么用",
-        "使用说明", "手册", "帮助文档", "教程", "新手",
-        "入门", "操作指南", "常见问题",
-        # 英文
-        "setup", "set up", "install", "configuration", "compatibility",
-        "feature", "how to use", "user manual", "guide",
-        "documentation", "tutorial", "faq",
-    ),
-    "general": (
-        # 中文
-        "其他", "一般", "杂项",
-        # 英文
-        "generic", "miscellaneous", "other",
+    "shipping": (
+        "物流", "快递", "发货", "配送", "到哪", "快递查询", "物流查询",
+        "查物流", "包裹", "签收", "延误", "没收到", "丢件",
+        "快递单号", "取件", "上门取件", "预约取件",
+        "shipping", "tracking", "delivery", "package", "shipment",
     ),
 }
 
@@ -161,8 +56,6 @@ _KNOWN_DOMAINS = tuple(sorted(_DOMAIN_KEYWORDS.keys()))
 
 @dataclass(frozen=True)
 class RouterResult:
-    """路由结果，含多阶段分数用于离线分析。"""
-
     allowed_domains: tuple[str, ...]
     primary_domain: str | None
     confidence: float
@@ -173,7 +66,6 @@ class RouterResult:
 
 
 def _rule_scores(query: str) -> dict[str, float]:
-    """对 14 域做中英双语关键词计分（大小写不敏感）。"""
     q_lower = query.lower()
     scores: dict[str, float] = {d: 0.0 for d in _KNOWN_DOMAINS}
     for dom, kws in _DOMAIN_KEYWORDS.items():
@@ -184,14 +76,13 @@ def _rule_scores(query: str) -> dict[str, float]:
 
 
 def _llm_pick_domain(query: str, settings: Settings) -> str | None:
-    """LLM 从 14 个域中选最相关的一个。"""
     if not settings.zhipuai_api_key:
         return None
     from app.llm_zhipu import chat_completion
 
     dom_list = list(_KNOWN_DOMAINS)
     sys_p = (
-        "你是客服领域分类器。根据用户问题，从给定的 domain 列表中只选一个最相关的。\n"
+        "你是电商售后领域分类器。根据用户问题，从给定的 domain 列表中只选一个最相关的。\n"
         "输出严格 JSON：{\"domain\":\"...\"}，不要其它文字。"
     )
     user_p = f"domain 列表：{dom_list}\n用户问题：{query.strip()}"
@@ -205,18 +96,11 @@ def _llm_pick_domain(query: str, settings: Settings) -> str | None:
         if isinstance(d, str) and d in _DOMAIN_KEYWORDS:
             return d
     except Exception:
-        logger.exception("domain router LLM 分类失败")
+        logger.exception("domain router LLM classification failed")
     return None
 
 
 def route_domains(query: str, settings: Settings) -> RouterResult:
-    """客服领域路由主入口。
-
-    1. 关键词 ≥2 → 强信号直接返回
-    2. 关键词 =1 且唯一 → 中等信号返回
-    3. 无命中或多域竞争 → LLM 分类
-    4. 全失败 → 返回 None
-    """
     text = (query or "").strip()
     if not text:
         return RouterResult(
@@ -235,7 +119,6 @@ def route_domains(query: str, settings: Settings) -> RouterResult:
         "active_count": len(active_domains),
     }
 
-    # ── 强信号：≥2 个关键词命中同一域 ──
     if active_domains and active_domains[0][1] >= 2.0:
         best_dom, best_score = active_domains[0]
         trace["confidence_branch"] = "keywords_strong"
@@ -249,7 +132,6 @@ def route_domains(query: str, settings: Settings) -> RouterResult:
             routing_trace=trace,
         )
 
-    # ── 中等信号：1 个命中且唯一 ──
     if len(active_domains) == 1 and active_domains[0][1] >= 1.0:
         best_dom, best_score = active_domains[0]
         trace["confidence_branch"] = "keywords_weak"
@@ -263,7 +145,6 @@ def route_domains(query: str, settings: Settings) -> RouterResult:
             routing_trace=trace,
         )
 
-    # ── 多域竞争（>1 域命中 1 个）或 0 命中 → LLM ──
     if settings.zhipuai_api_key:
         picked = _llm_pick_domain(text, settings)
         if picked:
@@ -279,7 +160,6 @@ def route_domains(query: str, settings: Settings) -> RouterResult:
                 routing_trace=trace,
             )
 
-    # ── 全失败 ──
     trace["confidence_branch"] = "none"
     return RouterResult(
         (), None, 0.0, "none",
