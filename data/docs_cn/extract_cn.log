@@ -1,0 +1,23 @@
+2026-06-09 05:48:00,057 [INFO] ==================================================
+2026-06-09 05:48:00,057 [INFO]   STEP 1: Extract + Filter FAQ pairs from CSDS
+2026-06-09 05:48:00,057 [INFO] ==================================================
+2026-06-09 05:48:00,058 [INFO] Processing test.json...
+2026-06-09 05:48:00,121 [INFO] Processing train.json...
+2026-06-09 05:48:00,923 [INFO] Processing val.json...
+2026-06-09 05:48:01,089 [INFO] Total QA segments: 21126
+2026-06-09 05:48:01,089 [INFO]   Filtered - JD content: 3226
+2026-06-09 05:48:01,090 [INFO]   Filtered - length/quality: 103
+2026-06-09 05:48:01,090 [INFO]   Kept (deduped): 17792 → data/docs_cn/csds_faq_raw.jsonl
+2026-06-09 05:48:01,103 [INFO] ==================================================
+2026-06-09 05:48:01,103 [INFO]   STEP 2: Classify FAQ domains via SenseNova LLM
+2026-06-09 05:48:01,103 [INFO] ==================================================
+2026-06-09 05:48:01,154 [INFO] Classifying 17792 FAQs into 14 domains...
+Traceback (most recent call last):
+  File "/mnt/workspace/rag-kb-project/scripts/extract_csds.py", line 390, in <module>
+    main()
+  File "/mnt/workspace/rag-kb-project/scripts/extract_csds.py", line 383, in main
+    classify_domains(args.output, args.output)
+  File "/mnt/workspace/rag-kb-project/scripts/extract_csds.py", line 223, in classify_domains
+    if intent in INTENT_TO_DOMAIN:
+                 ^^^^^^^^^^^^^^^^
+NameError: name 'INTENT_TO_DOMAIN' is not defined

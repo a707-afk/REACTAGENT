@@ -24,3 +24,6 @@ data/qdrant_cs_local/
 data/bm25_cs_corpus.jsonl
 data/raw/
 *.db
+
+# 本地模型文件（通过 models/download_models.py 下载）
+models/

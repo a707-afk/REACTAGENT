@@ -24,7 +24,7 @@ _key_idx = 0
 
 
 def _load_keys() -> list[str]:
-    """从环境变量加载 SenseNova API keys（逗号分隔多 key 轮转）。"""
+    """从 Settings(.env) 加载，fallback 到环境变量。"""
     raw = os.getenv("SENSENOVA_API_KEYS", "").strip()
     return [k.strip() for k in raw.split(",") if k.strip()] if raw else []
 

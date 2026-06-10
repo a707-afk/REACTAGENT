@@ -1,0 +1,65 @@
+2026-06-09 06:34:14,150 [INFO] PyTorch version 2.10.0+cu129 available.
+2026-06-09 06:34:15,280 [INFO] Building CN index: 17792 FAQs → Collection 'kb_cn_general'
+2026-06-09 06:34:19,757 [INFO] Qwen Embedding: device=cuda (NVIDIA A10)
+2026-06-09 06:34:19,759 [INFO] Loading SentenceTransformer model from /mnt/workspace/rag-kb-project/models/Qwen/Qwen3-Embedding-0___6B.
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 8938.28it/s]
+2026-06-09 06:34:20,816 [INFO] Embedding 17792 nodes (GPU)...
+2026-06-09 06:34:34,655 [INFO]   embedding progress: 500/17792
+2026-06-09 06:34:48,148 [INFO]   embedding progress: 1000/17792
+2026-06-09 06:35:01,665 [INFO]   embedding progress: 1500/17792
+2026-06-09 06:35:15,173 [INFO]   embedding progress: 2000/17792
+2026-06-09 06:35:28,773 [INFO]   embedding progress: 2500/17792
+2026-06-09 06:35:42,220 [INFO]   embedding progress: 3000/17792
+2026-06-09 06:35:57,461 [INFO]   embedding progress: 3500/17792
+2026-06-09 06:36:14,544 [INFO]   embedding progress: 4000/17792
+2026-06-09 06:36:31,827 [INFO]   embedding progress: 4500/17792
+2026-06-09 06:36:49,050 [INFO]   embedding progress: 5000/17792
+2026-06-09 06:37:06,228 [INFO]   embedding progress: 5500/17792
+2026-06-09 06:37:23,374 [INFO]   embedding progress: 6000/17792
+2026-06-09 06:37:40,256 [INFO]   embedding progress: 6500/17792
+2026-06-09 06:37:57,284 [INFO]   embedding progress: 7000/17792
+2026-06-09 06:38:14,209 [INFO]   embedding progress: 7500/17792
+2026-06-09 06:38:31,470 [INFO]   embedding progress: 8000/17792
+2026-06-09 06:38:48,534 [INFO]   embedding progress: 8500/17792
+2026-06-09 06:39:05,467 [INFO]   embedding progress: 9000/17792
+2026-06-09 06:39:22,480 [INFO]   embedding progress: 9500/17792
+2026-06-09 06:39:39,525 [INFO]   embedding progress: 10000/17792
+2026-06-09 06:39:56,759 [INFO]   embedding progress: 10500/17792
+2026-06-09 06:40:13,809 [INFO]   embedding progress: 11000/17792
+2026-06-09 06:40:30,818 [INFO]   embedding progress: 11500/17792
+2026-06-09 06:40:48,066 [INFO]   embedding progress: 12000/17792
+2026-06-09 06:41:05,158 [INFO]   embedding progress: 12500/17792
+2026-06-09 06:41:22,283 [INFO]   embedding progress: 13000/17792
+2026-06-09 06:41:39,398 [INFO]   embedding progress: 13500/17792
+2026-06-09 06:41:56,535 [INFO]   embedding progress: 14000/17792
+2026-06-09 06:42:13,433 [INFO]   embedding progress: 14500/17792
+2026-06-09 06:42:30,476 [INFO]   embedding progress: 15000/17792
+2026-06-09 06:42:47,552 [INFO]   embedding progress: 15500/17792
+2026-06-09 06:43:04,709 [INFO]   embedding progress: 16000/17792
+2026-06-09 06:43:21,844 [INFO]   embedding progress: 16500/17792
+2026-06-09 06:43:38,915 [INFO]   embedding progress: 17000/17792
+2026-06-09 06:43:56,113 [INFO]   embedding progress: 17500/17792
+2026-06-09 06:44:08,368 [INFO] Deleted existing collection 'kb_cn_general'
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+/opt/conda/lib/python3.11/site-packages/llama_index/vector_stores/qdrant/base.py:852: UserWarning: Payload indexes have no effect in the local Qdrant. Please use server Qdrant if you need payload indexes.
+  self._client.create_payload_index(
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+Generating embeddings: 0it [00:00, ?it/s]Generating embeddings: 0it [00:00, ?it/s]
+2026-06-09 06:44:47,496 [INFO] BM25 语料已写入 /mnt/workspace/rag-kb-project/data/bm25_cn_corpus.jsonl (17792 条)
+2026-06-09 06:44:47,498 [INFO] CN index complete: 17792 nodes → 'kb_cn_general'
+2026-06-09 06:44:47,498 [INFO] BM25 corpus: data/bm25_cn_corpus.jsonl
+2026-06-09 06:44:47,679 [INFO] Build complete: 17792 nodes in 638.3 seconds (27.9 nodes/sec)
+2026-06-09 06:44:47,679 [INFO] Collection: kb_cn_general
+2026-06-09 06:44:47,679 [INFO] Qdrant path: /mnt/workspace/rag-kb-project/data/qdrant_cn_local
+Exception ignored in: <function QdrantClient.__del__ at 0x7fafaa90fce0>
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.11/site-packages/qdrant_client/qdrant_client.py", line 169, in __del__
+  File "/opt/conda/lib/python3.11/site-packages/qdrant_client/qdrant_client.py", line 178, in close
+  File "/opt/conda/lib/python3.11/site-packages/qdrant_client/local/qdrant_local.py", line 85, in close
+ImportError: sys.meta_path is None, Python is likely shutting down

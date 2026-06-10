@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=10, ge=0, le=100)
 
+    
+
     zhipuai_api_key: str | None = Field(
         default=None,
         validation_alias=AliasChoices("ZHIPUAI_API_KEY", "ZHIPU_API_KEY"),

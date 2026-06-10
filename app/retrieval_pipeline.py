@@ -223,7 +223,9 @@ def _retrieve_scored_nodes_impl(
             logger.warning("中文索引不存在，回退到英文索引")
             idx = index
     else:
-        idx = index    rr: RouterResult | None = None
+        idx = index
+
+    rr: RouterResult | None = None
     if getattr(settings, "domain_router_enabled", True) and not skip_domain_router:
         rr = route_domains(rq, settings)
 

@@ -1,0 +1,31 @@
+2026-06-09 06:08:16,150 [INFO] Loaded 17792 FAQs
+2026-06-09 06:08:16,157 [INFO] Intent match: 17170/17792 (96.5%), remaining: 0
+2026-06-09 06:08:16,238 [INFO] === Domain Distribution ===
+2026-06-09 06:08:16,239 [INFO]   returns: 4106
+2026-06-09 06:08:16,239 [INFO]   delivery: 3454
+2026-06-09 06:08:16,239 [INFO]   general: 3048
+2026-06-09 06:08:16,239 [INFO]   order: 2663
+2026-06-09 06:08:16,239 [INFO]   billing: 1560
+2026-06-09 06:08:16,239 [INFO]   customer_service: 873
+2026-06-09 06:08:16,239 [INFO]   product_support: 819
+2026-06-09 06:08:16,239 [INFO]   sales: 610
+2026-06-09 06:08:16,239 [INFO]   tech_support: 582
+2026-06-09 06:08:16,239 [INFO]   account: 52
+2026-06-09 06:08:16,239 [INFO]   hr: 25
+2026-06-09 06:08:16,239 [INFO] Done! 17792 FAQs -> data/docs_cn/faq_cn.jsonl
+2026-06-09 06:33:41,904 [INFO] Loaded 17792 FAQs
+2026-06-09 06:33:41,911 [INFO] Intent match: 17677/17792 (99.4%), remaining: 0
+2026-06-09 06:33:41,992 [INFO] === Domain Distribution ===
+2026-06-09 06:33:41,992 [INFO]   returns: 4220
+2026-06-09 06:33:41,992 [INFO]   delivery: 3514
+2026-06-09 06:33:41,992 [INFO]   order: 2702
+2026-06-09 06:33:41,992 [INFO]   general: 2645
+2026-06-09 06:33:41,992 [INFO]   billing: 1611
+2026-06-09 06:33:41,992 [INFO]   customer_service: 881
+2026-06-09 06:33:41,992 [INFO]   product_support: 826
+2026-06-09 06:33:41,992 [INFO]   sales: 629
+2026-06-09 06:33:41,992 [INFO]   tech_support: 602
+2026-06-09 06:33:41,992 [INFO]   account: 98
+2026-06-09 06:33:41,992 [INFO]   feedback: 39
+2026-06-09 06:33:41,992 [INFO]   hr: 25
+2026-06-09 06:33:41,992 [INFO] Done! 17792 FAQs -> data/docs_cn/faq_cn.jsonl

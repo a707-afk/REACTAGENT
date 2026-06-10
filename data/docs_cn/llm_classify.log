@@ -1,0 +1,15 @@
+2026-06-09 06:06:33,515 [INFO] Loaded 17792 FAQs
+2026-06-09 06:06:33,522 [INFO] Intent match: 16603/17792 (93.3%), remaining: 1189
+2026-06-09 06:06:33,522 [INFO] Unmatched intents (98): ['PLUS会员', '下单后无记录', '下单地址填写', '下单备注', '为什么显示无货', '京东ID', '京东特色配送', '京东钱包绑定', '京豆积分有效期', '京豆积分查看', '京豆积分比值', '京豆积分获得方式', '京豆积分解释', '京豆积分退回', '价保记录查询', '优惠券使用', '优惠券查看', '优惠券获得方式', '优惠券退回', '会员俱乐部', '余额查询', '余额退款', '修改账户信息', '催促处理纠纷单', '充值到账异常', '充值号码咨询', '充值号码错误', '分期付款', '取消订单白条处理', '取消退款']
+2026-06-09 06:06:36,009 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:36,009 [INFO] Retrying request to /chat/completions in 0.496055 seconds
+2026-06-09 06:06:36,765 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:36,766 [INFO] Retrying request to /chat/completions in 0.979745 seconds
+2026-06-09 06:06:37,879 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:37,880 [WARNING] Rate limited, waiting 20s
+2026-06-09 06:06:58,207 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:58,207 [INFO] Retrying request to /chat/completions in 0.400711 seconds
+2026-06-09 06:06:58,760 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:58,760 [INFO] Retrying request to /chat/completions in 0.958696 seconds
+2026-06-09 06:06:59,863 [INFO] HTTP Request: POST https://token.sensenova.cn/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-09 06:06:59,863 [WARNING] Rate limited, waiting 40s
