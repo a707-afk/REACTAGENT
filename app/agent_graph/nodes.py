@@ -249,13 +249,14 @@ def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> 
         }
 
     draft: str
+    failures = state.get("_llm_failures", 0)
     try:
         from app.llm_zhipu import chat_completion
         draft = chat_completion(_CHAT_SYSTEM, user_prompt)
-        state["_llm_failures"] = record_llm_success(state)
+        failures = record_llm_success(state)
     except Exception as e:
-        state["_llm_failures"] = record_llm_failure(state)
-        logger.warning("draft LLM 不可用 (failures=%s): %s", state.get("_llm_failures", 0), e)
+        failures = record_llm_failure(state)
+        logger.warning("draft LLM 不可用 (failures=%s): %s", failures, e)
         top = chunks[0] if chunks else {}
         draft = (
             "【自动回复 — LLM 调用失败】\n"
@@ -266,8 +267,9 @@ def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> 
 
     return {
         "draft_reply": draft,
-        "human_review_required": state.get("_llm_failures", 0) > 0,
-        "audit_trace": _append_audit(state, "draft", {"chars": len(draft), "llm_failures": state.get("_llm_failures", 0)}),
+        "_llm_failures": failures,
+        "human_review_required": failures > 0,
+        "audit_trace": _append_audit(state, "draft", {"chars": len(draft), "llm_failures": failures}),
     }
 
 
@@ -339,76 +341,75 @@ def node_rewrite_query(state: TicketAgentState, *, settings: Settings | None = N
 
 
 def node_hallucination(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """草稿句级 grounding：调用 citation_verify.sentence_level_grounding。"""
     from app.telemetry import trace_span
-    with trace_span("node_hallucination", ticket_id=state.get("ticket_id", "")[:32]):
-        """草稿句级 grounding：调用 citation_verify.sentence_level_grounding。"""
     _ = settings
     if state.get("policy_skip_rag") or not state.get("grader_passed"):
         return {"audit_trace": _append_audit(state, "hallucination", {"skipped": True})}
 
-    try:
-        draft = (state.get("draft_reply") or "").strip()
-        chunks = list(state.get("retrieved_chunks") or [])
-        citations = [
-            {
-                "index": i + 1,
-                "file_name": c.get("file_name"),
-                "file_path": c.get("file_path"),
-                "node_id": c.get("node_id"),
-            }
-            for i, c in enumerate(chunks[:5])
-        ]
-
-        if not draft:
-            return {
-                "hallucination_passed": False,
-                "hallucination_feedback": "草稿为空",
-                "citations": citations,
-                "human_review_required": True,
-                "audit_trace": _append_audit(state, "hallucination", {"passed": False, "reason": "empty_draft"}),
-            }
-
-        report = sentence_level_grounding(draft, chunks, prefer_embedding=False)
-        passed = bool(report.passed)
-        feedback = report.feedback or ("grounding_ok" if passed else "grounding_fail")
-
-        out: dict[str, Any] = {
-            "hallucination_passed": passed,
-            "hallucination_feedback": feedback,
-            "citations": citations,
-            "audit_trace": _append_audit(
-                state,
-                "hallucination",
+    with trace_span("node_hallucination", ticket_id=state.get("ticket_id", "")[:32]):
+        try:
+            draft = (state.get("draft_reply") or "").strip()
+            chunks = list(state.get("retrieved_chunks") or [])
+            citations = [
                 {
-                    "passed": passed,
-                    "method": report.method,
-                    "overlap_ratio": round(report.overlap_ratio, 4),
-                    "unsupported_sentence_rate": round(report.unsupported_sentence_rate, 4),
-                    "citations": len(citations),
-                },
-            ),
-        }
-        if not passed:
-            out["human_review_required"] = True
-            out["ticket_note"] = "幻觉检测未通过，需人工复核草稿"
-            # Grounding strip: remove unsupported sentences for human review
-            try:
-                from app.citation_verify import strip_unsupported_sentences
-                ctx = "\n".join(c.get("text", "") for c in chunks)
-                stripped = strip_unsupported_sentences(draft, ctx)
-                if stripped != draft:
-                    out["draft_reply"] = stripped
-            except Exception:
-                pass
-        return out
-    except Exception as e:
-        logger.warning("hallucination 检测异常，降级放行并标记人工: %s", e)
-        return {
-            "hallucination_passed": True,
-            "hallucination_feedback": f"检测异常降级: {e}",
-            "human_review_required": True,
-            "audit_trace": _append_audit(state, "hallucination", {"passed": True, "degraded": True}),
-        }
+                    "index": i + 1,
+                    "file_name": c.get("file_name"),
+                    "file_path": c.get("file_path"),
+                    "node_id": c.get("node_id"),
+                }
+                for i, c in enumerate(chunks[:5])
+            ]
+
+            if not draft:
+                return {
+                    "hallucination_passed": False,
+                    "hallucination_feedback": "草稿为空",
+                    "citations": citations,
+                    "human_review_required": True,
+                    "audit_trace": _append_audit(state, "hallucination", {"passed": False, "reason": "empty_draft"}),
+                }
+
+            report = sentence_level_grounding(draft, chunks, prefer_embedding=False)
+            passed = bool(report.passed)
+            feedback = report.feedback or ("grounding_ok" if passed else "grounding_fail")
+
+            out: dict[str, Any] = {
+                "hallucination_passed": passed,
+                "hallucination_feedback": feedback,
+                "citations": citations,
+                "audit_trace": _append_audit(
+                    state,
+                    "hallucination",
+                    {
+                        "passed": passed,
+                        "method": report.method,
+                        "overlap_ratio": round(report.overlap_ratio, 4),
+                        "unsupported_sentence_rate": round(report.unsupported_sentence_rate, 4),
+                        "citations": len(citations),
+                    },
+                ),
+            }
+            if not passed:
+                out["human_review_required"] = True
+                out["ticket_note"] = "幻觉检测未通过，需人工复核草稿"
+                try:
+                    from app.citation_verify import strip_unsupported_sentences
+                    ctx = "\n".join(c.get("text", "") for c in chunks)
+                    stripped = strip_unsupported_sentences(draft, ctx)
+                    if stripped != draft:
+                        out["draft_reply"] = stripped
+                except Exception:
+                    pass
+            return out
+        except Exception as e:
+            logger.warning("hallucination 检测异常，降级放行并标记人工: %s", e)
+            return {
+                "hallucination_passed": True,
+                "hallucination_feedback": f"检测异常降级: {e}",
+                "human_review_required": True,
+                "audit_trace": _append_audit(state, "hallucination", {"passed": True, "degraded": True}),
+            }
 
 
 def node_finalize(state: TicketAgentState) -> dict[str, Any]:
@@ -510,13 +511,13 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
     address = state.get("pickup_address", "上海市浦东新区")
 
     async def policy_worker():
-        return execute_tool("policy_check", state, {"order_id": order_id, "return_reason": reason})
+        return await asyncio.to_thread(execute_tool, "policy_check", state, {"order_id": order_id, "return_reason": reason})
 
     async def inventory_worker():
-        return execute_tool("inventory_query", state, {"sku": sku, "size": size, "color": color})
+        return await asyncio.to_thread(execute_tool, "inventory_query", state, {"sku": sku, "size": size, "color": color})
 
     async def logistics_worker():
-        return execute_tool("create_pickup", state, {"order_id": order_id, "address": address})
+        return await asyncio.to_thread(execute_tool, "create_pickup", state, {"order_id": order_id, "address": address})
 
     policy_r, inventory_r, logistics_r = await asyncio.gather(
         policy_worker(), inventory_worker(), logistics_worker(),
@@ -565,13 +566,13 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
         "logistics_result": logistics_data,
         "exchange_ready": all_ok,
         "exchange_summary": summary,
+        "grader_passed": True,
         "retrieved_chunks": [{"text": summary, "score": 1.0, "file_name": "exchange_check", "domain": "exchange"}],
         "routed_domains": ["exchange"],
         "gate_passed": True,
-        "audit_trace": state.get("audit_trace", []) + [{
-            "step": "exchange_parallel",
+        "audit_trace": _append_audit(state, "exchange_parallel", {
             "policy_ok": not isinstance(policy_r, Exception),
             "inventory_ok": not isinstance(inventory_r, Exception),
             "logistics_ok": not isinstance(logistics_r, Exception),
-        }],
+        }),
     }

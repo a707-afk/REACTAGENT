@@ -87,7 +87,10 @@ def _llm_pick_domain(query: str, settings: Settings) -> str | None:
     )
     user_p = f"domain 列表：{dom_list}\n用户问题：{query.strip()}"
     try:
-        raw = chat_completion(sys_p, user_p)
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(chat_completion, sys_p, user_p)
+            raw = future.result(timeout=10.0)  # 10s timeout for domain routing
         m = re.search(r"\{[\s\S]*\}", raw)
         if not m:
             return None
@@ -95,6 +98,8 @@ def _llm_pick_domain(query: str, settings: Settings) -> str | None:
         d = obj.get("domain")
         if isinstance(d, str) and d in _DOMAIN_KEYWORDS:
             return d
+    except (concurrent.futures.TimeoutError, TimeoutError):
+        logger.warning("domain router LLM timed out after 10s")
     except Exception:
         logger.exception("domain router LLM classification failed")
     return None

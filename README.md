@@ -2,7 +2,7 @@
 
 > **v2.0** — Rebranded from generic CS Agent to e-commerce after-sales Agent with Supervisor-Worker orchestration.
 >
-> Production-grade e-commerce after-sales AI agent: Supervisor intent routing, asyncio.gather 3-Worker parallel execution (Policy/Inventory/Logistics), hybrid search (BM25 + dense vector), LangGraph workflow, citation verification, and circuit breaker protection. Built with FastAPI, Qdrant, and local Qwen3 models.
+> E-commerce after-sales AI agent: Supervisor intent routing, `asyncio.gather` 3-Worker parallel exchange, hybrid search (BM25 + dense vector), LangGraph workflow, citation verification, and circuit breaker protection. Built with FastAPI, Qdrant, and local Qwen3 models.
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.136-green)
@@ -19,65 +19,64 @@ Client Request
 ┌──────────────────────────────────────────┐
 │             FastAPI Gateway              │
 │  /api/chat  /api/tickets  /agent/ticket  │
-│        │            │           │         │
-│   Auth │       Rate Limit   │   SSE      │
-└────────┼────────────┼───────┼────────────┘
-         │            │       │
-    ┌────▼────────────▼───────▼────────┐
-    │         Agent Graph (LangGraph)   │
-    │  policy → reason → tools →       │
-    │  retrieve → gate → grader →      │
-    │  rewrite → draft → hallucination │
-    └────────────────┬─────────────────┘
-                     │
-    ┌────────────────┼─────────────────┐
-    │                │                  │
-    ▼                ▼                  ▼
-┌────────┐   ┌────────────┐   ┌──────────────┐
-│ Qdrant │   │  Qwen3     │   │ PostgreSQL   │
-│ 78K    │   │ Embedding  │   │ Tickets      │
-│ vectors│   │ + Reranker │   │ Sessions     │
-│ + BM25 │   │ (RTX 5070) │   │ Customers    │
-└────────┘   └────────────┘   └──────────────┘
+└──────────────┬───────────────────────────┘
+               │
+    ┌──────────▼──────────────────────┐
+    │     Agent Graph (LangGraph)      │
+    │  policy → reason (Supervisor) →  │
+    │  exchange_parallel / retrieve →  │
+    │  gate → grader → draft →         │
+    │  hallucination → finalize        │
+    └──────────┬───────────────────────┘
+               │
+    ┌──────────┼───────────────────────┐
+    ▼          ▼                       ▼
+┌──────┐ ┌──────────┐ ┌──────────────────┐
+│Qdrant│ │ Qwen3    │ │ Mock Data Layer  │
+│ 54   │ │ Embedding│ │ Orders/Inventory │
+│ nodes│ │ (auto    │ │ /Logistics       │
+│+ BM25│ │ GPU/CPU) │ │                  │
+└──────┘ └──────────┘ └──────────────────┘
 ```
 
 ## Key Features
 
-### Retrieval Pipeline
-- **Hybrid Search**: BM25 (sparse) + Qdrant Dense Vector → RRF/Max fusion → Qwen3 Reranker
-- **Domain Router**: Keyword + embedding dual-path fusion + Zhipu LLM fallback + Platt calibration (15 domains)
-- **Similarity Gate**: Post-rerank quality threshold with configurable refusal messages
-- **Query Rewrite**: Auto-mode heuristic + Zhipu LLM for Chinese query expansion
-- **Access Control**: Tenant/role/security-clearance pre-filter on vector + BM25 retrieval
+### Supervisor-Worker Multi-Agent
+- **Intent Routing**: classify into 4 intents (exchange/refund/complaint/tracking) via keyword + LLM fallback
+- **Exchange Parallel**: `asyncio.gather` runs Policy/Inventory/Logistics checks concurrently — the differentiator vs Dify
+- **Emotion Detection**: inline angry keyword detection, escalates complaint urgency (P0 SLA: 2h)
 
-### Agent System
-- **LangGraph Workflow**: policy → reason → tool_exec → retrieve → gate → grader → rewrite loop → draft → hallucination → finalize
-- **4 Built-in Tools**: `retrieve_kb`, `create_ticket`, `escalate`, `customer_lookup` (OpenAI function-calling schema)
-- **Agentic Loop**: Up to 3 rewrite iterations with loop detection
-- **Grounding Verification**: Sentence-level citation verification + unsupported sentence stripping
+### Agent Tools (6 e-commerce tools)
+- `order_lookup` — fuzzy-match user orders by product keyword
+- `policy_check` — evaluate return eligibility (7-day unconditional / 30-day quality / denied)
+- `inventory_query` — check SKU stock across multi-warehouse
+- `create_pickup` — schedule return pickup (next-day 9:00-18:00)
+- `track_shipment` — real-time logistics status
+- `create_after_sale_ticket` — priority-tiered SLA ticket (P0=2h, P1=4h, P2=24h, P3=72h)
 
-### Business Logic
-- **Ticket State Machine**: 6 states with validated transitions (NEW→IN_PROGRESS→WAITING_CUSTOMER→ESCALATED→RESOLVED→CLOSED)
-- **SLA Scheduling**: Priority-tiered deadlines (P0=15min, P1=1h, P2=4h, P3=8h) with customer-tier multipliers
-- **Session Memory**: Multi-turn conversation context injection (last N messages, 4K char window)
+### Retrieval Pipeline (preserved from v1)
+- **Hybrid Search**: BM25 (sparse) + Qdrant Dense Vector → Max fusion
+- **Domain Router**: 5 e-commerce domain keywords + Zhipu LLM fallback (10s timeout)
+- **Similarity Gate**: post-retrieval quality threshold
+- **Citation Verification**: sentence-level grounding
 
-### Safety & Observability
-- **Policy Engine**: Behavior guard (keyword + embedding + LLM classifier) + OPA integration
-- **OpenTelemetry**: OTEL spans + Langfuse LLM traces + Prometheus metrics endpoint
+### Quality & Safety
+- **Behavior Guard**: keyword-based policy engine
+- **Circuit Breaker**: LLM failure auto-degrade (2 retries max)
 - **Structured Logging**: JSON event logs with trace IDs
 
 ## Quick Start
 
 ### Prerequisites
 - Python 3.12+
-- NVIDIA GPU (optional, CPU fallback supported)
-- [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) model (local)
-- [Zhipu API key](https://open.bigmodel.cn/) (for LLM features)
+- NVIDIA GPU (optional, CPU fallback supported via `INFERENCE_DEVICE=auto`)
+- Qwen3-Embedding-0.6B model (local path configured in .env)
 
 ### Install
 ```bash
 git clone https://github.com/a707-afk/REACTAGENT.git
 cd REACTAGENT
+git checkout feature/ecom-agent
 python -m venv .venv
 .venv\Scripts\activate   # Windows
 pip install -r requirements.txt
@@ -85,87 +84,65 @@ pip install -r requirements.txt
 
 ### Configure
 ```bash
-copy .env.cs-agent .env
-# Edit .env: set ZHIPUAI_API_KEY, verify model paths
+# Copy and edit .env (see .env.example for all options)
+# Key settings: DOCS_DIR, INFERENCE_DEVICE, QDRANT_PATH
 ```
 
-### Build Index (if not pre-built)
+### Build Index
 ```bash
-python scripts/download_cs_data.py   # Download datasets (62K + 27K)
-python scripts/preprocess_cs_data.py  # Clean & unify
-python scripts/reindex_cs.py          # Qdrant + BM25 indexing (GPU)
+python scripts/build_ecom_kb.py           # Generate FAQ markdowns
+python scripts/reindex.py                 # Qdrant + BM25 indexing
 ```
 
 ### Run
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-# Or with Docker:
-docker compose up -d
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+# Frontend: http://127.0.0.1:8000/
+# API docs: http://127.0.0.1:8000/docs
 ```
 
 ## API Reference
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/chat` | RAG-augmented chat (JSON response) |
-| POST | `/api/chat/stream` | RAG chat with SSE streaming |
-| POST | `/agent/ticket` | Full agent workflow (ticket + retrieval + draft) |
+| POST | `/agent/ticket` | Full agent workflow (intent → workers → draft) |
 | POST | `/agent/ticket/stream` | Agent workflow with SSE streaming |
-| GET  | `/api/tickets` | List tickets (filter by status) |
+| GET | `/api/tickets` | List tickets |
 | POST | `/api/tickets` | Create ticket |
-| GET  | `/api/tickets/{id}` | Get ticket detail |
-| PATCH | `/api/tickets/{id}/transition` | State machine transition |
-| GET  | `/health` | Health check |
-| GET  | `/metrics` | Prometheus metrics |
-| GET  | `/docs` | OpenAPI Swagger UI |
-
-## Evaluation Results
-
-**Dataset**: 78,023 documents across 15 CS domains (Tobi-Bueck 62K tickets + Bitext 27K Q&A)
-
-| Metric | Value |
-|--------|-------|
-| **Recall@5** | **0.867** |
-| Precision@5 | 0.520 |
-| MRR | 0.579 |
-| Latency p50 | 2.78s |
-| Latency p95 | 47.30s |
-
-```bash
-# Run evaluation
-python scripts/run_eval_cs_full.py --size full
-```
+| GET | `/api/tickets/{id}` | Get ticket detail |
+| GET | `/health` | Health check |
+| GET | `/health/config` | Runtime configuration dump |
+| GET | `/docs` | OpenAPI Swagger UI |
 
 ## Project Structure
 
 ```
 ├── app/
-│   ├── agent/            # Agent tools (function-calling schemas + implementations)
-│   │   └── tools.py      # retrieve_kb, create_ticket, escalate, customer_lookup
-│   ├── agent_graph/      # LangGraph workflow
-│   │   ├── graph.py      # Graph compilation: 10 nodes
-│   │   ├── nodes.py      # Node implementations
-│   │   └── state.py      # TicketAgentState TypedDict
-│   ├── api/              # REST API layer
-│   │   ├── chat.py       # POST /api/chat, /api/chat/stream
-│   │   ├── tickets.py    # CRUD + state transitions
-│   │   └── deps.py       # Auth, DB session DI
-│   ├── db/               # SQLAlchemy async models
-│   │   ├── engine.py     # Async engine + session factory
-│   │   └── models/       # Ticket, Customer, ChatSession, Message
-│   ├── services/         # Business logic
-│   │   ├── ticket_sm.py  # Ticket state machine
-│   │   └── session_mgr.py # Multi-turn conversation memory
-│   ├── policy/           # Safety guardrails
-│   ├── retrieval_pipeline.py  # Hybrid retrieval + rerank
-│   ├── domain_router.py  # Multi-domain classification
-│   └── config.py         # Settings (env-driven)
-├── data/                 # CS corpus, Qdrant index, BM25
-├── scripts/              # Data pipeline + eval
-├── tests/                # 15+ test modules
-├── alembic/              # DB migrations
-├── docker-compose.yml    # App + PostgreSQL + Qdrant
-└── .github/workflows/    # CI: test + lint
+│   ├── agent/
+│   │   └── tools.py          # 6 e-commerce tools (order_lookup, policy_check, etc.)
+│   ├── agent_graph/
+│   │   ├── graph.py          # LangGraph: 11 nodes (incl. exchange_parallel)
+│   │   ├── nodes.py          # Node implementations + routing functions
+│   │   └── state.py          # TicketAgentState (55 fields, TypedDict)
+│   ├── supervisor/
+│   │   └── router.py         # Intent routing + emotion detection
+│   ├── mock/
+│   │   ├── orders.py         # Order fixtures (3 policy states)
+│   │   ├── inventory.py      # Multi-warehouse stock
+│   │   └── logistics.py      # Tracking + pickup
+│   ├── api/                  # REST API layer
+│   ├── db/                   # SQLAlchemy async models
+│   ├── services/             # Ticket state machine, session memory
+│   ├── policy/               # Safety guardrails
+│   ├── retrieval_pipeline.py # Hybrid BM25 + Qdrant retrieval
+│   ├── domain_router.py      # 5-domain e-commerce classification
+│   └── config.py             # Settings (env-driven, device auto-detect)
+├── frontend/src/             # React 18 demo UI (Vite + TypeScript)
+├── data/docs_ecom/           # E-commerce FAQ knowledge base (24 Q&A, 54 chunks)
+├── scripts/                  # FAQ builder + reindex
+├── tests/                    # Locust load test
+├── docs/                     # Audit reports, plans, specs
+└── docker-compose.yml        # PostgreSQL + optional Qdrant server
 ```
 
 ## Tech Stack
@@ -173,17 +150,14 @@ python scripts/run_eval_cs_full.py --size full
 | Layer | Technology |
 |-------|-----------|
 | Framework | FastAPI 0.136 (async) |
-| Agent | LangGraph (10-node workflow) |
-| Vector DB | Qdrant (embedded, 78K vectors) |
+| Agent | LangGraph (11-node workflow) |
+| Vector DB | Qdrant (embedded, 54 FAQ nodes) |
 | Sparse Index | BM25 (rank-bm25) |
-| Embedding | Qwen3-Embedding-0.6B (GPU) |
-| Reranker | Qwen3-Reranker-0.6B (GPU) |
+| Embedding | Qwen3-Embedding-0.6B (GPU auto-detect) |
 | LLM | Zhipu GLM-4-Flash (API) |
-| Database | PostgreSQL 16 + SQLAlchemy 2.0 async |
-| Migrations | Alembic |
-| Observability | OpenTelemetry + Langfuse + Prometheus |
-| Container | Docker + docker-compose |
-| CI/CD | GitHub Actions |
+| Database | SQLite (dev) / PostgreSQL 16 (prod) |
+| Frontend | React 18 + Vite + TypeScript |
+| Testing | Locust (load), pytest |
 
 ## License
 

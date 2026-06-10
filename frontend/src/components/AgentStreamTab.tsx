@@ -12,7 +12,7 @@ type AgentDone = {
 
 export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
   const [ticketId, setTicketId] = useState("T-DEMO-001");
-  const [query, setQuery] = useState(presetQuery || "客户咨询退款需要哪些材料？");
+  const [query, setQuery] = useState(presetQuery?.trim() || "输入电商售后问题...");
   const [steps, setSteps] = useState<AuditStep[]>([]);
   const [draft, setDraft] = useState("");
   const [done, setDone] = useState<AgentDone | null>(null);
@@ -20,7 +20,7 @@ export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (presetQuery) {
+    if (presetQuery?.trim()) {
       setQuery(presetQuery);
     }
   }, [presetQuery]);

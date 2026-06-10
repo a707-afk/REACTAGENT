@@ -35,13 +35,19 @@ async def lifespan(app: FastAPI):
 
     setup_telemetry(settings)
     logger.info("Starting %s (debug=%s)", settings.app_name, settings.debug)
-    # Pre-warm Qdrant to avoid embedded-mode lock conflicts
+    # Pre-warm Qdrant and BM25 to avoid cold-start latency
     try:
         from app.vector_index import get_vector_index
         get_vector_index()
         logger.info("Qdrant pre-warmed")
     except Exception as e:
         logger.warning("Qdrant pre-warm failed: %s", e)
+    try:
+        from app.bm25_store import _get_bm25
+        _get_bm25(settings)
+        logger.info("BM25 pre-warmed")
+    except Exception as e:
+        logger.warning("BM25 pre-warm failed: %s", e)
     yield
     logger.info("Shutting down %s", settings.app_name)
 

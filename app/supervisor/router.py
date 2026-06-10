@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 
 def detect_emotion(query: str) -> str:
     """Inline emotion detection: angry keywords or exclamation intensity."""
-    angry_keywords = ["垃圾", "骗子", "投诉你", "差评", "举报", "气死", "退款", "!!!"]
+    angry_keywords = ["垃圾", "骗子", "投诉你", "差评", "举报", "气死", "!!!"]
+    # Note: "退款" removed — normal refund queries are not angry
     query_lower = query.lower()
     for kw in angry_keywords:
         if kw in query_lower:

@@ -154,17 +154,26 @@ def _execute_policy_check(state: TicketAgentState, args: dict[str, Any]) -> Tool
     if days <= 7 and status == "unopened":
         return ToolResult("policy_check", True, data={
             "eligible": True, "policy": "7天无理由退换", "refund_type": "full",
-            "days_since_purchase": days, "reason": f"购买{days}天，未拆封，符合全额退换条件", "deduction_rate": 0,
+            "days_since_purchase": days,
+            "return_reason": reason,
+            "reason": f"购买{days}天，未拆封，退货原因：{reason}，符合全额退换条件",
+            "deduction_rate": 0,
         })
     elif days <= 30 and status == "opened_damaged":
         return ToolResult("policy_check", True, data={
             "eligible": True, "policy": "质量问题退换", "refund_type": "partial",
-            "days_since_purchase": days, "reason": f"购买{days}天，已拆封影响二次销售，部分退款(扣10%)", "deduction_rate": 0.10,
+            "days_since_purchase": days,
+            "return_reason": reason,
+            "reason": f"购买{days}天，已拆封影响二次销售，退货原因：{reason}，部分退款(扣10%)",
+            "deduction_rate": 0.10,
         })
     else:
         return ToolResult("policy_check", True, data={
             "eligible": False, "policy": "超出退换期限", "refund_type": "denied",
-            "days_since_purchase": days, "reason": f"购买{days}天，超出退换期限，不支持退换", "deduction_rate": 0,
+            "days_since_purchase": days,
+            "return_reason": reason,
+            "reason": f"购买{days}天，超出退换期限，退货原因：{reason}，不支持退换",
+            "deduction_rate": 0,
         })
 
 
@@ -202,7 +211,8 @@ def _execute_create_after_sale_ticket(state: TicketAgentState, args: dict[str, A
     hours = sla_hours.get(priority, 24)
     sla_deadline = datetime.now(timezone.utc) + timedelta(hours=hours)
 
-    ticket_id = f"AS{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    import uuid
+    ticket_id = f"AS-{uuid.uuid4().hex[:8]}"
     return ToolResult("create_after_sale_ticket", True, data={
         "ticket_id": ticket_id,
         "type": ticket_type,

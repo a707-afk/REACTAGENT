@@ -6,6 +6,7 @@ export default function App() {
   const DEMO_SCENARIOS = [
     { label: "换货", query: "买了件M码T恤太小了想换L码" },
     { label: "退款", query: "我要退款，质量太差了" },
+    { label: "退货政策", query: "七天无理由退货有什么条件" },
     { label: "投诉", query: "投诉你们客服态度太差了" },
     { label: "物流查询", query: "我的快递到哪了" },
   ];
