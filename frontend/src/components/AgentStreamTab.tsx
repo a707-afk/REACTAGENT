@@ -24,11 +24,6 @@ export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
       setQuery(presetQuery);
     }
   }, [presetQuery]);
-  const [steps, setSteps] = useState<AuditStep[]>([]);
-  const [draft, setDraft] = useState("");
-  const [done, setDone] = useState<AgentDone | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
