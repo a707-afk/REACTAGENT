@@ -524,65 +524,6 @@ def node_reason(state: TicketAgentState, *, settings: Settings | None = None) ->
     return route_intent(state)
 
 
-def node_tool_exec(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
-    """Execute tool calls decided by the reasoning node."""
-    _ = settings
-    tool_calls = list(state.get("tool_calls") or [])
-    if not tool_calls:
-        return {"audit_trace": _append_audit(state, "tool_exec", {"skipped": True})}
-
-    from app.agent.tools import execute_tool
-
-    results: list[dict[str, Any]] = []
-    escalated = False
-    ticket_created = False
-
-    for tc in tool_calls:
-        name = str(tc.get("name", ""))
-        args = dict(tc.get("args", {}))
-        tr = execute_tool(name, state, args)
-        results.append({"name": name, "success": tr.success, "data": tr.data, "error": tr.error})
-        if name == "escalate" and tr.success:
-            escalated = True
-        if name == "create_ticket" and tr.success:
-            ticket_created = True
-
-    out: dict[str, Any] = {
-        "tool_results": results,
-        "audit_trace": _append_audit(state, "tool_exec", {
-            "calls": len(tool_calls), "ok": sum(1 for r in results if r["success"])
-        }),
-    }
-
-    if escalated:
-        out["final_action"] = "escalated"
-        out["human_review_required"] = True
-        out["ticket_note"] = "已转人工二线处理"
-        out["draft_reply"] = "已为您转接人工客服，请稍候。"
-    elif ticket_created:
-        out["final_action"] = "ticket_created"
-        out["ticket_note"] = "已创建工单"
-
-    return out
-
-
-def route_after_reason(state: TicketAgentState) -> str:
-    """After reasoning: go to tool_exec if tool calls exist, otherwise retrieve."""
-    if state.get("policy_skip_rag"):
-        return "finalize"
-    tool_calls = state.get("tool_calls") or []
-    non_retrieve = [tc for tc in tool_calls if tc.get("name") != "retrieve_kb"]
-    if non_retrieve:
-        return "tool_exec"
-    return "retrieve"
-
-
-def route_after_tool_exec(state: TicketAgentState) -> str:
-    """After tool execution: if escalated/ticketed, finalize; otherwise retrieve."""
-    if state.get("final_action") in ("escalated", "ticket_created"):
-        return "finalize"
-    return "retrieve"
-
 
 # ── EcomAgent: Exchange Parallel Node ──
 

@@ -32,9 +32,6 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     def _reason(s: TicketAgentState) -> dict[str, Any]:
         return nodes.node_reason(s, settings=settings)
 
-    def _tool_exec(s: TicketAgentState) -> dict[str, Any]:
-        return nodes.node_tool_exec(s, settings=settings)
-
     def _retrieve(s: TicketAgentState) -> dict[str, Any]:
         return nodes.node_retrieve(s, settings=settings)
 
@@ -56,7 +53,6 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g: StateGraph = StateGraph(TicketAgentState)
     g.add_node("policy", _policy)
     g.add_node("reason", _reason)
-    g.add_node("tool_exec", _tool_exec)
     g.add_node("retrieve", _retrieve)
     g.add_node("gate", _gate)
     g.add_node("grader", _grader)
