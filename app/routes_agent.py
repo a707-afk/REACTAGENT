@@ -49,7 +49,7 @@ async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgent
     timeout_s = getattr(settings, "api_agent_timeout_seconds", 120.0)
     try:
         uc_dict = req.user_context.model_dump() if req.user_context else {}
-        result = run_ticket_agent(
+        result = await run_ticket_agent(
             ticket_id=req.ticket_id,
             user_query=req.user_query,
             user_context=uc_dict,

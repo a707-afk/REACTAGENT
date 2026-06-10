@@ -96,6 +96,7 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g.add_edge("rewrite_query", "retrieve")
     g.add_edge("draft", "hallucination")
     g.add_conditional_edges("hallucination", nodes.route_after_hallucination, {
+        "draft": "draft",
         "finalize": "finalize",
     })
     g.add_edge("finalize", END)
@@ -224,7 +225,7 @@ def iter_ticket_agent_sse(
     )
 
 
-def run_ticket_agent(
+async def run_ticket_agent(
     *,
     ticket_id: str,
     user_query: str,
@@ -254,5 +255,4 @@ def run_ticket_agent(
             session_id=session_id,
             conversation_history=conversation_history,
         )
-        import asyncio
-        return asyncio.run(graph.ainvoke(initial, {"recursion_limit": recursion_limit}))
+        return await graph.ainvoke(initial, {"recursion_limit": recursion_limit})
