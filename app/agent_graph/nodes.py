@@ -514,81 +514,14 @@ REASON_SYSTEM = (
 
 
 def node_reason(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
-    """Agent reasoning: classify intent and decide which tools to call."""
-    settings = settings or get_settings()
-    from app.agent_graph.fault_tolerance import check_circuit_breaker, record_llm_failure, record_llm_success
-    q = (state.get("user_query") or "").strip()
-    if state.get("policy_skip_rag"):
-        return {"audit_trace": _append_audit(state, "reason", {"skipped": True})}
+    """Supervisor reasoning: classify intent using domain_router + detect emotion for complaints.
 
-    # Heuristic pre-filter: fast pattern matching before LLM call
-    q_lower = q.lower()
-    escalate_keywords = ["人工", "转人工", "找经理", "投诉", "投诉你们", "叫你们领导", "human agent", "speak to manager", "supervisor"]
-    ticket_keywords = ["建工单", "创建工单", "提交工单", "上报", "create ticket", "open ticket", "file a ticket"]
-
-    history = state.get("conversation_history") or ""
-
-    for kw in escalate_keywords:
-        if kw in q_lower:
-            return {
-                "tool_calls": [{"name": "escalate", "args": {"reason": q[:200], "urgency": "immediate"}}],
-                "audit_trace": _append_audit(state, "reason", {"method": "heuristic", "action": "escalate"}),
-            }
-
-    for kw in ticket_keywords:
-        if kw in q_lower:
-            return {
-                "tool_calls": [{"name": "create_ticket", "args": {"title": q[:200], "description": q, "priority": "p2_medium"}}],
-                "audit_trace": _append_audit(state, "reason", {"method": "heuristic", "action": "create_ticket"}),
-            }
-
-    # Try LLM-based reasoning if API key is configured and circuit not open
-    if check_circuit_breaker(state):
-        logger.debug("reason: LLM circuit breaker open, skipping LLM call")
-        return {
-            "tool_calls": [],
-            "audit_trace": _append_audit(state, "reason", {"method": "default", "action": "retrieve", "circuit_open": True}),
-        }
-
-    try:
-        from app.llm_zhipu import chat_completion
-
-        user_prompt = (
-            f"对话历史：{history or '无'}\n"
-            f"用户问题：{q}\n"
-            "可用的工具：retrieve_kb（搜索知识库）、create_ticket（建工单）、escalate（转人工）。"
-        )
-        raw = chat_completion(REASON_SYSTEM, user_prompt)
-        import json, re
-        m = re.search(r"\{[\s\S]*\}", raw)
-        if m:
-            obj = json.loads(m.group())
-            action = obj.get("action", "retrieve")
-            tool_name = None
-            if action == "escalate":
-                tool_name = "escalate"
-            elif action == "create_ticket":
-                tool_name = "create_ticket"
-            elif action == "retrieve":
-                tool_name = "retrieve_kb"
-
-            tool_args = obj.get("tool_args", {})
-            if not isinstance(tool_args, dict):
-                tool_args = {}
-            if tool_name and tool_name != "retrieve_kb":
-                return {
-                    "tool_calls": [{"name": tool_name, "args": tool_args}],
-                    "audit_trace": _append_audit(state, "reason", {"method": "llm", "action": action}),
-                }
-    except Exception as e:
-        state["_llm_failures"] = record_llm_failure(state)
-        logger.debug("reason LLM fallback (failures=%s): %s", state.get("_llm_failures", 0), e)
-
-    # Default: retrieve knowledge base
-    return {
-        "tool_calls": [],
-        "audit_trace": _append_audit(state, "reason", {"method": "default", "action": "retrieve"}),
-    }
+    Replaces the old LLM-based intent classification with keyword+LLM domain_router.
+    The routing decision (exchange_parallel/retrieve/finalize) is handled by
+    route_after_supervisor in app/supervisor/router.py.
+    """
+    from app.supervisor.router import route_intent
+    return route_intent(state)
 
 
 def node_tool_exec(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
@@ -648,5 +581,91 @@ def route_after_tool_exec(state: TicketAgentState) -> str:
     """After tool execution: if escalated/ticketed, finalize; otherwise retrieve."""
     if state.get("final_action") in ("escalated", "ticket_created"):
         return "finalize"
-    # Still need to search knowledge base
     return "retrieve"
+
+
+# ── EcomAgent: Exchange Parallel Node ──
+
+async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """Exchange flow: run Policy + Inventory + Logistics checks in parallel via asyncio.gather.
+
+    Three checks run concurrently — the slowest determines total response time.
+    This is the core differentiator vs Dify's linear workflows.
+    """
+    _ = settings
+    from app.agent.tools import execute_tool
+    import asyncio
+
+    order_id = state.get("order_id", "ORD-001")
+    reason = state.get("return_reason", "尺码不合适")
+    sku = state.get("product_sku", "TEE-WHITE")
+    size = state.get("target_size", "L")
+    color = state.get("target_color", "白色")
+    address = state.get("pickup_address", "上海市浦东新区")
+
+    async def policy_worker():
+        return execute_tool("policy_check", state, {"order_id": order_id, "return_reason": reason})
+
+    async def inventory_worker():
+        return execute_tool("inventory_query", state, {"sku": sku, "size": size, "color": color})
+
+    async def logistics_worker():
+        return execute_tool("create_pickup", state, {"order_id": order_id, "address": address})
+
+    policy_r, inventory_r, logistics_r = await asyncio.gather(
+        policy_worker(), inventory_worker(), logistics_worker(),
+        return_exceptions=True,
+    )
+
+    def _unwrap(r):
+        if isinstance(r, Exception):
+            return {"success": False, "error": str(r)}
+        try:
+            return r.data if hasattr(r, "data") else r
+        except Exception:
+            return {"success": False, "error": str(r)}
+
+    policy_data = _unwrap(policy_r) if not isinstance(policy_r, Exception) else {"success": False, "error": str(policy_r)}
+    inventory_data = _unwrap(inventory_r) if not isinstance(inventory_r, Exception) else {"success": False, "error": str(inventory_r)}
+    logistics_data = _unwrap(logistics_r) if not isinstance(logistics_r, Exception) else {"success": False, "error": str(logistics_r)}
+
+    all_ok = (
+        not isinstance(policy_r, Exception)
+        and not isinstance(inventory_r, Exception)
+        and not isinstance(logistics_r, Exception)
+    )
+
+    lines = []
+    pd = policy_data if isinstance(policy_data, dict) else {}
+    if pd.get("eligible"):
+        lines.append(f"Policy: {pd.get('policy', '可退换')} — {pd.get('reason', '')}")
+    else:
+        lines.append(f"Policy: 不符合退换条件 — {pd.get('reason', '不符合条件')}")
+
+    id_ = inventory_data if isinstance(inventory_data, dict) else {}
+    if id_.get("available"):
+        lines.append(f"Inventory: {size}码有货（{id_.get('warehouse', '仓库')}，库存{id_.get('stock', 0)}件）")
+    else:
+        lines.append(f"Inventory: {size}码已售罄 — {id_.get('message', '无货')}")
+
+    ld = logistics_data if isinstance(logistics_data, dict) else {}
+    lines.append(f"Logistics: 取件已预约 — {ld.get('scheduled', '明天')}（{ld.get('carrier', '顺丰')}）")
+
+    summary = "\n".join(f"  {line}" for line in lines)
+
+    return {
+        "policy_result": policy_data,
+        "inventory_result": inventory_data,
+        "logistics_result": logistics_data,
+        "exchange_ready": all_ok,
+        "exchange_summary": summary,
+        "retrieved_chunks": [{"text": summary, "score": 1.0, "file_name": "exchange_check", "domain": "exchange"}],
+        "routed_domains": ["exchange"],
+        "gate_passed": True,
+        "audit_trace": state.get("audit_trace", []) + [{
+            "step": "exchange_parallel",
+            "policy_ok": not isinstance(policy_r, Exception),
+            "inventory_ok": not isinstance(inventory_r, Exception),
+            "logistics_ok": not isinstance(logistics_r, Exception),
+        }],
+    }

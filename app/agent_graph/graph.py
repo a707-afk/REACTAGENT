@@ -65,21 +65,24 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g.add_node("hallucination", _hallucination)
     g.add_node("finalize", nodes.node_finalize)
 
+    # EcomAgent: add exchange parallel node
+    from app.agent_graph.nodes import node_exchange_parallel
+    from app.supervisor.router import route_after_supervisor
+    g.add_node("exchange_parallel", node_exchange_parallel)
+
     # Edges
     g.add_edge(START, "policy")
     g.add_conditional_edges("policy", nodes.route_after_policy, {
         "retrieve": "reason",
         "finalize": "finalize",
     })
-    g.add_conditional_edges("reason", nodes.route_after_reason, {
-        "tool_exec": "tool_exec",
+    # Supervisor routes: exchange_parallel / retrieve / finalize
+    g.add_conditional_edges("reason", route_after_supervisor, {
+        "exchange_parallel": "exchange_parallel",
         "retrieve": "retrieve",
-        "finalize": "finalize",
     })
-    g.add_conditional_edges("tool_exec", nodes.route_after_tool_exec, {
-        "retrieve": "retrieve",
-        "finalize": "finalize",
-    })
+    # After exchange_parallel, go to draft (skip retrieve/gate/grader)
+    g.add_edge("exchange_parallel", "draft")
     g.add_edge("retrieve", "gate")
     g.add_conditional_edges("gate", nodes.route_after_gate, {
         "grader": "grader",
@@ -251,4 +254,5 @@ def run_ticket_agent(
             session_id=session_id,
             conversation_history=conversation_history,
         )
-        return graph.invoke(initial, {"recursion_limit": recursion_limit})
+        import asyncio
+        return asyncio.run(graph.ainvoke(initial, {"recursion_limit": recursion_limit}))

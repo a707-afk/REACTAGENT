@@ -29,8 +29,8 @@ _DOMAIN_KEYWORDS: dict[str, tuple[str, ...]] = {
         "return policy", "no reason return", "refund policy",
     ),
     "exchange": (
-        "换货", "交换", "换尺码", "换颜色", "换型号", "尺寸不合适",
-        "大小不合适", "换一个", "调换", "更换",
+        "换货", "换", "交换", "换尺码", "换颜色", "换型号", "尺寸不合适",
+        "大小不合适", "换一个", "调换", "更换", "换L", "换M", "换XL",
         "exchange", "swap", "wrong size",
     ),
     "refund": (
