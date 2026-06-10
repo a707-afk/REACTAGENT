@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     )
     zhipu_chat_model: str = Field(default="glm-4-flash")
     zhipu_api_base: str = Field(default="https://open.bigmodel.cn/api/paas/v4/")
+    sensenova_api_keys: str = Field(default="", description="Sensenova API keys, comma-separated")
 
     qwen_embedding_model_path: str = Field(default=_DEFAULT_QWEN_EMBED_PATH)
 

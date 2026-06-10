@@ -456,18 +456,8 @@ def route_after_grader(state: TicketAgentState) -> str:
         return "finalize"
     return "draft"
 
-
 def route_after_hallucination(state: TicketAgentState) -> str:
-    """Grounding 失败→ draft 重试（上限 agent_max_draft_attempts）。"""
-    if state.get("final_action"):
-        return "finalize"
-    passed = state.get("hallucination_passed", True)
-    if passed is False:
-        from app.config import get_settings
-        s = get_settings()
-        max_drafts = getattr(s, "agent_max_draft_attempts", 2)
-        if state.get("draft_attempts", 0) < max_drafts:
-            return "draft"
+    """Always go to finalize (draft retry loop removed for stability)."""
     return "finalize"
 
 

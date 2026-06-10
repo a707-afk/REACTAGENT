@@ -31,6 +31,11 @@ APP_STATIC_DIR = STATIC_DIR / "app"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+    import os
+    # Export SENSENOVA_API_KEYS as OS env var so llm_zhipu._load_keys() can find it
+    raw = getattr(settings, "sensenova_api_keys", "") or ""
+    if raw and not os.getenv("SENSENOVA_API_KEYS"):
+        os.environ["SENSENOVA_API_KEYS"] = raw
     from app.telemetry import setup_telemetry
 
     setup_telemetry(settings)

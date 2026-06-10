@@ -24,11 +24,16 @@ _key_idx = 0
 
 
 def _load_keys() -> list[str]:
-    """从 Settings(.env) 加载，fallback 到环境变量。"""
-    raw = os.getenv("SENSENOVA_API_KEYS", "").strip()
-    return [k.strip() for k in raw.split(",") if k.strip()] if raw else []
-
-
+    """
+    Load API keys from Settings (.env in project root),
+    with fallback to SENSENOVA_API_KEYS OS env var.
+    """
+    raw = getattr(get_settings(), "sensenova_api_keys", None)
+    keys = [k.strip() for k in raw.split(",") if k.strip()] if raw else []
+    if not keys:
+        raw = os.getenv("SENSENOVA_API_KEYS", "").strip()
+        keys = [k.strip() for k in raw.split(",") if k.strip()] if raw else []
+    return keys
 def _next_key() -> str:
     global _key_idx, _SENSENOVA_KEYS
     if not _SENSENOVA_KEYS:
