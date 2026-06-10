@@ -1,13 +1,7 @@
-"""Agent tools: function definitions the Agent can call during a conversation.
-
-Each tool has a JSON Schema for its parameters (OpenAI function-calling format)
-and a sync implementation that the LangGraph node invokes.
-Uses async DB via asyncio bridge for real persistence.
-"""
+"""EcomAgent tools: 6 e-commerce after-sales tools (OpenAI function-calling format)."""
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -20,121 +14,109 @@ logger = logging.getLogger(__name__)
 
 # ── Tool Schema Definitions (OpenAI function-calling compatible) ──
 
-TOOL_RETRIEVE_KB = {
+TOOL_ORDER_LOOKUP = {
     "type": "function",
     "function": {
-        "name": "retrieve_kb",
-        "description": "Search the customer service knowledge base for relevant articles, policies, and solutions. Returns top matching document chunks.",
+        "name": "order_lookup",
+        "description": "Look up user's recent orders by keyword. Returns matching orders with product details, purchase date, and condition status.",
         "parameters": {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Natural language search query about the customer's issue.",
-                },
-                "domain": {
-                    "type": "string",
-                    "enum": [
-                        "tech_support", "billing", "account", "order", "returns",
-                        "delivery", "outages", "sales", "feedback", "hr",
-                        "it_support", "product_support", "customer_service", "general"
-                    ],
-                    "description": "Optional domain filter to narrow search scope.",
-                },
-                "top_k": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 5,
-                    "description": "Number of document chunks to retrieve.",
-                },
+                "user_id": {"type": "string", "description": "User ID for order lookup."},
+                "keyword": {"type": "string", "description": "Product keyword to filter orders (e.g. 'T恤')."},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 5, "default": 3},
             },
-            "required": ["query"],
+            "required": ["user_id"],
         },
     },
 }
 
-TOOL_CREATE_TICKET = {
+TOOL_POLICY_CHECK = {
     "type": "function",
     "function": {
-        "name": "create_ticket",
-        "description": "Create a new customer service ticket. Use this when the customer's issue cannot be resolved immediately and needs tracking.",
+        "name": "policy_check",
+        "description": "Check if an order is eligible for return/exchange based on purchase days and product condition. Returns eligibility, refund type, and reason.",
         "parameters": {
             "type": "object",
             "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "Short summary of the issue (max 200 chars).",
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Detailed description of the issue, including what was tried and relevant context.",
-                },
-                "priority": {
-                    "type": "string",
-                    "enum": ["p0_critical", "p1_high", "p2_medium", "p3_low"],
-                    "description": "Ticket priority. p0=service down/business critical, p1=major impact, p2=normal, p3=minor.",
-                },
-                "domain": {
-                    "type": "string",
-                    "enum": [
-                        "tech_support", "billing", "account", "order", "returns",
-                        "delivery", "outages", "sales", "feedback", "hr",
-                        "it_support", "product_support", "customer_service", "general"
-                    ],
-                    "description": "Issue category for routing.",
-                },
+                "order_id": {"type": "string", "description": "Order ID to check."},
+                "return_reason": {"type": "string", "description": "Reason for return/exchange (e.g. '尺码不合适')."},
             },
-            "required": ["title", "description", "priority"],
+            "required": ["order_id", "return_reason"],
         },
     },
 }
 
-TOOL_ESCALATE = {
+TOOL_INVENTORY_QUERY = {
     "type": "function",
     "function": {
-        "name": "escalate",
-        "description": "Escalate the current ticket or issue to a human agent (L2 support). Use when the AI cannot resolve the issue, the customer demands human assistance, or the issue requires supervisor authority.",
+        "name": "inventory_query",
+        "description": "Check inventory availability for a specific product SKU, target size, and color. Used for exchange scenarios.",
         "parameters": {
             "type": "object",
             "properties": {
-                "reason": {
-                    "type": "string",
-                    "description": "Clear reason for escalation: what was tried, why AI cannot resolve, and what expertise is needed.",
-                },
-                "urgency": {
-                    "type": "string",
-                    "enum": ["immediate", "soon", "when_available"],
-                    "description": "How quickly human intervention is needed.",
-                },
+                "sku": {"type": "string", "description": "Product SKU code."},
+                "size": {"type": "string", "description": "Target size (e.g. 'L', 'XL')."},
+                "color": {"type": "string", "description": "Target color.", "default": ""},
             },
-            "required": ["reason", "urgency"],
+            "required": ["sku", "size"],
         },
     },
 }
 
-TOOL_CUSTOMER_LOOKUP = {
+TOOL_CREATE_PICKUP = {
     "type": "function",
     "function": {
-        "name": "customer_lookup",
-        "description": "Look up customer information by ID or email. Returns account tier, open ticket count, and recent activity.",
+        "name": "create_pickup",
+        "description": "Create a pickup request for return/exchange items. Generates a pickup order with scheduled pickup time window.",
         "parameters": {
             "type": "object",
             "properties": {
-                "customer_id": {
-                    "type": "string",
-                    "description": "Customer ID (UUID). Use this if known.",
-                },
-                "email": {
-                    "type": "string",
-                    "description": "Customer email address for lookup.",
-                },
+                "order_id": {"type": "string", "description": "Order ID to create pickup for."},
+                "address": {"type": "string", "description": "Pickup address."},
             },
+            "required": ["order_id", "address"],
         },
     },
 }
 
-ALL_TOOLS = [TOOL_RETRIEVE_KB, TOOL_CREATE_TICKET, TOOL_ESCALATE, TOOL_CUSTOMER_LOOKUP]
+TOOL_TRACK_SHIPMENT = {
+    "type": "function",
+    "function": {
+        "name": "track_shipment",
+        "description": "Track the shipping/delivery status of an order. Returns current status, last update, and estimated delivery.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "order_id": {"type": "string", "description": "Order ID to track."},
+            },
+            "required": ["order_id"],
+        },
+    },
+}
+
+TOOL_CREATE_AFTER_SALE_TICKET = {
+    "type": "function",
+    "function": {
+        "name": "create_after_sale_ticket",
+        "description": "Create an after-sales service ticket (exchange/refund/complaint) with priority and SLA deadline tracking.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "type": {"type": "string", "enum": ["exchange", "refund", "complaint"], "description": "After-sales ticket type."},
+                "priority": {"type": "string", "enum": ["p0_critical", "p1_high", "p2_medium", "p3_low"], "description": "Ticket priority level."},
+                "order_id": {"type": "string", "description": "Related order ID."},
+                "detail": {"type": "string", "description": "Ticket detail/description.", "maxLength": 500},
+            },
+            "required": ["type", "priority", "order_id", "detail"],
+        },
+    },
+}
+
+ALL_TOOLS = [
+    TOOL_ORDER_LOOKUP, TOOL_POLICY_CHECK, TOOL_INVENTORY_QUERY,
+    TOOL_CREATE_PICKUP, TOOL_TRACK_SHIPMENT, TOOL_CREATE_AFTER_SALE_TICKET,
+]
 
 
 # ── Tool Result ──
@@ -147,267 +129,99 @@ class ToolResult:
     error: str | None = None
 
 
-# ── Async DB helpers ──
-
-def _run_async(coro):
-    """Bridge: run async DB op from sync LangGraph node context."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        return asyncio.run(coro)
-    # If already in event loop, try to create a new one (limited but works for simple ops)
-    import concurrent.futures
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
-        fut = ex.submit(asyncio.run, coro)
-        return fut.result(timeout=15)
-
-
-async def _get_async_session():
-    """Get an async DB session."""
-    from app.db.engine import get_sessionmaker
-    sm = get_sessionmaker()
-    return sm()
-
-
-async def _lookup_customer_db(customer_id: str | None, email: str | None) -> dict[str, Any]:
-    """Query customer from DB."""
-    from sqlalchemy import select
-    from app.db.models.customer import Customer
-
-    async with await _get_async_session() as session:
-        stmt = select(Customer)
-        if customer_id:
-            stmt = stmt.where(Customer.id == customer_id)
-        elif email:
-            stmt = stmt.where(Customer.email == email)
-        else:
-            return {"found": False, "reason": "no identifier"}
-
-        result = await session.execute(stmt)
-        customer = result.scalar_one_or_none()
-        if customer is None:
-            return {"found": False}
-        return {
-            "found": True,
-            "customer_id": customer.id,
-            "name": customer.name,
-            "email": customer.email,
-            "tier": customer.tier.value if customer.tier else "free",
-            "tenant_id": customer.tenant_id,
-        }
-
-
-async def _create_ticket_db(
-    title: str,
-    description: str,
-    priority: str,
-    domain: str | None,
-    customer_id: str | None,
-    tenant_id: str,
-) -> dict[str, Any]:
-    """Create a ticket in DB with proper state machine and SLA."""
-    from app.db.models.ticket import Ticket, TicketPriority, TicketStatus
-    from app.db.models.customer import Customer, CustomerTier, TIER_SLA_MINUTES
-    from sqlalchemy import select
-
-    async with await _get_async_session() as session:
-        # Resolve priority enum
-        pri_map = {
-            "p0_critical": TicketPriority.P0_CRITICAL,
-            "p1_high": TicketPriority.P1_HIGH,
-            "p2_medium": TicketPriority.P2_MEDIUM,
-            "p3_low": TicketPriority.P3_LOW,
-        }
-        pri = pri_map.get(priority, TicketPriority.P2_MEDIUM)
-
-        # Calculate SLA deadline from customer tier
-        sla_minutes = 480  # default 8h
-        if customer_id:
-            result = await session.execute(
-                select(Customer).where(Customer.id == customer_id)
-            )
-            cust = result.scalar_one_or_none()
-            if cust and cust.tier:
-                sla_minutes = TIER_SLA_MINUTES.get(cust.tier, 480)
-
-        sla_deadline = datetime.now(timezone.utc) + timedelta(minutes=sla_minutes)
-
-        ticket = Ticket(
-            title=title[:500],
-            description=description[:5000],
-            status=TicketStatus.NEW,
-            priority=pri,
-            domain=domain,
-            customer_id=customer_id,
-            tenant_id=tenant_id,
-            sla_deadline=sla_deadline,
-        )
-        session.add(ticket)
-        await session.flush()
-        await session.refresh(ticket)
-
-        return {
-            "ticket_id": ticket.id,
-            "title": ticket.title,
-            "status": ticket.status.value,
-            "priority": ticket.priority.value,
-            "domain": ticket.domain,
-            "sla_deadline": sla_deadline.isoformat(),
-            "sla_minutes": sla_minutes,
-            "tenant_id": ticket.tenant_id,
-            "message": f"工单 {ticket.id[:8]} 已创建，优先级 {priority}，SLA {sla_minutes} 分钟。",
-        }
-
-
 # ── Tool Implementations ──
 
-def _execute_retrieve_kb(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
-    """Execute knowledge base retrieval from agent context."""
-    query = str(args.get("query", ""))
-    if not query.strip():
-        return ToolResult("retrieve_kb", False, error="Empty query")
+def _execute_order_lookup(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    user_id = str(args.get("user_id", state.get("user_id", "u001")))
+    keyword = str(args.get("keyword", ""))
+    limit = min(int(args.get("limit", 3)), 5)
+    from app.mock.orders import lookup_orders
+    orders = lookup_orders(user_id, keyword, limit)
+    return ToolResult("order_lookup", True, data={"orders": orders, "count": len(orders)})
 
-    try:
-        from app.config import get_settings
-        from app.retrieval_pipeline import retrieve_scored_nodes
-        from app.vector_index import get_vector_index
 
-        settings = get_settings()
-        index = get_vector_index()
-        top_k = min(int(args.get("top_k", 5)), 10)
+def _execute_policy_check(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    order_id = str(args.get("order_id", ""))
+    reason = str(args.get("return_reason", "未说明"))
+    from app.mock.orders import get_order, days_since_purchase
+    order = get_order(order_id)
+    if not order:
+        return ToolResult("policy_check", False, error=f"Order {order_id} not found")
 
-        sr = retrieve_scored_nodes(
-            index, query, top_k, settings, trace_id=state.get("trace_id")
-        )
+    days = days_since_purchase(order_id)
+    status = order.get("status", "")
 
-        chunks: list[dict[str, Any]] = []
-        for sn in sr.nodes:
-            meta = dict(sn.node.metadata or {})
-            chunks.append({
-                "text": sn.node.get_content()[:800],
-                "file_name": meta.get("file_name"),
-                "domain": meta.get("domain"),
-                "score": float(sn.score) if sn.score is not None else None,
-            })
-
-        return ToolResult("retrieve_kb", True, data={
-            "query": query,
-            "hits": len(chunks),
-            "chunks": chunks,
+    if days <= 7 and status == "unopened":
+        return ToolResult("policy_check", True, data={
+            "eligible": True, "policy": "7天无理由退换", "refund_type": "full",
+            "days_since_purchase": days, "reason": f"购买{days}天，未拆封，符合全额退换条件", "deduction_rate": 0,
         })
-    except Exception as e:
-        logger.exception("retrieve_kb tool failed")
-        return ToolResult("retrieve_kb", False, error=str(e))
+    elif days <= 30 and status == "opened_damaged":
+        return ToolResult("policy_check", True, data={
+            "eligible": True, "policy": "质量问题退换", "refund_type": "partial",
+            "days_since_purchase": days, "reason": f"购买{days}天，已拆封影响二次销售，部分退款(扣10%)", "deduction_rate": 0.10,
+        })
+    else:
+        return ToolResult("policy_check", True, data={
+            "eligible": False, "policy": "超出退换期限", "refund_type": "denied",
+            "days_since_purchase": days, "reason": f"购买{days}天，超出退换期限，不支持退换", "deduction_rate": 0,
+        })
 
 
-def _execute_create_ticket(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
-    """Create a ticket with real DB persistence."""
-    title = str(args.get("title", ""))[:200]
-    description = str(args.get("description", ""))[:2000]
+def _execute_inventory_query(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    sku = str(args.get("sku", "")).upper()
+    size = str(args.get("size", ""))
+    color = str(args.get("color", ""))
+    from app.mock.inventory import query_inventory
+    result = query_inventory(sku, size, color)
+    return ToolResult("inventory_query", True, data=result)
+
+
+def _execute_create_pickup(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    order_id = str(args.get("order_id", ""))
+    address = str(args.get("address", state.get("pickup_address", "默认地址")))
+    from app.mock.logistics import create_pickup
+    result = create_pickup(order_id, address)
+    return ToolResult("create_pickup", True, data=result)
+
+
+def _execute_track_shipment(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    order_id = str(args.get("order_id", ""))
+    from app.mock.logistics import track_shipment
+    result = track_shipment(order_id)
+    return ToolResult("track_shipment", True, data=result)
+
+
+def _execute_create_after_sale_ticket(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
+    ticket_type = str(args.get("type", "refund"))
     priority = str(args.get("priority", "p2_medium"))
-    domain = args.get("domain")
+    order_id = str(args.get("order_id", "unknown"))
+    detail = str(args.get("detail", ""))[:500]
 
-    if not title.strip():
-        return ToolResult("create_ticket", False, error="Title is required")
+    sla_hours = {"p0_critical": 2, "p1_high": 4, "p2_medium": 24, "p3_low": 72}
+    hours = sla_hours.get(priority, 24)
+    sla_deadline = datetime.now(timezone.utc) + timedelta(hours=hours)
 
-    customer_id = state.get("customer_id")
-    tenant_id = state.get("user_context", {}).get("tenant_id", "default") if state.get("user_context") else "default"
-
-    try:
-        data = _run_async(_create_ticket_db(
-            title=title,
-            description=description,
-            priority=priority,
-            domain=domain,
-            customer_id=customer_id,
-            tenant_id=tenant_id,
-        ))
-        return ToolResult("create_ticket", True, data=data)
-    except Exception as e:
-        logger.exception("create_ticket DB failed")
-        return ToolResult("create_ticket", False, error=str(e))
-
-
-def _execute_escalate(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
-    """Escalate to human agent, update ticket status if ticket_id exists."""
-    reason = str(args.get("reason", ""))[:500]
-    urgency = str(args.get("urgency", "soon"))
-
-    ticket_id = state.get("ticket_id")
-
-    async def _escalate_db():
-        if not ticket_id or ticket_id == "unknown":
-            return {
-                "reason": reason,
-                "urgency": urgency,
-                "ticket_id": None,
-                "message": f"已转人工（{urgency}）。原因: {reason[:120]}",
-            }
-        from app.db.models.ticket import Ticket, TicketStatus
-        from sqlalchemy import select
-
-        async with await _get_async_session() as session:
-            result = await session.execute(
-                select(Ticket).where(Ticket.id == ticket_id)
-            )
-            ticket = result.scalar_one_or_none()
-            if ticket is None:
-                return {
-                    "reason": reason,
-                    "urgency": urgency,
-                    "ticket_id": ticket_id,
-                    "message": f"已转人工（{urgency}），但工单 {ticket_id[:8]} 未在数据库中找到。",
-                }
-            ticket.status = TicketStatus.ESCALATED
-            ticket.assignee = "L2_SUPPORT"
-            await session.flush()
-            return {
-                "reason": reason,
-                "urgency": urgency,
-                "ticket_id": ticket.id,
-                "new_status": "escalated",
-                "message": f"工单 {ticket.id[:8]} 已升级至二线支持（{urgency}）。",
-            }
-
-    try:
-        data = _run_async(_escalate_db())
-        return ToolResult("escalate", True, data=data)
-    except Exception as e:
-        logger.exception("escalate DB failed")
-        # Fallback: non-persistent escalation still works
-        return ToolResult("escalate", True, data={
-            "reason": reason,
-            "urgency": urgency,
-            "message": f"已转人工（{urgency}，数据库暂不可用）。",
-        })
-
-
-def _execute_customer_lookup(state: TicketAgentState, args: dict[str, Any]) -> ToolResult:
-    """Look up customer info from DB."""
-    customer_id = args.get("customer_id")
-    email = args.get("email")
-
-    if not customer_id and not email:
-        return ToolResult("customer_lookup", False, error="Need customer_id or email")
-
-    try:
-        data = _run_async(_lookup_customer_db(customer_id, email))
-        if not data.get("found"):
-            return ToolResult("customer_lookup", True, data={
-                "found": False,
-                "note": "客户未在系统中注册。建议创建新客户档案。",
-            })
-        return ToolResult("customer_lookup", True, data=data)
-    except Exception as e:
-        logger.exception("customer_lookup DB failed")
-        return ToolResult("customer_lookup", False, error=str(e))
+    ticket_id = f"AS{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    return ToolResult("create_after_sale_ticket", True, data={
+        "ticket_id": ticket_id,
+        "type": ticket_type,
+        "priority": priority,
+        "status": "NEW",
+        "sla_deadline": sla_deadline.isoformat(),
+        "sla_hours": hours,
+        "order_id": order_id,
+        "detail": detail,
+    })
 
 
 TOOL_DISPATCH = {
-    "retrieve_kb": _execute_retrieve_kb,
-    "create_ticket": _execute_create_ticket,
-    "escalate": _execute_escalate,
-    "customer_lookup": _execute_customer_lookup,
+    "order_lookup": _execute_order_lookup,
+    "policy_check": _execute_policy_check,
+    "inventory_query": _execute_inventory_query,
+    "create_pickup": _execute_create_pickup,
+    "track_shipment": _execute_track_shipment,
+    "create_after_sale_ticket": _execute_create_after_sale_ticket,
 }
 
 
