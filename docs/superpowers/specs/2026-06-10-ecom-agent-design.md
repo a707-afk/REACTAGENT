@@ -35,11 +35,13 @@
 
 ## 二、改造范围
 
-### 2.1 保留不动
+### 2.1 保留+演化
+
+以下模块保留核心逻辑，随架构调整产生结构性变化：
 
 | 模块 | 说明 |
 |------|------|
-| LangGraph 10节点工作流 | policy → reason → tools → retrieve → gate → grader → rewrite → draft → hallucination → finalize |
+| LangGraph 工作流 | 10节点的单意图流程改造为 Supervisor-Worker 模式。各 Worker 内部的 检索→评估→生成 逻辑复用现有节点实现（retrieve/gate/grader/draft/hallucination/finalize），新增 Supervisor 节点做意图路由，policy/reason/tool_exec 节点根据意图重定向 |
 | 混合检索管道 | Qdrant向量 + BM25 + Qwen3 Reranker |
 | 句级幻觉检测 | citation_verify.py + hallucination节点 |
 | LLM熔断器+降级 | fault_tolerance.py |
@@ -54,9 +56,10 @@
 
 | 模块 | 改动内容 | 预计工作量 |
 |------|---------|-----------|
+| 领域路由 | domain_router.py 从15客服领域改为4电商意图路由（简化掉 Platt calibration，改用 LLM 直接分类） | 0.5-1天 |
 | 知识库 | 换为京东售后政策 + LLM构造FAQ | 2-3天 |
-| Agent工具 | 6个工具重定义（+2新 +4改） | 2天 |
-| Agent编排 | Supervisor意图路由 + 三Worker并行 | 3天 |
+| Agent工具 | 6个工具重定义（+3新 +3改： customer_lookup→order_lookup, escalate→policy_check, create_ticket→create_after_sale_ticket, 新增 inventory_query/create_pickup/track_shipment） | 2天 |
+| Agent编排 | Supervisor意图路由 + asyncio.gather 三Worker并行（见三.4） | 3天 |
 | 前端 | 增加订单面板、工单时间线 | 2天 |
 | Mock数据层 | 订单/库存/物流 Mock API | 1天 |
 | README+文档 | 重写为电商场景 | 1天 |
@@ -94,6 +97,41 @@
   └── intent=tracking → 物流查询（直通）
         order_lookup → track_shipment → 返回物流状态
 ```
+
+### 3.4 换货三Worker并行实现（asyncio.gather）
+
+换货意图下的三Worker并行通过 `asyncio.gather` 在单节点内实现，不需要改动 LangGraph 图结构：
+
+```python
+async def node_exchange_parallel(state: TicketAgentState) -> dict[str, Any]:
+    order_id = state["order_id"]
+    reason = state.get("return_reason", "尺码不合适")
+    sku = state.get("product_sku")
+    size = state.get("target_size")
+    address = state.get("pickup_address")
+
+    # 三个Worker并行执行，最慢的决定总响应时间
+    policy_result, inventory_result, logistics_result = await asyncio.gather(
+        policy_check(order_id, reason),
+        inventory_query(sku, size),
+        create_pickup(order_id, address),
+        return_exceptions=True  # 单个Worker失败不影响其他
+    )
+
+    # 合并结果
+    return {
+        "policy_check": _unwrap(policy_result),
+        "inventory_check": _unwrap(inventory_result),
+        "pickup_info": _unwrap(logistics_result),
+        "exchange_ready": all(not isinstance(r, Exception) for r in [policy_result, inventory_result, logistics_result])
+    }
+```
+
+选择 asyncio.gather 而非 LangGraph Send() fan-out 的理由：
+- 代码改动量小，不需要拆子图
+- 三个Worker共享同一个状态对象，结果合并简单
+- 面试时讲的"三个Worker并行，最慢的决定总响应时间"就是 asyncio.gather 的行为
+- LangGraph Send() fan-out 需要建三个独立子图，代码量 2-3 倍且在两周周期内容易出 bug
 
 ### 3.2 Supervisor 输出结构
 
@@ -302,7 +340,9 @@ else:
 > Dify做不了三件事：第一，Supervisor-Worker多Agent并行协作——三个Worker同时跑政策/库存/物流，最慢的决定总响应时间；第二，句级引用溯源+幻觉剥离——电商售后政策回答必须可靠，Dify没有这个能力；第三，深度业务逻辑——情绪分级、补偿金额动态推荐、工单SLA倒计时。
 
 **Q: 产生什么价值？**
-> 离线评估：Recall@5=0.87，幻觉无引用率<3%。性能压测：Locust 1000并发下P50延迟<3秒。换货场景用户交互从5-8步降到2-3步确认。
+> 离线评估：Recall@5=0.87，幻觉无引用率<3%。
+> 性能压测（Locust 1000并发）：P50延迟 2.78s，P95延迟 47.30s（主要来自 rewrite loop 最多3次重试 + Zhipu API偶发超时，后续通过超时熔断优化后 P95 可降至 12-15s）。
+> 换货场景用户交互从5-8步降到2-3步确认。
 
 **Q: 为什么付钱？**
 > 电商售后客服人力成本高、流动性大。一套年费8-15万的AI售后系统，如果替代2-3个初级客服的人力（月薪6-8K/人），6个月回本。
@@ -352,15 +392,16 @@ Agent：换货申请已提交，工单号 #AS20240610-001
 |------|------|---------|
 | 0 | 现有代码跑通验证 | 0.5天 |
 | 1 | 创建feature/ecom-agent分支 | 0.1天 |
-| 2 | 知识库替换（爬取+构造+索引） | 2-3天 |
-| 3 | Agent工具重定义（6个工具） | 2天 |
-| 4 | Supervisor意图路由+Worker编排 | 3天 |
-| 5 | Mock数据层 | 1天 |
-| 6 | 前端改造（订单面板+时间线） | 2天 |
-| 7 | 设备自动检测 | 0.5天 |
-| 8 | Locust压测+性能报告 | 1天 |
-| 9 | README+演示视频+博客 | 2天 |
-| **总计** | | **14-16天** |
+| 1.5 | domain_router 从15领域改为4意图路由（Platt校准→LLM直接分类） | 0.5-1天 |
+| 2 | 知识库替换（爬取京东+LLM构造+重新索引） | 2-3天 |
+| 3 | Agent工具重定义（6个工具，3改+3新） | 2天 |
+| 4 | Supervisor意图路由 + asyncio.gather 三Worker并行 | 3天 |
+| 5 | Mock数据层（订单/库存/物流） | 1天 |
+| 6 | 前端改造（订单面板+工单时间线） | 2天 |
+| 7 | 设备自动检测（config.py CUDA检测） | 0.5天 |
+| 8 | Locust压测 + p95优化 + 完整性能报告 | 1.5天 |
+| 9 | README重写 + 演示视频 + 2篇技术博客 | 2天 |
+| **总计** | | **16-18天** |
 
 ---
 
