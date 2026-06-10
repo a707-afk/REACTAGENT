@@ -1,53 +1,53 @@
 # EcomAgent 全局任务跟踪台账
 
-> 创建时间: 2026-06-11 | 分支: feature/ecom-agent | 总原子任务: 27
+> 更新时间: 2026-06-11 00:02 | 分支: feature/ecom-agent | 总原子任务: 27
 
 ## 任务状态统计
-- 待执行: 27
-- 执行中: 0
-- 已完成: 0
+- 已完成: 19
+- 已推迟(P2低优): 6
+- 待执行: 2
 - 遇卡点: 0
 
 ---
 
-## P0 — 阻塞级 (7项)
+## P0 — 阻塞级 (7/7 完成)
 
-| ID | 文件 | 内容 | 状态 |
-|----|------|------|------|
-| P0-1 | nodes.py | exchange_parallel 缺少 grader_passed:True | 待执行 |
-| P0-2 | nodes.py | exchange_parallel 硬编码默认值 | 待执行 |
-| P0-3 | domain_router.py | LLM fallback 无超时控制 | 待执行 |
-| P0-4 | tools.py | return_reason 参数未使用 | 待执行 |
-| P0-5 | state.py | 缺失16个运行时字段定义 | 待执行 |
-| P0-6 | README.md | 多处文档与代码不一致 | 待执行 |
-| P0-7 | .env | ZHIPUAI_API_KEY检查/SENSENOVA配置 | 待执行 |
+| ID | 内容 | 状态 | 修改文件 |
+|----|------|------|---------|
+| P0-1 | exchange_parallel 缺 grader_passed | ✅ | nodes.py +1行 |
+| P0-2 | exchange_parallel 硬编码默认值 | ✅ 已为state.get回退 | 无需改 |
+| P0-3 | LLM fallback 无超时 | ✅ | domain_router.py +ThreadPoolExecutor |
+| P0-4 | return_reason 未使用 | ✅ | tools.py 3处return添加return_reason |
+| P0-5 | state.py 缺16字段 | ✅ | state.py +20行 |
+| P0-6 | README 多处不一致 | ✅ | README.md 全量重写 |
+| P0-7 | ZHIPUAI_API_KEY缺失 | ✅ 误报 | 系统用SENSENOVA_API_KEYS |
 
-## P1 — 高优 (9项)
+## P1 — 高优 (8/9 完成, 1推迟)
 
-| ID | 文件 | 内容 | 状态 |
-|----|------|------|------|
-| P1-1 | nodes.py | asyncio.gather 内同步函数未真正并行 | 待执行 |
-| P1-2 | nodes.py | node_draft 直接修改 state dict | 待执行 |
-| P1-3 | main.py | lifespan 未预热 BM25 | 待执行 |
-| P1-4 | .env | DOCS_DIR/DOCS_DIR_CN 重复 | 待执行 |
-| P1-5 | router.py | return_policy 映射到 refund 不精准 | 待执行 |
-| P1-6 | router.py | detect_emotion 中"退款"误列为angry | 待执行 |
-| P1-7 | tools.py | ticket_id 并发碰撞风险 | 待执行 |
-| P1-8 | README.md | 仓库URL确认 | 待执行 |
-| P1-9 | AgentStreamTab.tsx | presetQuery 空字符串边界 | 待执行 |
+| ID | 内容 | 状态 |
+|----|------|------|
+| P1-1 | asyncio.gather 假并行 | ✅ asyncio.to_thread |
+| P1-2 | node_draft 直接改state | ✅ 用返回值替代 |
+| P1-3 | lifespan 缺BM25预热 | ✅ main.py +8行 |
+| P1-4 | DOCS_DIR_CN重复 | ✅ 添加注释说明 |
+| P1-5 | return_policy映射 | ⏸ 保留refund(功能正确) |
+| P1-6 | 退款误标angry | ✅ 从angry关键词移除 |
+| P1-7 | ticket_id碰撞 | ✅ 改用uuid |
+| P1-8 | README URL | ✅ P0-6已修复 |
+| P1-9 | presetQuery空串 | ✅ trim+默认文案 |
 
-## P2 — 改善 (11项)
+## P2 — 改善 (4/11 完成, 7推迟)
 
-| ID | 文件 | 内容 | 状态 |
-|----|------|------|------|
-| P2-1 | graph.py | supervisor 路由缺 finalize 降级 | 待执行 |
-| P2-2 | nodes.py | exchange_parallel 不用 _append_audit | 待执行 |
-| P2-3 | nodes.py | grader 简化版未用 LLM | 待执行 |
-| P2-4 | nodes.py | route_after_grader 未启用 rewrite 回环 | 待执行 |
-| P2-5 | nodes.py | node_hallucination trace_span 作用域错误 | 待执行 |
-| P2-6 | mock/orders.py | days_since_purchase 依赖系统时钟 | 待执行 |
-| P2-7 | config.py | agent_graph_mode 双开关冲突 | 待执行 |
-| P2-8 | App.tsx | 前端缺 return_policy 场景 | 待执行 |
-| P2-9 | App.tsx | Demo 不绑定 ticket_id | 待执行 |
-| P2-10 | AgentStreamTab.tsx | draft_reply 双重设置覆盖 | 待执行 |
-| P2-11 | mock/inventory.py | color 参数被忽略 | 待执行 |
+| ID | 内容 | 状态 |
+|----|------|------|
+| P2-1 | supervisor降级路径 | ⏸ 不可达路径,低优 |
+| P2-2 | _append_audit一致性 | ✅ 统一使用 |
+| P2-3 | grader LLM能力 | ⏸ 需LLM集成测试 |
+| P2-4 | rewrite回环恢复 | ⏸ 需更多测试 |
+| P2-5 | trace_span作用域 | ✅ 修复with块 |
+| P2-6 | days_since_purchase时钟 | ⏸ 仅注释问题 |
+| P2-7 | agent_graph_mode冲突 | ⏸ 低风险 |
+| P2-8 | 前端缺return_policy | ✅ 新增场景按钮 |
+| P2-9 | Demo不绑ticket_id | ⏸ 需后端配合 |
+| P2-10 | draft_reply双重设置 | ⏸ 需SSE流测试 |
+| P2-11 | color参数忽略 | ⏸ 低影响 |
