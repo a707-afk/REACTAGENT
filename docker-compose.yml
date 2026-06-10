@@ -1,8 +1,17 @@
-# CS Agent Backend — Docker Compose (dev)
-# Start: docker compose up -d
-# Includes: App server, PostgreSQL, Qdrant (embedded mode)
+# EcomAgent — Docker Compose (dev)
+# Start: docker compose up -d qdrant postgres
+# Includes: App server, PostgreSQL, Qdrant (server mode for concurrent access)
 
 services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
   app:
     build: .
     ports:

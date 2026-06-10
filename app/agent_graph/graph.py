@@ -92,7 +92,6 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g.add_edge("rewrite_query", "retrieve")
     g.add_edge("draft", "hallucination")
     g.add_conditional_edges("hallucination", nodes.route_after_hallucination, {
-        "draft": "draft",
         "finalize": "finalize",
     })
     g.add_edge("finalize", END)
