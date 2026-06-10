@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuditStep, consumeSse } from "../api";
 
 type AgentDone = {
@@ -10,9 +10,20 @@ type AgentDone = {
   retrieved_chunks?: Array<{ text?: string; file_name?: string }>;
 };
 
-export function AgentStreamTab() {
+export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
   const [ticketId, setTicketId] = useState("T-DEMO-001");
-  const [query, setQuery] = useState("客户咨询退款需要哪些材料？");
+  const [query, setQuery] = useState(presetQuery || "客户咨询退款需要哪些材料？");
+  const [steps, setSteps] = useState<AuditStep[]>([]);
+  const [draft, setDraft] = useState("");
+  const [done, setDone] = useState<AgentDone | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (presetQuery) {
+      setQuery(presetQuery);
+    }
+  }, [presetQuery]);
   const [steps, setSteps] = useState<AuditStep[]>([]);
   const [draft, setDraft] = useState("");
   const [done, setDone] = useState<AgentDone | null>(null);

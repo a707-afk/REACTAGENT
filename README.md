@@ -1,6 +1,8 @@
-# CS Agent Backend — Customer Service AI Agent with RAG
+# EcomAgent — E-commerce After-Sales Multi-Agent System
 
-Production-grade customer service AI agent backend: hybrid search (BM25 + dense vector), LangGraph agent loop with tool calling, ticket state machine, multi-turn session memory, and policy guardrails. Built with FastAPI, Qdrant, PostgreSQL, and local Qwen3 models.
+> **v2.0** — Rebranded from generic CS Agent to e-commerce after-sales Agent with Supervisor-Worker orchestration.
+>
+> Production-grade e-commerce after-sales AI agent: Supervisor intent routing, asyncio.gather 3-Worker parallel execution (Policy/Inventory/Logistics), hybrid search (BM25 + dense vector), LangGraph workflow, citation verification, and circuit breaker protection. Built with FastAPI, Qdrant, and local Qwen3 models.
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.136-green)
