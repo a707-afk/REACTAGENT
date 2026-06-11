@@ -26,7 +26,7 @@ data/raw/
 *.db
 
 # 本地模型文件（通过 models/download_models.py 下载）
-models/
+/models/
 
 # Upload artifacts (test-generated)
 data/uploads/

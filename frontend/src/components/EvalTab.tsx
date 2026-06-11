@@ -28,12 +28,12 @@ export function EvalTab() {
     setLoading(true);
     setError("");
     try {
-      // Try to get latest eval result
       const list = await getJson<{ items: { id: string }[]; total: number }>(
         "/api/jobs?tenant_id=corp-default&task_type=run_eval&limit=1"
       );
       if (list.items.length > 0) {
-        // Fetch eval run details (simplified)
+        // Placeholder: when full eval API is wired, fetch detail and setSummary(...)
+        setSummary(null);
       }
     } catch {
       // No eval runs yet — that's OK

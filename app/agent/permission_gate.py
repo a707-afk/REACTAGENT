@@ -149,13 +149,39 @@ def check_permission(
 def _audit_allowed(tool_name: str, reason: str, params: dict, tenant_id: str) -> None:
     logger.info("PERMISSION_ALLOWED tool=%s reason=%s tenant=%s params=%s",
                 tool_name, reason, tenant_id, str(params)[:200])
+    # Fire-and-forget DB audit log
+    _write_db_audit(tenant_id, "allow", f"tool:{tool_name}", detail={"reason": reason, "params_preview": str(params)[:200]})
 
 
 def _audit_denied(tool_name: str, reason: str, detail: str, tenant_id: str) -> None:
     logger.warning("PERMISSION_DENIED tool=%s reason=%s detail=%s tenant=%s",
                    tool_name, reason, detail, tenant_id)
+    _write_db_audit(tenant_id, "deny", f"tool:{tool_name}", detail={"reason": reason, "detail": detail}, risk_level="high")
 
 
 def _audit_needs_approval(tool_name: str, params: dict, tenant_id: str) -> None:
     logger.warning("PERMISSION_NEEDS_APPROVAL tool=%s tenant=%s params=%s",
                    tool_name, tenant_id, str(params)[:200])
+    _write_db_audit(tenant_id, "hitl_request", f"tool:{tool_name}", detail={"params_preview": str(params)[:200]})
+
+
+def _write_db_audit(tenant_id: str, event_type: str, action: str, detail: dict | None = None, risk_level: str | None = None) -> None:
+    """Schedule an async audit log write. Safe in both sync and async contexts."""
+    try:
+        import asyncio
+        from app.services.audit_service import write_audit_log
+        coro = write_audit_log(
+            tenant_id=tenant_id,
+            event_type=event_type,
+            action=action,
+            detail=detail,
+            risk_level=risk_level,
+        )
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(coro)
+        except RuntimeError:
+            # No running loop (e.g. sync test context) — skip silently
+            coro.close()
+    except Exception:
+        pass  # Non-critical: don't disrupt business flow

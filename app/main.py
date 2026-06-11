@@ -98,6 +98,40 @@ def create_app() -> FastAPI:
         response.headers["X-Tenant-ID"] = tid
         return response
 
+    @app.middleware("http")
+    async def input_guard_middleware(request: Request, call_next):
+        """Block prompt injection in JSON request bodies."""
+        from app.input_sanitizer import InputGuard
+        ct = request.headers.get("content-type", "")
+        if "json" in ct and request.method in ("POST", "PUT", "PATCH"):
+            try:
+                body = await request.body()
+                text = body.decode("utf-8", errors="replace")
+                result = InputGuard.check(text)
+                if result.blocked:
+                    from fastapi.responses import JSONResponse
+                    return JSONResponse(
+                        status_code=400,
+                        content={"detail": "Blocked by input guard", "threats": result.threats},
+                    )
+            except Exception:
+                pass  # Non-JSON body — skip guard
+        return await call_next(request)
+
+    @app.get("/health/degradation")
+    def health_degradation():
+        """Return current degradation status for monitoring."""
+        from app.degradation import get_degradation_manager
+        dm = get_degradation_manager()
+        report = dm.get_report()
+        return {
+            "level": report.level.value,
+            "degraded_components": report.degraded_components,
+            "user_message": report.user_message,
+            "recommendations": report.recommendations,
+            "timestamp": report.timestamp,
+        }
+
 
 
     app.include_router(rag_router)
@@ -180,17 +214,61 @@ def create_app() -> FastAPI:
 
     @app.get("/health/ready", include_in_schema=False)
     async def health_ready():
-        """就绪探针：检查 BM25 语料和向量索引是否可用。"""
+        """就绪探针：检查 DB/Redis/BM25/Qdrant 是否可用，并同步 DegradationManager。"""
+        from app.degradation import get_degradation_manager
+        dm = get_degradation_manager()
+        issues = []
+
+        # Check BM25
         try:
             from app.bm25_store import _get_bm25
             _get_bm25(get_settings())
+            dm.recover("embedding")
+        except Exception as e:
+            dm.degrade("embedding", str(e))
+            issues.append(f"bm25: {e}")
+
+        # Check vector index
+        try:
             from app.vector_index import get_vector_index
             idx = get_vector_index()
             if idx is None:
-                return {"status": "unhealthy", "reason": "vector index not loaded"}
-            return {"status": "ok"}
+                dm.degrade("qdrant", "vector index not loaded")
+                issues.append("qdrant: vector index not loaded")
+            else:
+                dm.recover("qdrant")
         except Exception as e:
-            return {"status": "unhealthy", "reason": str(e)}
+            dm.degrade("qdrant", str(e))
+            issues.append(f"qdrant: {e}")
+
+        # Check DB connectivity
+        try:
+            from app.db.engine import get_sessionmaker
+            from sqlalchemy import text
+            sm = get_sessionmaker()
+            async with sm() as session:
+                await session.execute(text("SELECT 1"))
+            dm.recover("postgres")
+        except Exception as e:
+            dm.degrade("postgres", str(e))
+            issues.append(f"postgres: {e}")
+
+        # Check Redis (optional — degrade if not available)
+        try:
+            from app.redis_client import get_redis_pool
+            r = await get_redis_pool()
+            await r.ping()
+            dm.recover("redis")
+        except Exception as e:
+            dm.degrade("redis", str(e))
+            issues.append(f"redis: {e}")
+
+        status = "ok" if not issues else "degraded"
+        return {
+            "status": status,
+            "degradation_level": dm.overall_level.value,
+            "issues": issues,
+        }
 
     return app
 

@@ -3,7 +3,6 @@ import {
   type DocumentItem,
   type DocumentList,
   type UploadResponse,
-  postJson,
   getJson,
   delJson,
 } from "../api";

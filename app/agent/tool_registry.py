@@ -88,7 +88,9 @@ class ToolRegistry:
 
     def __init__(self):
         self._tools: dict[str, ToolDef] = {}
+        # In-memory fallback when Redis is unavailable
         self._idempotency_cache: dict[str, ToolCallResult] = {}
+        self._redis_enabled: bool = True
 
     def register(self, tool: ToolDef) -> None:
         """Register a tool definition."""
@@ -189,11 +191,34 @@ class ToolRegistry:
                     permission_reason="requires_approval",
                 )
 
-        # Step 3: Idempotency check
+        # Step 3: Idempotency check (Redis-first, in-memory fallback)
         idem_key = tool.build_idempotency_key(params)
+        redis_cache_key = f"idem:{tool_name}:{idem_key}"
+
+        # Try Redis first
+        if self._redis_enabled:
+            try:
+                from app.redis_client import cache_get
+                cached_redis = await cache_get(redis_cache_key)
+                if cached_redis is not None:
+                    logger.info("Redis idempotency cache hit for %s/%s", tool_name, idem_key)
+                    return ToolCallResult(
+                        tool_name=tool_name,
+                        success=cached_redis.get("success", False),
+                        data=cached_redis.get("data", {}),
+                        error=cached_redis.get("error"),
+                        latency_ms=0.0,
+                        idempotency_key=idem_key,
+                        permission_denied=cached_redis.get("permission_denied", False),
+                        permission_reason=cached_redis.get("permission_reason"),
+                    )
+            except Exception:
+                logger.debug("Redis idempotency check failed, falling back to in-memory")
+
+        # In-memory fallback
         if idem_key in self._idempotency_cache:
             cached = self._idempotency_cache[idem_key]
-            logger.info("Idempotency cache hit for %s/%s", tool_name, idem_key)
+            logger.info("In-memory idempotency cache hit for %s/%s", tool_name, idem_key)
             return cached
 
         # Step 4: Execute
@@ -233,13 +258,31 @@ class ToolRegistry:
             tr = ToolCallResult(tool_name, False, error=str(e),
                                 latency_ms=(time.perf_counter() - t0) * 1000)
 
-        # Step 5: Cache idempotency result
+        # Step 5: Cache idempotency result (Redis + in-memory fallback)
         self._idempotency_cache[idem_key] = tr
-        # Clean old entries (simple LRU by count)
+        # Clean old in-memory entries (simple LRU by count)
         if len(self._idempotency_cache) > 1000:
             oldest = list(self._idempotency_cache.keys())[:100]
             for k in oldest:
                 del self._idempotency_cache[k]
+
+        # Write to Redis with TTL
+        if self._redis_enabled:
+            try:
+                from app.redis_client import cache_set
+                await cache_set(
+                    redis_cache_key,
+                    {
+                        "success": tr.success,
+                        "data": tr.data,
+                        "error": tr.error,
+                        "permission_denied": tr.permission_denied,
+                        "permission_reason": tr.permission_reason,
+                    },
+                    ttl_seconds=tool.idempotency_window_seconds,
+                )
+            except Exception:
+                logger.debug("Redis idempotency write failed (non-critical)")
 
         return tr
 

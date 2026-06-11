@@ -326,35 +326,116 @@ def _assess_risk(objective: str) -> str:
 
 
 def _build_plan(objective: str, risk_level: str) -> list[dict]:
-    """Build an execution plan based on objective and risk.
+    """Build an execution plan using LLM-based planning.
 
-    This is a rule-based planner. In production, this would use LLM-based planning.
+    The LLM receives the available tools and the objective, then produces
+    a structured plan (list of steps with tool names and params).
+    Falls back to rule-based planning if LLM is unavailable.
     """
-    plan = []
-    plan.append({"type": "retrieve", "description": "Search knowledge base for relevant policies"})
+    try:
+        from app.llm import chat_completion
+        from app.agent.tool_registry import get_tool_registry
 
+        registry = get_tool_registry()
+        tools_desc = []
+        for t in registry.list_tools():
+            tools_desc.append(f"- {t.name}: {t.description} (risk: {t.risk_level.value}, side_effect: {t.side_effect.value})")
+        tools_text = "\n".join(tools_desc)
+
+        system = (
+            "你是一个电商售后 Agent 规划器。根据用户目标，生成一个执行计划。\n"
+            "计划是一个 JSON 数组，每个步骤包含 type、tool、params。\n"
+            "type 可以是 'retrieve'（检索知识库）或 'execute'（调用工具）。\n"
+            "只使用下面列出的可用工具，不要发明不存在的工具。\n"
+            "params 中的值应基于用户请求推断，不要用占位符。\n"
+            "返回纯 JSON，不要包含其他文字。"
+        )
+        user = (
+            f"风险等级: {risk_level}\n"
+            f"可用工具:\n{tools_text}\n\n"
+            f"用户目标: {objective}\n\n"
+            "请生成执行计划 (JSON array):"
+        )
+
+        raw = chat_completion(system, user)
+        # Parse JSON from LLM response
+        import re
+        json_match = re.search(r'\[.*\]', raw, re.DOTALL)
+        if json_match:
+            plan = json.loads(json_match.group())
+            if isinstance(plan, list) and len(plan) > 0:
+                logger.info("LLM plan generated: %d steps for '%s'", len(plan), objective[:50])
+                return plan
+
+        logger.warning("LLM plan parse failed, falling back to rule-based")
+    except Exception as e:
+        logger.warning("LLM planning failed, falling back: %s", e)
+
+    # Fallback: rule-based planning
+    return _build_plan_rule_based(objective, risk_level)
+
+
+def _build_plan_rule_based(objective: str, risk_level: str) -> list[dict]:
+    """Rule-based fallback planner when LLM is unavailable."""
+    plan = [{"type": "retrieve", "description": "Search knowledge base for relevant policies"}]
     low = objective.lower()
     if any(w in low for w in ["退款", "refund"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "u001", "keyword": objective[:10]}})
-        plan.append({"type": "execute", "tool": "policy_check", "params": {"order_id": "TBD", "return_reason": "申请退款"}})
+        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
+        plan.append({"type": "execute", "tool": "policy_check", "params": {"order_id": "from_order_lookup", "return_reason": "申请退款"}})
     elif any(w in low for w in ["换货", "exchange", "尺码"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "u001"}})
-        plan.append({"type": "execute", "tool": "inventory_query", "params": {"sku": "DEFAULT", "size": "L"}})
-        plan.append({"type": "execute", "tool": "create_pickup", "params": {"order_id": "TBD", "address": "default"}})
+        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
+        plan.append({"type": "execute", "tool": "inventory_query", "params": {"sku": "from_order", "size": "L"}})
     elif any(w in low for w in ["物流", "track", "快递", "包裹"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "u001"}})
-        plan.append({"type": "execute", "tool": "track_shipment", "params": {"order_id": "TBD"}})
+        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
+        plan.append({"type": "execute", "tool": "track_shipment", "params": {"order_id": "from_order_lookup"}})
     elif any(w in low for w in ["投诉", "complaint"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "u001"}})
-
+        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
     return plan
 
 
 def _generate_draft(objective: str, observations: list[dict], errors: list[dict]) -> str:
-    """Generate a draft answer from observations."""
+    """Generate a draft answer using LLM with tool observations as context."""
+    # Build context from observations
+    context_parts = []
+    for obs in observations[-10:]:
+        tool = obs.get("tool", "unknown")
+        result = obs.get("result", {})
+        if isinstance(result, dict):
+            result_summary = json.dumps(result, ensure_ascii=False)[:500]
+        else:
+            result_summary = str(result)[:500]
+        context_parts.append(f"[{tool}]: {result_summary}")
+
+    context = "\n".join(context_parts) if context_parts else "无工具调用结果"
+    error_text = json.dumps(errors[-5:], ensure_ascii=False)[:300] if errors else "无错误"
+
+    try:
+        from app.llm import chat_completion
+        system = (
+            "你是一个专业的电商售后客服 Agent。根据用户问题和工具查询结果，生成一个专业、友好的回复。\n"
+            "规则：\n"
+            "1. 只基于提供的工具结果回答，不要编造信息\n"
+            "2. 如果信息不足，明确告知用户需要更多信息或建议联系人工客服\n"
+            "3. 对于退款/补偿类问题，说明处理时效和流程\n"
+            "4. 回复要简洁、专业、有温度\n"
+            "5. 不要暴露内部系统名称或技术细节"
+        )
+        user = (
+            f"用户问题: {objective}\n\n"
+            f"工具查询结果:\n{context}\n\n"
+            f"执行过程中的错误: {error_text}\n\n"
+            "请生成回复:"
+        )
+        draft = chat_completion(system, user)
+        if draft and len(draft) > 10:
+            logger.info("LLM draft generated: %d chars", len(draft))
+            return draft
+    except Exception as e:
+        logger.warning("LLM draft generation failed: %s", e)
+
+    # Fallback: template-based draft
     if not observations:
         return f"根据您的请求「{objective}」，我暂时无法获取完整信息，建议联系人工客服处理。"
-
     parts = []
     for obs in observations[-5:]:
         result = obs.get("result", {})
@@ -362,19 +443,68 @@ def _generate_draft(objective: str, observations: list[dict], errors: list[dict]
             for k, v in result.items():
                 if isinstance(v, str) and len(v) < 200:
                     parts.append(f"{k}: {v}")
-
     if parts:
         return f"处理结果（{objective}）：\n" + "\n".join(f"  - {p}" for p in parts[:10])
     return f"已根据「{objective}」查询相关信息，请查看工单详情。"
 
 
 def _evaluate_result(draft: str, observations: list[dict], errors: list[dict]) -> dict:
-    """Evaluate the result: grounding, completeness, safety."""
-    passed = len(errors) == 0 and len(draft) > 10
+    """Evaluate the result using LLM-based grounding verification.
+
+    Checks:
+    1. Does the draft reference the observations?
+    2. Are there unsupported claims?
+    3. Is the response safe (no PII, no injection)?
+    """
+    issues = []
+
+    # Basic structural checks
+    if len(draft) < 10:
+        issues.append("draft_too_short")
+    if len(errors) > 0:
+        issues.append(f"{len(errors)}_tool_errors")
+    if not observations:
+        issues.append("no_observations")
+
+    # LLM-based grounding check
+    try:
+        from app.llm import chat_completion
+        obs_text = json.dumps([{"tool": o.get("tool"), "result_keys": list(o.get("result", {}).keys()) if isinstance(o.get("result"), dict) else []} for o in observations[-5:]], ensure_ascii=False)
+
+        system = (
+            "你是一个回复质量审查员。检查客服回复是否基于工具查询结果。\n"
+            "返回 JSON: {\"grounded\": true/false, \"unsupported_claims\": [...], \"safe\": true/false}\n"
+            "grounded=true 表示回复的所有信息都来自工具结果。\n"
+            "safe=true 表示没有暴露内部系统名、API key、个人信息。\n"
+            "只返回 JSON，不要其他文字。"
+        )
+        user = (
+            f"客服回复:\n{draft[:800]}\n\n"
+            f"工具查询结果摘要:\n{obs_text}\n\n"
+            "请评估 (JSON):"
+        )
+        raw = chat_completion(system, user)
+        import re
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if json_match:
+            eval_data = json.loads(json_match.group())
+            grounded = eval_data.get("grounded", False)
+            safe = eval_data.get("safe", True)
+            unsupported = eval_data.get("unsupported_claims", [])
+            if not grounded:
+                issues.append("not_grounded")
+            if not safe:
+                issues.append("unsafe_content")
+            if unsupported:
+                issues.append(f"unsupported: {unsupported[:3]}")
+    except Exception as e:
+        logger.warning("LLM evaluation failed: %s", e)
+
+    passed = len(issues) == 0
     return {
         "passed": passed,
         "observations_count": len(observations),
         "error_count": len(errors),
         "draft_length": len(draft),
-        "issues": errors if not passed else [],
+        "issues": issues,
     }

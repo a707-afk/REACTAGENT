@@ -9,6 +9,10 @@ from app.db.models.eval_case import EvalCase
 from app.db.models.agent_run import AgentRun
 from app.db.models.agent_step import AgentStep
 from app.db.models.approval import Approval
+from app.db.models.tenant import Tenant
+from app.db.models.user import User, ApiKey
+from app.db.models.policy_audit_log import PolicyAuditLog
+from app.db.models.tool_call import ToolCall
 
 __all__ = [
     "Customer",
@@ -25,4 +29,9 @@ __all__ = [
     "AgentRun",
     "AgentStep",
     "Approval",
+    "Tenant",
+    "User",
+    "ApiKey",
+    "PolicyAuditLog",
+    "ToolCall",
 ]
