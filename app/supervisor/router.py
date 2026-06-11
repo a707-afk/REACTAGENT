@@ -103,13 +103,19 @@ def _llm_classify_intent(query: str) -> tuple[str, float]:
 
 
 def route_after_supervisor(state: TicketAgentState) -> str:
-    """LangGraph routing: direct to correct flow based on intent."""
-    intent = state.get("intent", "refund")
-    if intent == "exchange":
-        return "exchange_parallel"
-    elif intent == "complaint":
-        return "retrieve"
-    elif intent == "tracking":
-        return "retrieve"
-    else:
-        return "retrieve"
+    """
+    LangGraph 条件路由：根据 intent 分派到对应的专属节点。
+    exchange    → exchange_parallel（asyncio.gather 三Worker并行）
+    refund      → refund_flow（串行：policy检查→计算退款→工单）
+    complaint   → complaint_flow（情绪分级：angry=P0工单，neutral=补偿推荐）
+    tracking    → tracking_flow（直通：order_lookup→track_shipment→回复）
+    unknown     → retrieve（通用 RAG 兜底）
+    """
+    intent = state.get("intent")
+    routes = {
+        "exchange":  "exchange_parallel",
+        "refund":    "refund_flow",
+        "complaint": "complaint_flow",
+        "tracking":  "tracking_flow",
+    }
+    return routes.get(intent, "retrieve")
