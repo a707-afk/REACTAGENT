@@ -19,6 +19,8 @@ _stub_requests: dict[tuple[str, str, str], int] = {}
 _stub_request_latency: list[tuple[str, float]] = []
 _stub_retrieve_latency: list[float] = []
 _LLM_CALLS: Any = None
+_AGENT_STEPS: Any = None
+_RATE_LIMIT_HITS: Any = None
 _stub_llm_calls: list[dict] = []
 _stub_agent_steps: int = 0
 _stub_rate_limit_hits: int = 0
@@ -28,6 +30,7 @@ _stub_cache_hits: dict[str, int] = {}
 def _init_prometheus() -> None:
     global _prometheus_available, _registry, _REQUESTS, _REQUEST_LATENCY
     global _RETRIEVE_LATENCY, _CACHE_HITS
+    global _LLM_CALLS, _AGENT_STEPS, _RATE_LIMIT_HITS
     try:
         from prometheus_client import Counter, Histogram, REGISTRY, generate_latest
 

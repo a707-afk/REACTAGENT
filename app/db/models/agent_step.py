@@ -50,7 +50,7 @@ class AgentStep(Base):
     recovered: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        DateTime, nullable=False, default=lambda: datetime.utcnow(),
     )
 
     # Relationships

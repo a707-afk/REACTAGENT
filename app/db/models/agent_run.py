@@ -59,10 +59,10 @@ class AgentRun(Base):
     audit_trace_json: Mapped[str | None] = mapped_column(Text, nullable=True, comment="JSON array of audit entries")
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        DateTime, nullable=False, default=lambda: datetime.utcnow(),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        DateTime, nullable=False, default=lambda: datetime.utcnow(),
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
