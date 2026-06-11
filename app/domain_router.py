@@ -150,7 +150,7 @@ def route_domains(query: str, settings: Settings) -> RouterResult:
             routing_trace=trace,
         )
 
-    if settings.zhipuai_api_key:
+    if settings.sensenova_api_keys:
         picked = _llm_pick_domain(text, settings)
         if picked:
             trace["confidence_branch"] = "llm"
