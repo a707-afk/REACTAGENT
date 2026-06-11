@@ -104,7 +104,7 @@ def compute_ndcg(gold_ids: list[str], retrieved_ids: list[str], k: int = 10) -> 
 
 
 def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str]) -> float:
-    """Fraction of retrieved chunks that are among gold chunks.
+    """Fraction of retrieved chunks matching gold. For live mode, uses actual grounding.
 
     If no gold chunks specified, returns 1.0 (no constraint).
     If no chunks retrieved, returns 0.0.
@@ -259,6 +259,8 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
             "mrr_at_10": round(mrr10, 4),
             "ndcg_at_10": round(ndcg10, 4),
             "citation_precision": round(cit_precision, 4),
+        "grounding_passed": resp.get("grounding", {}).get("passed") if live_mode else None,
+        "grounding_unsupported_rate": resp.get("grounding", {}).get("unsupported_sentence_rate") if live_mode else None,
             "unauthorized_chunks": unauthorized,
             "refusal_correct": refusal_correct,
             "latency_ms": round(elapsed_ms, 2),
@@ -270,6 +272,8 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
     avg_mrr10 = sum(r["mrr_at_10"] for r in results) / n
     avg_ndcg10 = sum(r["ndcg_at_10"] for r in results) / n
     avg_cit_precision = sum(r["citation_precision"] for r in results) / n
+    # Use actual grounding metrics when available
+    grounding_vals = [r.get("grounding_unsupported_rate") for r in results if r.get("grounding_unsupported_rate") is not None]
     total_unauthorized = sum(r["unauthorized_chunks"] for r in results)
     refusal_correct = sum(1 for r in results if r["refusal_correct"] and not r["has_answer"])
     total_no_answer = sum(1 for r in results if not r["has_answer"])
@@ -277,7 +281,10 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
     avg_latency = total_latency_ms / max(n, 1)
 
     # Unsupported sentence rate (estimated from citation precision inverse)
-    unsupported_rate = 1.0 - avg_cit_precision
+    if grounding_vals:
+        unsupported_rate = sum(grounding_vals) / len(grounding_vals)
+    else:
+        unsupported_rate = 1.0 - avg_cit_precision
 
     summary = {
         "eval_type": "rag",
