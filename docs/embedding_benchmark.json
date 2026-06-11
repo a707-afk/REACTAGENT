@@ -1,0 +1,22 @@
+[
+  {
+    "model": "bge-m3",
+    "dim": 1024,
+    "Recall@1": 41.0,
+    "Recall@5": 90.0,
+    "Recall@10": 96.0,
+    "MRR": 64.6,
+    "latency_ms": 10.8,
+    "load_time_s": 3.1
+  },
+  {
+    "model": "bge-large-zh-v1.5",
+    "dim": 1024,
+    "Recall@1": 40.0,
+    "Recall@5": 92.0,
+    "Recall@10": 96.0,
+    "MRR": 64.1,
+    "latency_ms": 6.2,
+    "load_time_s": 1.1
+  }
+]

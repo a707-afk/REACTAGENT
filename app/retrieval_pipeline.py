@@ -252,64 +252,70 @@ def _retrieve_scored_nodes_impl(
                 language=lang, collection_used=lang_route.collection_name,
             )
 
-    if allowed_ids is not None:
-        from app.access_prefilter import vector_retrieve_access_filtered
+    # Parallel vector + BM25 search
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    import threading
 
-        vector_scored = vector_retrieve_access_filtered(
-            idx,
-            rq,
-            candidate_k,
-            settings,
-            roles=user_context.roles,
-            tenant_id=user_context.tenant_id,
-            security_clearance=user_context.security_clearance,
-            allowed_ids=allowed_ids,
-        )
-    else:
-        retriever = idx.as_retriever(similarity_top_k=candidate_k)
-        vector_scored = retriever.retrieve(rq)
+    vector_scored: list[NodeWithScore] = []
+    bm25_nodes: list[NodeWithScore] = []
+    _lock = threading.Lock()
 
-    merged: list[NodeWithScore] = list(vector_scored)
-    if settings.hybrid_bm25_enabled:
+    def _do_vector_search():
+        nonlocal vector_scored
+        if allowed_ids is not None:
+            from app.access_prefilter import vector_retrieve_access_filtered
+            vs = vector_retrieve_access_filtered(
+                idx, rq, candidate_k, settings,
+                roles=user_context.roles, tenant_id=user_context.tenant_id,
+                security_clearance=user_context.security_clearance, allowed_ids=allowed_ids,
+            )
+        else:
+            retriever = idx.as_retriever(similarity_top_k=candidate_k)
+            vs = retriever.retrieve(rq)
+        with _lock:
+            vector_scored = list(vs)
+
+    def _do_bm25_search():
+        if not settings.hybrid_bm25_enabled:
+            return
         try:
             from app.bm25_store import bm25_search, node_with_score_from_bm25, _get_bm25
-
-            # 使用语言对应的 BM25 语料
             bm25_path = getattr(settings, "bm25_corpus_path_cn", "data/bm25_cn_corpus.jsonl") if lang == "zh" else settings.bm25_corpus_path
-            bm25_hits = bm25_search(
-                settings,
-                rq,
-                settings.bm25_candidate_top_k,
-                allowed_ids=allowed_ids,
-                corpus_path=bm25_path,
-            )
-            _, _, meta_lookup = _get_bm25(settings, corpus_path=bm25_path)
-            bm25_nodes: list[NodeWithScore] = []
-            for nid, bsc in bm25_hits:
-                nws = node_with_score_from_bm25(nid, bsc, meta_lookup)
+            hits = bm25_search(settings, rq, settings.bm25_candidate_top_k, allowed_ids=allowed_ids, corpus_path=bm25_path)
+            _, _, meta = _get_bm25(settings, corpus_path=bm25_path)
+            bn: list[NodeWithScore] = []
+            for nid, bsc in hits:
+                nws = node_with_score_from_bm25(nid, bsc, meta)
                 if nws is not None:
-                    bm25_nodes.append(nws)
-            merged = _merge_hybrid_by_node_id(
-                vector_scored,
-                bm25_nodes,
-                normalize_scores=getattr(settings, "hybrid_score_normalize", True),
-                fusion=getattr(settings, "hybrid_fusion", "max"),
-                rrf_k=getattr(settings, "hybrid_rrf_k", 60),
-            )
-            logger.debug(
-                "hybrid: vec=%s bm25=%s merged=%s prefilter=%s fusion=%s lang=%s",
-                len(vector_scored),
-                len(bm25_nodes),
-                len(merged),
-                allowed_ids is not None,
-                getattr(settings, "hybrid_fusion", "max"),
-                lang,
-            )
+                    bn.append(nws)
+            with _lock:
+                bm25_nodes.extend(bn)
         except FileNotFoundError:
-            logger.warning("BM25 语料未找到，仅使用向量召回（请运行 reindex.py / build_cn_index.py）")
+            logger.warning("BM25 语料未找到，仅使用向量召回")
         except Exception:
             logger.exception("BM25 分支失败，回退为纯向量候选")
-            merged = list(vector_scored)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        f_vec = pool.submit(_do_vector_search)
+        f_bm25 = pool.submit(_do_bm25_search)
+        for f in as_completed([f_vec, f_bm25]):
+            try:
+                f.result()
+            except Exception:
+                logger.exception("并行检索子任务失败")
+
+    if bm25_nodes:
+        merged = _merge_hybrid_by_node_id(
+            vector_scored, bm25_nodes,
+            normalize_scores=getattr(settings, "hybrid_score_normalize", True),
+            fusion=getattr(settings, "hybrid_fusion", "max"),
+            rrf_k=getattr(settings, "hybrid_rrf_k", 60),
+        )
+        logger.debug("hybrid: vec=%s bm25=%s merged=%s fusion=%s lang=%s",
+            len(vector_scored), len(bm25_nodes), len(merged),
+            getattr(settings, "hybrid_fusion", "max"), lang)
+    else:
+        merged = list(vector_scored)
 
     if not merged:
         _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)
