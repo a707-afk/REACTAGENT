@@ -76,9 +76,9 @@ def _rule_scores(query: str) -> dict[str, float]:
 
 
 def _llm_pick_domain(query: str, settings: Settings) -> str | None:
-    if not settings.zhipuai_api_key:
+    if not settings.sensenova_api_keys:
         return None
-    from app.llm_zhipu import chat_completion
+    from app.llm import chat_completion
 
     dom_list = list(_KNOWN_DOMAINS)
     sys_p = (

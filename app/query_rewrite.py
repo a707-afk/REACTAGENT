@@ -11,7 +11,7 @@ import logging
 import re
 
 from app.config import Settings
-from app.llm_zhipu import chat_completion
+from app.llm import chat_completion
 from app.observability import log_structured_event
 
 logger = logging.getLogger(__name__)

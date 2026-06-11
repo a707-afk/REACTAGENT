@@ -34,13 +34,8 @@ class Settings(BaseSettings):
 
     
 
-    zhipuai_api_key: str | None = Field(
-        default=None,
-        validation_alias=AliasChoices("ZHIPUAI_API_KEY", "ZHIPU_API_KEY"),
-    )
-    zhipu_chat_model: str = Field(default="glm-4-flash")
-    zhipu_api_base: str = Field(default="https://open.bigmodel.cn/api/paas/v4/")
-    sensenova_api_keys: str = Field(default="", description="Sensenova API keys, comma-separated")
+    # LLM：SenseNova (商汤) DeepSeek-V4-Flash via OpenAI 兼容端点
+    sensenova_api_keys: str = Field(default="", description="SenseNova API keys, comma-separated for rotation")
 
     qwen_embedding_model_path: str = Field(default=_DEFAULT_QWEN_EMBED_PATH)
 
@@ -94,7 +89,7 @@ class Settings(BaseSettings):
     chunk_size_tokens: int = Field(default=512, ge=64)
     chunk_overlap_tokens: int = Field(default=64, ge=0)
 
-    # 检索前 Query Rewrite（智谱）：off=关；on=每次检索必改写；auto=启发式决定是否调用改写
+    # 检索前 Query Rewrite（LLM）：off=关；on=每次检索必改写；auto=启发式决定是否调用改写
     query_rewrite_mode: Literal["off", "on", "auto"] = Field(default="auto")
 
     # 混合检索：BM25 + 向量召回合并后再 Rerank（BM25 语料在 reindex 时生成）

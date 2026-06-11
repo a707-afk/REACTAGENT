@@ -13,7 +13,7 @@ from app.citation_verify import citation_overlap_ratio, sentence_level_grounding
 from app.config import get_settings
 from app.domain_router import RouterResult
 from app.vector_index import get_vector_index
-from app.llm_zhipu import chat_completion
+from app.llm import chat_completion
 from app.observability import log_structured_event
 from app.retrieval_gates import evaluate_similarity_gate
 from app.retrieval_pipeline import retrieve_scored_nodes

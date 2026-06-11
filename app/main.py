@@ -32,7 +32,7 @@ APP_STATIC_DIR = STATIC_DIR / "app"
 async def lifespan(app: FastAPI):
     settings = get_settings()
     import os
-    # Export SENSENOVA_API_KEYS as OS env var so llm_zhipu._load_keys() can find it
+    # Export SENSENOVA_API_KEYS as OS env var (safety net for llm._load_keys)
     raw = getattr(settings, "sensenova_api_keys", "") or ""
     if raw and not os.getenv("SENSENOVA_API_KEYS"):
         os.environ["SENSENOVA_API_KEYS"] = raw
@@ -125,7 +125,7 @@ def create_app() -> FastAPI:
         return {
             "qwen_embedding_model_path": str(p.resolve()),
             "qwen_model_dir_exists": p.is_dir(),
-            "zhipu_api_key_configured": bool(settings.zhipuai_api_key),
+            "sensenova_api_configured": bool(settings.sensenova_api_keys),
             "query_rewrite_mode": settings.query_rewrite_mode,
             "inference_device": settings.inference_device,
             "inference_device_resolved": resolved_dev,
@@ -135,7 +135,7 @@ def create_app() -> FastAPI:
             "torch_cuda_version_built": cuda_info.get("cuda_version_built"),
             "cuda_available": cuda_info.get("cuda_available"),
             "cuda_device_capability": cuda_info.get("device_capability"),
-            "zhipu_chat_model": settings.zhipu_chat_model,
+            "llm_model": "deepseek-v4-flash",
             "docs_dir": settings.docs_dir,
                 "vector_backend": settings.vector_backend,
             "qdrant_url": settings.qdrant_url,

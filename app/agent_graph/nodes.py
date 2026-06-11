@@ -251,7 +251,7 @@ def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> 
     draft: str
     failures = state.get("_llm_failures", 0)
     try:
-        from app.llm_zhipu import chat_completion
+        from app.llm import chat_completion
         draft = chat_completion(_CHAT_SYSTEM, user_prompt)
         failures = record_llm_success(state)
     except Exception as e:

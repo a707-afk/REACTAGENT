@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse
 
 from app.api.deps import get_db_session, verify_api_key
 from app.config import get_settings
-from app.llm_zhipu import chat_completion
+from app.llm import chat_completion
 from app.observability import log_structured_event
 from app.retrieval_gates import evaluate_similarity_gate
 from app.retrieval_pipeline import retrieve_scored_nodes

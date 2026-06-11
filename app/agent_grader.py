@@ -22,7 +22,7 @@ def ngram_overlap(query: str, text: str, n: int = 3) -> float:
 
 def llm_grade(query: str, context: str) -> dict:
     """???? LLM ???????????????????"""
-    from app.llm_zhipu import get_zhipu_client
+    from app.llm import chat_completion
     
     settings = get_settings()
     prompt = f"""???? AI ??????????????????????????????????????
@@ -41,15 +41,9 @@ def llm_grade(query: str, context: str) -> dict:
 ?????
 {context}
 """
-    client = get_zhipu_client()
+    result = chat_completion("", prompt)
     try:
-        resp = client.chat.completions.create(
-            model=settings.zhipu_chat_model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            max_tokens=512,
-        )
-        text = resp.choices[0].message.content.strip()
+        text = result.strip()
         text = re.sub(r"^```(?:json)?\s*", "", text).rstrip("`").strip()
         return json.loads(text)
     except Exception as exc:
@@ -61,7 +55,7 @@ def grade_sufficiency(query: str, context: str) -> dict:
     """?????auto ???? LLM Key ? LLM???????"""
     settings = get_settings()
     mode = getattr(settings, "agent_grader_mode", "auto")
-    if mode == "llm" or (mode == "auto" and getattr(settings, "zhipuai_api_key", None)):
+    if mode == "llm" or (mode == "auto" and getattr(settings, "sensenova_api_keys", None)):
         result = llm_grade(query, context)
         if result.get("sufficient"):
             return result
