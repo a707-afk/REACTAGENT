@@ -1,4 +1,4 @@
-from functools import lru_cache
+﻿from functools import lru_cache
 from typing import Literal
 
 from pydantic import AliasChoices, Field, model_validator
@@ -148,7 +148,7 @@ class Settings(BaseSettings):
 
     # 访问控制：有 user_context 时在向量/BM25 检索前按元数据预筛候选 ID（默认开启）
     access_post_filter_safety_net: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("ACCESS_POST_FILTER_SAFETY_NET"),
         description="True 时在 merge 后再做一次 Post-filter 兜底；正常仅 Pre-filter",
     )
@@ -175,7 +175,7 @@ class Settings(BaseSettings):
         description="False 时不调用路由推断（无 router_trace）",
     )
     domain_router_hard_filter: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("DOMAIN_ROUTER_HARD_FILTER"),
         description="True 时在 rerank 前按 allowed_domains 淘汰候选；默认 False：路由结果仅作 trace",
     )
@@ -249,7 +249,7 @@ class Settings(BaseSettings):
 
     # 策略引擎扩展：向量相似度 / LLM 分类（app/policy/engine.py）
     policy_embedding_guard_enabled: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("POLICY_EMBEDDING_GUARD"),
     )
     policy_embedding_threshold: float = Field(
@@ -259,7 +259,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("POLICY_EMBEDDING_THRESHOLD"),
     )
     policy_llm_guard_enabled: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("POLICY_LLM_GUARD"),
     )
     policy_llm_confidence_threshold: float = Field(
@@ -271,7 +271,7 @@ class Settings(BaseSettings):
 
     # OPA 外部策略（可选，默认 fail-open）
     opa_enabled: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("OPA_ENABLED"),
     )
     opa_url: str = Field(
@@ -289,7 +289,7 @@ class Settings(BaseSettings):
 
     # 多 Agent 图（supervisor + escalation 骨架）
     agent_multi_agent_enabled: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("AGENT_MULTI_AGENT_ENABLED"),
     )
     agent_grader_mode: str = Field(
@@ -316,13 +316,6 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("AGENT_REWRITE_USE_LLM"),
         description="Agent 回环中是否使用 LLM 做 query rewrite",
     )
-    agent_graph_recursion_limit: int = Field(
-        default=20,
-        ge=8,
-        le=100,
-        validation_alias=AliasChoices("AGENT_GRAPH_RECURSION_LIMIT"),
-        description="LangGraph invoke recursion_limit 最大步数",
-    )
     api_agent_timeout_seconds: float = Field(
         default=120.0,
         ge=10.0,
@@ -348,10 +341,6 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("LLM_TIMEOUT_SECONDS"),
     )
 
-    agent_graph_mode: Literal["linear", "multi"] = Field(
-        default="linear",
-        validation_alias=AliasChoices("AGENT_GRAPH_MODE"),
-    )
 
     # OpenTelemetry / Langfuse（未配置时 no-op）
     otel_enabled: bool = Field(
@@ -458,14 +447,9 @@ class Settings(BaseSettings):
 
     # ── Agent Harness 统一配置 ─────────────────────────────────
     agent_harness_unified: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("AGENT_HARNESS_UNIFIED"),
         description="/agent/ticket 是否统一走 Harness（True=Harness, False=LangGraph）",
-    )
-    agent_harness_shadow: bool = Field(
-        default=False,
-        validation_alias=AliasChoices("AGENT_HARNESS_SHADOW"),
-        description="Shadow 模式：并行跑 Harness 但不返回结果，仅日志对比",
     )
     agent_refund_hitl_threshold: float = Field(
         default=500.0,
@@ -488,11 +472,6 @@ class Settings(BaseSettings):
         description="Harness 单步工具执行超时（秒）",
     )
 
-    @model_validator(mode="after")
-    def _default_qdrant_path(self) -> "Settings":
-        if self.qdrant_path is None:
-            object.__setattr__(self, "qdrant_path", "data/qdrant_local")
-        return self
 
 
 @lru_cache
