@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import json
+import asyncio
 import os
 import sys
 from datetime import datetime, timezone
@@ -134,19 +135,19 @@ def _run_one_case(case: dict) -> dict:
         patch("app.agent_graph.nodes.evaluate_policy", return_value=policy_mock),
         patch("app.agent_graph.nodes.retrieve_scored_nodes", return_value=retrieve_mock),
         patch("app.agent_graph.nodes.get_vector_index", return_value=MagicMock()),
-        patch("app.llm_zhipu.chat_completion", return_value=llm_reply),
+        patch("app.llm.chat_completion", return_value=llm_reply),
     ]
 
     for p in patches:
         p.start()
     try:
-        out = run_ticket_agent(
+        out = asyncio.run(run_ticket_agent(
             ticket_id=str(case.get("ticket_id") or case.get("id") or "T-mock"),
             user_query=str(case.get("user_query") or ""),
             user_context=dict(case.get("user_context") or {}),
             trace_id=f"eval-{case.get('id')}",
             top_k=int(case.get("top_k") or 5),
-        )
+        ))
     finally:
         for p in patches:
             p.stop()
