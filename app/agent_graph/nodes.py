@@ -491,14 +491,39 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
     """
     _ = settings
     from app.agent.tools import execute_tool
-    import asyncio
+    import asyncio, re
 
-    order_id = state.get("order_id", "ORD-001")
-    reason = state.get("return_reason", "尺码不合适")
-    sku = state.get("product_sku", "TEE-WHITE")
-    size = state.get("target_size", "L")
-    color = state.get("target_color", "白色")
-    address = state.get("pickup_address", "上海市浦东新区")
+    # ── Step 0: 从 user_query 中提取目标尺码 ────────────────
+    user_query = state.get("user_query", "")
+    size_match = re.search(r'\b([SMLXsmlx]{1,3}|[3-4][0-9])\b', user_query)
+    target_size = size_match.group(1).upper() if size_match else state.get("target_size", "L")
+
+    # ── Step 1: 查询订单（从 order_hint 或 query 中获取商品关键词）──
+    order_hint = state.get("order_hint", "")
+    user_id    = state.get("customer_id") or "u001"
+    oe_result = execute_tool("order_lookup", state, {
+        "user_id": user_id,
+        "keyword": order_hint or user_query[:15],
+        "limit": 1,
+    })
+    orders = oe_result.data.get("orders", []) if oe_result.success else []
+
+    if not orders:
+        return {
+            "draft_reply": "请问您是想换哪个订单的商品？能告诉我商品名称或订单号吗？",
+            "grader_passed": True, "gate_passed": True,
+            "retrieved_chunks": [{"text": "未找到订单", "score": 1.0,
+                                   "file_name": "exchange_parallel", "domain": "exchange"}],
+            "audit_trace": _append_audit(state, "exchange_parallel", {"result": "order_not_found"}),
+        }
+
+    order    = orders[0]
+    order_id = order["order_id"]
+    sku      = order.get("sku", state.get("product_sku", "TEE-WHITE"))
+    color    = order.get("color", state.get("target_color", ""))
+    address  = order.get("address") or state.get("pickup_address", "上海市")
+    reason   = "尺码不合适"
+    size     = target_size
 
     async def policy_worker():
         return await asyncio.to_thread(execute_tool, "policy_check", state, {"order_id": order_id, "return_reason": reason})
