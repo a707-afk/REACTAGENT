@@ -3,6 +3,10 @@
 Provides a thin async wrapper over redis.asyncio so the rest of the app
 does not import redis directly.  All operations accept an optional
 ``redis`` parameter so tests can inject a fakeredis instance.
+
+Also provides synchronous cache helpers (cache_get_sync / cache_set_sync)
+for use in synchronous code paths (e.g. retrieval pipeline) without
+needing an event loop bridge.
 """
 from __future__ import annotations
 
@@ -12,15 +16,21 @@ import time
 import uuid
 from typing import Any
 
+import redis as redis_sync
 import redis.asyncio as aioredis
 
 from app.config import Settings, get_settings
 
 logger = logging.getLogger(__name__)
 
-# ── Module-level connection pool ──────────────────────────────────
+# ── Module-level connection pool (async) ───────────────────────────
 
 _pool: aioredis.Redis | None = None
+
+# ── Module-level connection pool (sync, for retrieval cache) ───────
+
+_sync_pool: redis_sync.Redis | None = None
+_sync_pool_failed: bool = False
 
 
 async def get_redis_pool(settings: Settings | None = None) -> aioredis.Redis:
@@ -95,6 +105,87 @@ async def cache_delete(
     """Delete a cache key.  Returns True if the key existed."""
     r = redis or await get_redis_pool(settings)
     return bool(await r.delete(f"{CACHE_PREFIX}{key}"))
+
+
+# ── Synchronous cache helpers (for sync code paths like retrieval pipeline) ──
+
+RETRIEVAL_CACHE_PREFIX = "retrieval:"
+
+
+def get_redis_sync(settings: Settings | None = None) -> redis_sync.Redis | None:
+    """Return (and lazily create) a synchronous Redis client.  Returns None on failure."""
+    global _sync_pool, _sync_pool_failed
+    if _sync_pool_failed:
+        return None
+    if _sync_pool is not None:
+        return _sync_pool
+    settings = settings or get_settings()
+    if not getattr(settings, "cache_redis_enabled", True):
+        return None
+    try:
+        password = settings.redis_password or None
+        _sync_pool = redis_sync.from_url(
+            settings.redis_url,
+            password=password,
+            decode_responses=True,
+            max_connections=10,
+            socket_connect_timeout=2,
+        )
+        _sync_pool.ping()
+        logger.info("Redis sync pool created: %s", settings.redis_url)
+        return _sync_pool
+    except Exception as e:
+        _sync_pool_failed = True
+        logger.debug("Redis sync pool unavailable (cache will use in-memory only): %s", e)
+        return None
+
+
+def cache_get_sync(key: str, *, settings: Settings | None = None) -> dict[str, Any] | None:
+    """Synchronous Redis cache get.  Returns None on miss or Redis unavailable."""
+    r = get_redis_sync(settings)
+    if r is None:
+        return None
+    try:
+        raw = r.get(f"{RETRIEVAL_CACHE_PREFIX}{key}")
+        if raw is None:
+            return None
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+def cache_set_sync(
+    key: str,
+    value: dict[str, Any],
+    *,
+    ttl_seconds: int = 600,
+    settings: Settings | None = None,
+) -> None:
+    """Synchronous Redis cache set with TTL.  Silently fails if Redis unavailable."""
+    r = get_redis_sync(settings)
+    if r is None:
+        return
+    try:
+        r.set(
+            f"{RETRIEVAL_CACHE_PREFIX}{key}",
+            json.dumps(value, ensure_ascii=False),
+            ex=ttl_seconds,
+        )
+    except Exception:
+        pass
+
+
+def cache_clear_sync(*, settings: Settings | None = None) -> None:
+    """Clear all retrieval cache keys in Redis.  Silently fails if Redis unavailable."""
+    r = get_redis_sync(settings)
+    if r is None:
+        return
+    try:
+        keys = r.keys(f"{RETRIEVAL_CACHE_PREFIX}*")
+        if keys:
+            r.delete(*keys)
+    except Exception:
+        pass
 
 
 # ── Distributed lock ──────────────────────────────────────────────

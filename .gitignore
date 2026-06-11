@@ -33,3 +33,8 @@ data/uploads/
 
 # Eval results (generated)
 data/eval/results/
+
+# AI IDE tools
+.codebuddy/
+.qoder/
+.workbuddy/

@@ -19,7 +19,6 @@ _stub_requests: dict[tuple[str, str, str], int] = {}
 _stub_request_latency: list[tuple[str, float]] = []
 _stub_retrieve_latency: list[float] = []
 _LLM_CALLS: Any = None
-_LLM_CALLS: Any = None
 _stub_llm_calls: list[dict] = []
 _stub_agent_steps: int = 0
 _stub_rate_limit_hits: int = 0
@@ -194,6 +193,7 @@ def record_llm_call(*, success: bool, duration_s: float, model: str = "") -> Non
 
 
 def record_agent_step(step: str) -> None:
+    global _stub_agent_steps
     if _prometheus_available and _AGENT_STEPS is not None:
         _AGENT_STEPS.labels(step=step).inc()
     else:
@@ -201,6 +201,7 @@ def record_agent_step(step: str) -> None:
 
 
 def record_rate_limit_hit() -> None:
+    global _stub_rate_limit_hits
     if _prometheus_available and _RATE_LIMIT_HITS is not None:
         _RATE_LIMIT_HITS.inc()
     else:

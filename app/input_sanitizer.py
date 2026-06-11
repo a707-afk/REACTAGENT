@@ -95,41 +95,52 @@ class InputGuard:
         """Check user input for injection patterns.
 
         Returns a SanitizerResult. If blocked=True, the input should be rejected.
-        If threats are found, they are cleaned but the input may pass with a warning.
+        If threats are found, the sanitized field contains the cleaned text.
         """
         threats = []
         blocked = False
         lower = text.lower()
+        matched_patterns: list[str] = []
 
         # Check each category
         for pattern in _SYSTEM_OVERRIDE_PATTERNS:
             if re.search(pattern, lower, re.IGNORECASE):
                 threats.append(f"system_override: matched '{pattern[:30]}...'")
                 blocked = True
+                matched_patterns.append(pattern)
                 break
 
         for pattern in _PROMPT_EXPORT_PATTERNS:
             if re.search(pattern, lower, re.IGNORECASE):
                 threats.append(f"prompt_export: matched '{pattern[:30]}...'")
                 blocked = True
+                matched_patterns.append(pattern)
                 break
 
         for pattern in _PERMISSION_BYPASS_PATTERNS:
             if re.search(pattern, lower, re.IGNORECASE):
                 threats.append(f"permission_bypass: matched '{pattern[:30]}...'")
                 blocked = True
+                matched_patterns.append(pattern)
                 break
 
         for pattern in _TOOL_PARAM_INJECTION_PATTERNS:
             if re.search(pattern, lower, re.IGNORECASE):
                 threats.append(f"tool_param_injection: matched '{pattern[:30]}...'")
                 blocked = True
+                matched_patterns.append(pattern)
                 break
 
         # Multi-turn injection check (less aggressive — only flag, don't block)
         for pattern in _MULTI_TURN_INJECTION_PATTERNS:
             if re.search(pattern, lower, re.IGNORECASE):
                 threats.append(f"multi_turn_injection: matched '{pattern[:30]}...'")
+                matched_patterns.append(pattern)
+
+        # Actually sanitize: remove matched patterns from text
+        sanitized = text
+        for pattern in matched_patterns:
+            sanitized = re.sub(pattern, "[FILTERED]", sanitized, flags=re.IGNORECASE)
 
         if threats and blocked:
             logger.warning("INPUT_GUARD_BLOCKED threats=%s text_len=%d", threats, len(text))
@@ -137,7 +148,7 @@ class InputGuard:
         return SanitizerResult(
             clean=len(threats) == 0,
             original=text,
-            sanitized=text,  # For now, pass through (future: clean the suspicious parts)
+            sanitized=sanitized,
             threats=threats,
             blocked=blocked,
         )
@@ -188,6 +199,41 @@ class DocumentSanitizer:
         )
 
 
+# ── OutputGuard patterns ─────────────────────────────────────────
+
+_OUTPUT_DB_CONN_PATTERNS = [
+    r'(?:mysql|postgresql|postgres|mongodb|redis|amqp)://[^\s"]+',
+    r'jdbc:[^\s"]+',
+    r'Server\s*=.*?(?:Database|Initial\s*Catalog)\s*=',
+]
+
+_OUTPUT_INTERNAL_IP_PATTERNS = [
+    r'\b10\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?\b',
+    r'\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(?::\d+)?\b',
+    r'\b192\.168\.\d{1,3}\.\d{1,3}(?::\d+)?\b',
+    r'\b127\.0\.0\.1(?::\d+)?\b',
+    r'\blocalhost:\d+\b',
+]
+
+_OUTPUT_STACK_TRACE_PATTERNS = [
+    r'Traceback \(most recent call last\)',
+    r'File "[^"]+",\s*line \d+',
+    r'\bat\s+\w+\.\w+\.\w+\(',
+]
+
+_OUTPUT_ENV_VAR_PATTERNS = [
+    r'(?:SECRET_KEY|API_KEY|PASSWORD|PRIVATE_KEY|ACCESS_KEY|AWS_ACCESS_KEY_ID|SENSENOVA_API_KEY)\s*[=:]\s*\S+',
+    r'\bexport\s+[A-Z_]{3,}\s*=\s*\S+',
+]
+
+_OUTPUT_FILE_PATH_PATTERNS = [
+    r'/etc/(?:passwd|shadow|hosts)',
+    r'/home/[^\s]+/\.',
+    r'C:\\Users\\[^\s]+',
+    r'\.env(?:\.[a-z]+)?\b',
+]
+
+
 class OutputGuard:
     """Guard for generated output (before sending to user)."""
 
@@ -199,25 +245,71 @@ class OutputGuard:
         - System prompt fragments
         - Internal configuration strings
         - API keys / tokens
+        - DB connection strings
+        - Internal/RFC1918 IPs
+        - Stack traces
+        - Environment variable values
+        - Sensitive file paths
         """
         threats = []
+        sanitized = text
 
-        # Check for internal strings
+        # Category 1: system prompt / internal config
         if "system prompt" in text.lower() or "系统提示" in text:
             threats.append("output: system prompt reference detected")
 
-        # Check for API key patterns
+        # Category 2: API key patterns
         if re.search(r'sk-[a-zA-Z0-9]{20,}', text):
             threats.append("output: potential API key exposure")
+            sanitized = re.sub(r'sk-[a-zA-Z0-9]{20,}', '[REDACTED]', sanitized)
 
-        # Check for internal URLs
+        # Category 3: internal URLs
         if "token.sensenova.cn" in text and "api" in text:
             threats.append("output: internal API endpoint reference")
 
+        # Category 4: DB connection strings
+        for pattern in _OUTPUT_DB_CONN_PATTERNS:
+            if re.search(pattern, sanitized, re.IGNORECASE):
+                threats.append(f"output: DB connection string detected")
+                sanitized = re.sub(pattern, '[REDACTED]', sanitized, flags=re.IGNORECASE)
+                break
+
+        # Category 5: Internal IPs
+        for pattern in _OUTPUT_INTERNAL_IP_PATTERNS:
+            if re.search(pattern, sanitized):
+                threats.append(f"output: internal IP address detected")
+                sanitized = re.sub(pattern, '[REDACTED]', sanitized)
+                break
+
+        # Category 6: Stack traces
+        for pattern in _OUTPUT_STACK_TRACE_PATTERNS:
+            if re.search(pattern, sanitized):
+                threats.append(f"output: stack trace detected")
+                sanitized = re.sub(pattern, '[REDACTED]', sanitized)
+                break
+
+        # Category 7: Environment variables
+        for pattern in _OUTPUT_ENV_VAR_PATTERNS:
+            if re.search(pattern, sanitized):
+                threats.append(f"output: environment variable exposure")
+                sanitized = re.sub(pattern, '[REDACTED]', sanitized)
+                break
+
+        # Category 8: Sensitive file paths
+        for pattern in _OUTPUT_FILE_PATH_PATTERNS:
+            if re.search(pattern, sanitized, re.IGNORECASE):
+                threats.append(f"output: sensitive file path detected")
+                sanitized = re.sub(pattern, '[REDACTED]', sanitized, flags=re.IGNORECASE)
+                break
+
+        blocked = len(threats) > 0
+        if blocked:
+            logger.warning("OUTPUT_GUARD_BLOCKED threats=%s text_len=%d", threats, len(text))
+
         return SanitizerResult(
-            clean=len(threats) == 0,
+            clean=not blocked,
             original=text,
-            sanitized=text,
+            sanitized=sanitized,
             threats=threats,
-            blocked=len(threats) > 0,
+            blocked=blocked,
         )

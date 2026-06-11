@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [main, feature/ecom-agent]
+    branches: ["**"]
   pull_request:
-    branches: [main, feature/ecom-agent]
+    branches: ["**"]
 
 jobs:
   test:
@@ -26,6 +26,26 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+        options: >-
+          --health-cmd "wget --spider -q http://localhost:6333/readyz"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,14 +58,25 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
+          pip install pytest pytest-asyncio pytest-cov ruff
 
-      - name: Run unit tests
+      - name: Lint check
+        run: |
+          ruff check --select E,F,I,N --ignore E501 app tests scripts
+
+      - name: Format check
+        run: |
+          ruff format --check app tests scripts || true
+
+      - name: Run unit tests with coverage
         env:
           DATABASE_URL: postgresql+asyncpg://csagent:csagent@localhost:5432/csagent_test
+          REDIS_URL: redis://localhost:6379/0
+          QDRANT_URL: http://localhost:6333
+          API_AUTH_ENABLED: "false"
         run: |
-          python -m pytest tests/ -v --tb=short --timeout=60
+          python -m pytest tests/ -v --tb=short --timeout=60 --cov=app --cov-report=term-missing
 
       - name: Verify imports
         run: |
-          python -c "from app.db.models.ticket import Ticket, TicketStatus; from app.services.ticket_sm import TicketStateMachine; from app.agent.tools import ALL_TOOLS; print('OK')"
+          python -c "from app.db.models.ticket import Ticket, TicketStatus; from app.services.ticket_sm import TicketStateMachine; from app.agent.tools import ALL_TOOLS; from app.agent.composite_tools import process_exchange; print('OK')"

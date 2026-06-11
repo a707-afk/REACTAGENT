@@ -16,6 +16,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # App code
 COPY . .
 
+# Non-root user for security
+RUN adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
 # Default: use CPU (override with INFERENCE_DEVICE=cuda for GPU)
 ENV INFERENCE_DEVICE=cpu
 

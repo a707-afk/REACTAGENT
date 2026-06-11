@@ -215,6 +215,43 @@ class ToolRegistry:
             except Exception:
                 logger.debug("Redis idempotency check failed, falling back to in-memory")
 
+        # DB-based idempotency check for write tools (safety net for process restart)
+        if (
+            tool.side_effect != SideEffect.READ_ONLY
+            and getattr(self, "_db_idempotency_enabled", True)
+        ):
+            try:
+                from app.db.engine import get_db_session
+                from app.db.models.tool_call import ToolCall
+                from sqlalchemy import select
+                from datetime import datetime, timedelta, timezone
+
+                window = timedelta(seconds=tool.idempotency_window_seconds)
+                cutoff = datetime.now(timezone.utc) - window
+                with get_db_session() as db:
+                    stmt = (
+                        select(ToolCall)
+                        .where(
+                            ToolCall.idempotency_key == idem_key,
+                            ToolCall.tenant_id == tenant_id,
+                            ToolCall.created_at >= cutoff,
+                            ToolCall.success == True,  # noqa: E712
+                        )
+                        .limit(1)
+                    )
+                    prev = db.execute(stmt).scalar_one_or_none()
+                    if prev is not None:
+                        logger.info("DB idempotency hit for %s/%s (replaying cached result)", tool_name, idem_key)
+                        import json as _json
+                        cached_data = _json.loads(prev.result_json) if prev.result_json else {}
+                        return ToolCallResult(
+                            tool_name, True, data=cached_data,
+                            idempotency_key=idem_key,
+                            latency_ms=(time.perf_counter() - t0) * 1000,
+                        )
+            except Exception as e:
+                logger.debug("DB idempotency check failed (non-critical): %s", e)
+
         # In-memory fallback
         if idem_key in self._idempotency_cache:
             cached = self._idempotency_cache[idem_key]
@@ -284,6 +321,30 @@ class ToolRegistry:
             except Exception:
                 logger.debug("Redis idempotency write failed (non-critical)")
 
+        # Step 6: Persist to ToolCall DB table (fire-and-forget, non-blocking)
+        try:
+            from app.db.engine import get_db_session
+            from app.db.models.tool_call import ToolCall as ToolCallModel
+            import json as _json
+
+            with get_db_session() as db:
+                record = ToolCallModel(
+                    run_id=(user_context or {}).get("run_id"),
+                    tenant_id=tenant_id,
+                    tool_name=tool_name,
+                    params_json=_json.dumps(params, ensure_ascii=False, default=str),
+                    result_json=_json.dumps(tr.data, ensure_ascii=False, default=str) if tr.data else None,
+                    success=tr.success,
+                    error_message=tr.error,
+                    permission_result="allowed" if not tr.permission_denied else "denied",
+                    idempotency_key=idem_key,
+                    latency_ms=tr.latency_ms,
+                )
+                db.add(record)
+                db.commit()
+        except Exception as e:
+            logger.debug("ToolCall DB persist failed (non-critical): %s", e)
+
         return tr
 
     def clear_idempotency_cache(self) -> None:
@@ -304,7 +365,7 @@ def get_tool_registry() -> ToolRegistry:
 
 
 def _register_default_tools(reg: ToolRegistry) -> None:
-    """Register all default e-commerce after-sales tools."""
+    """Register all default e-commerce after-sales tools (atomic + composite)."""
     from app.agent.tools import (
         TOOL_ORDER_LOOKUP, TOOL_POLICY_CHECK, TOOL_INVENTORY_QUERY,
         TOOL_CREATE_PICKUP, TOOL_TRACK_SHIPMENT, TOOL_CREATE_AFTER_SALE_TICKET,
@@ -355,4 +416,75 @@ def _register_default_tools(reg: ToolRegistry) -> None:
         side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
         required_scopes=["ticket:write"],
         handler=_wrap_sync(_execute_create_after_sale_ticket), timeout_seconds=15,
+    ))
+
+    # ── Composite tools (high-level business flows) ──────────────────
+    from app.agent.composite_tools import (
+        process_exchange, process_refund, process_complaint, process_tracking,
+    )
+
+    reg.register(ToolDef(
+        name="process_exchange",
+        description="换货流程：查订单→并行检查政策+库存+预约取件。触发关键词: 换货/换码/太小/太大/尺码不合适",
+        schema={"type": "function", "function": {
+            "name": "process_exchange",
+            "description": "Process exchange request: lookup order, check policy+inventory+pickup in parallel",
+            "parameters": {"type": "object", "properties": {
+                "user_id": {"type": "string", "description": "User ID"},
+                "keyword": {"type": "string", "description": "Product keyword"},
+                "target_size": {"type": "string", "description": "Target size", "default": "L"},
+                "color": {"type": "string", "description": "Target color", "default": ""},
+                "address": {"type": "string", "description": "Pickup address", "default": ""},
+                "query_text": {"type": "string", "description": "Original user query"},
+            }, "required": ["user_id"]},
+        }},
+        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.MEDIUM,
+        handler=process_exchange, timeout_seconds=20,
+    ))
+    reg.register(ToolDef(
+        name="process_refund",
+        description="退款流程：查订单→政策检查→计算金额→创建工单。触发关键词: 退款/退货/退钱/不想要",
+        schema={"type": "function", "function": {
+            "name": "process_refund",
+            "description": "Process refund request: lookup order, check policy, calculate refund, create ticket",
+            "parameters": {"type": "object", "properties": {
+                "user_id": {"type": "string", "description": "User ID"},
+                "keyword": {"type": "string", "description": "Product keyword or order hint"},
+                "return_reason": {"type": "string", "description": "Reason for refund", "default": "申请退款"},
+            }, "required": ["user_id"]},
+        }},
+        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
+        required_scopes=["ticket:write"],
+        handler=process_refund, timeout_seconds=15,
+    ))
+    reg.register(ToolDef(
+        name="process_complaint",
+        description="投诉流程：情绪分级→P0紧急/P2标准工单+补偿。触发关键词: 投诉/差评/举报/骗子/质量问题",
+        schema={"type": "function", "function": {
+            "name": "process_complaint",
+            "description": "Process complaint: detect emotion, create priority ticket with compensation",
+            "parameters": {"type": "object", "properties": {
+                "user_id": {"type": "string", "description": "User ID"},
+                "keyword": {"type": "string", "description": "Product keyword or order hint"},
+                "emotion": {"type": "string", "description": "Detected emotion: angry/neutral", "default": "neutral"},
+                "query_text": {"type": "string", "description": "Original complaint text"},
+            }, "required": ["user_id"]},
+        }},
+        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
+        required_scopes=["ticket:write"],
+        handler=process_complaint, timeout_seconds=15,
+    ))
+    reg.register(ToolDef(
+        name="process_tracking",
+        description="物流查询流程：查订单→查物流状态。触发关键词: 物流/快递/到哪了/查快递",
+        schema={"type": "function", "function": {
+            "name": "process_tracking",
+            "description": "Track shipment status: lookup order then track logistics",
+            "parameters": {"type": "object", "properties": {
+                "user_id": {"type": "string", "description": "User ID"},
+                "keyword": {"type": "string", "description": "Product keyword or order hint"},
+            }, "required": ["user_id"]},
+        }},
+        side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
+        handler=process_tracking, timeout_seconds=15,
     ))

@@ -379,11 +379,11 @@ def main():
     parser = argparse.ArgumentParser(description="RAG Evaluation Runner")
     parser.add_argument("--category", "-c", type=str, help="Evaluate a single category")
     parser.add_argument("--output", "-o", type=str, help="Output markdown report path")
-    parser.add_argument("--dry-run", action="store_true", default=True, help="Dry-run mode (test eval infrastructure)")
+    parser.add_argument("--dry-run", action="store_true", default=False, help="Dry-run mode (test eval infrastructure without Qdrant)")
     parser.add_argument("--live", action="store_true", help="Live mode (requires running Qdrant + embeddings)")
     args = parser.parse_args()
 
-    dry_run = not args.live  # Default to dry-run
+    dry_run = args.dry_run and not args.live  # Default to live mode
 
     logger.info("Loading eval cases...")
     cases = load_cases(args.category)
@@ -392,6 +392,19 @@ def main():
     if not cases:
         logger.error("No cases found in %s", EVAL_DIR)
         sys.exit(1)
+
+    # Pre-flight infrastructure check for live mode
+    if not dry_run:
+        try:
+            from app.vector_index import get_vector_index
+            get_vector_index()
+            logger.info("Qdrant pre-flight check passed")
+        except Exception as e:
+            logger.error(
+                "Qdrant not available for live evaluation: %s. "
+                "Use --dry-run to test eval infrastructure without Qdrant.", e
+            )
+            sys.exit(2)
 
     logger.info("Running evaluation (mode=%s)...", "dry_run" if dry_run else "live")
     summary = run_eval(cases, dry_run=dry_run)

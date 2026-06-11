@@ -373,7 +373,7 @@ def _retrieve_scored_nodes_impl(
         from app.rerank import rerank_nodes
 
         nodes = rerank_nodes(rq, merged, top_n=top_k, settings=settings)
-        nodes = apply_retrieval_intent_boost(nodes, rq, settings)
+        # NOTE: Do NOT call apply_retrieval_intent_boost again here — already applied before rerank
         out = ScoredRetrieval(
             nodes=nodes, retrieval_query=rq, router_result=rr,
             language=lang, collection_used=lang_route.collection_name,

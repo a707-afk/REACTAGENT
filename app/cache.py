@@ -238,12 +238,25 @@ def cache_get_retrieval(
     user_query: str,
     settings: Settings,
 ) -> tuple[ScoredRetrieval | None, str | None]:
-    """返回 (结果, 命中层级 l1|l2)。"""
+    """返回 (结果, 命中层级 l1|redis|l2)。"""
     if not settings.cache_enabled:
         return None, None
+    # L1: in-memory LRU
     hit = _l1_get(key, max_entries=settings.cache_max_entries)
     if hit is not None:
         return hit, "l1"
+    # L2-Redis: distributed cache (sync client, safe for sync code paths)
+    if getattr(settings, "cache_redis_enabled", True):
+        try:
+            from app.redis_client import cache_get_sync
+            data = cache_get_sync(key, settings=settings)
+            if data is not None:
+                sr = _deserialize_sr(data)
+                _l1_put(key, sr, max_entries=settings.cache_max_entries)  # promote to L1
+                return sr, "redis"
+        except Exception:
+            pass  # Redis unavailable, fall through to L2 semantic
+    # L3: semantic embedding cache
     return _l2_get(user_query, settings)
 
 
@@ -256,15 +269,29 @@ def cache_put_retrieval(
     if not settings.cache_enabled:
         return
     _l1_put(key, sr, max_entries=settings.cache_max_entries)
+    # L2-Redis: write-through to distributed cache
+    if getattr(settings, "cache_redis_enabled", True):
+        try:
+            from app.redis_client import cache_set_sync
+            ttl = getattr(settings, "cache_redis_ttl_seconds", 600)
+            cache_set_sync(key, _serialize_sr(sr), ttl_seconds=ttl, settings=settings)
+        except Exception:
+            pass  # Redis unavailable, non-fatal
     _l2_put(key, user_query, sr, settings)
 
 
 def cache_clear() -> None:
-    """索引重建或语料变更后调用，清空 L1/L2。"""
+    """索引重建或语料变更后调用，清空 L1 + Redis + L2。"""
     with _lock:
         _l1.clear()
         _l2_entries.clear()
-    logger.info("retrieval cache cleared (L1 + L2)")
+    # Also clear Redis retrieval cache
+    try:
+        from app.redis_client import cache_clear_sync
+        cache_clear_sync()
+    except Exception:
+        pass
+    logger.info("retrieval cache cleared (L1 + Redis + L2)")
 
 
 def cache_stats() -> dict[str, int]:

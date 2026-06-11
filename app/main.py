@@ -43,6 +43,12 @@ async def lifespan(app: FastAPI):
 
     setup_telemetry(settings)
     logger.info("Starting %s (debug=%s)", settings.app_name, settings.debug)
+    # Startup security warning
+    if settings.api_auth_enabled and not (getattr(settings, "api_keys", "") or "").strip():
+        logger.critical(
+            "API auth is ENABLED but no API keys configured — all authenticated requests will be rejected! "
+            "Set API_KEYS in .env or set API_AUTH_ENABLED=false for local dev."
+        )
     # Pre-warm Qdrant and BM25 to avoid cold-start latency
     try:
         from app.vector_index import get_vector_index

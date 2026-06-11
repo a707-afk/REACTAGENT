@@ -12,6 +12,7 @@ from app.policy.models import PolicyAction, PolicyEvalResult
 from app.citation_verify import citation_overlap_ratio, sentence_level_grounding
 from app.config import get_settings
 from app.domain_router import RouterResult
+from app.input_sanitizer import InputGuard
 from app.vector_index import get_vector_index
 from app.llm import chat_completion
 from app.observability import log_structured_event
@@ -123,6 +124,26 @@ def _policy_response_fields(pe: PolicyEvalResult | None) -> dict[str, Any]:
 def retrieve(req: RetrieveRequest, request: Request) -> RetrieveResponse:
     tid = getattr(request.state, "trace_id", None)
     settings = get_settings()
+
+    # Endpoint-level InputGuard check (defense-in-depth on top of HTTP middleware)
+    if getattr(settings, "input_guard_endpoint_enabled", True):
+        guard = InputGuard.check(req.query)
+        if guard.blocked:
+            _log_event(tid, "retrieve", {"query": req.query[:500], "input_guard_blocked": True, "threats": guard.threats})
+            return RetrieveResponse(
+                query=req.query,
+                retrieval_query=None,
+                chunks=[],
+                gate_passed=False,
+                error_code="INPUT_GUARD",
+                behavior="refuse",
+                refusal_reason_code="INPUT_GUARD",
+                ranked_quality_scores=[],
+                router_trace=None,
+                trace_id=tid,
+            )
+        if guard.threats:
+            logger.warning("retrieve: InputGuard threats (non-blocking) tid=%s threats=%s", tid, guard.threats)
     pe = evaluate_policy(
         req.query,
         settings,
@@ -212,6 +233,30 @@ SYS_PROMPT = (
 def _execute_chat(req: ChatRequest, tid: str | None) -> ChatResponse:
     """同步执行 /chat 核心逻辑，供 JSON 与 SSE 共用。"""
     settings = get_settings()
+
+    # Endpoint-level InputGuard check (defense-in-depth on top of HTTP middleware)
+    if getattr(settings, "input_guard_endpoint_enabled", True):
+        guard = InputGuard.check(req.query)
+        if guard.blocked:
+            _log_event(tid, "chat", {"query": req.query[:500], "input_guard_blocked": True, "threats": guard.threats})
+            return ChatResponse(
+                query=req.query,
+                retrieval_query=None,
+                answer="请求包含不安全内容，已被拒绝。",
+                citations=[],
+                chunks_used=0,
+                refused=True,
+                error_code="INPUT_GUARD",
+                behavior="refuse",
+                refusal_reason_code="INPUT_GUARD",
+                ranked_quality_scores=[],
+                router_trace=None,
+                trace_id=tid,
+                citation_overlap_ratio=None,
+            )
+        if guard.threats:
+            logger.warning("chat: InputGuard threats (non-blocking) tid=%s threats=%s", tid, guard.threats)
+
     pe = evaluate_policy(
         req.query,
         settings,
@@ -387,6 +432,8 @@ def chat(req: ChatRequest, request: Request) -> ChatResponse:
 
 
 def _chat_stream_events(req: ChatRequest, tid: str | None) -> Iterator[str]:
+    # Yield progress: retrieving
+    yield format_sse_event("progress", {"stage": "retrieve", "message": "检索知识库…"})
     try:
         resp = _execute_chat(req, tid)
     except HTTPException as e:
@@ -396,6 +443,13 @@ def _chat_stream_events(req: ChatRequest, tid: str | None) -> Iterator[str]:
         logger.exception("chat/stream 失败")
         yield format_sse_event("error", {"message": str(e)})
         return
+
+    # Yield progress: generating
+    yield format_sse_event("progress", {
+        "stage": "generate",
+        "message": f"已找到 {resp.chunks_used} 个相关片段，正在生成回复…",
+        "chunks_used": resp.chunks_used,
+    })
 
     answer = resp.answer or ""
     if answer and not resp.refused:

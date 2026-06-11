@@ -284,6 +284,31 @@ def sentence_level_grounding(
     )
 
 
+def verify_grounding(
+    answer: str,
+    evidence_text: str,
+    threshold: float = DEFAULT_NGRAM_SUPPORT_THRESHOLD,
+) -> dict[str, Any]:
+    """检查 answer 中每句话是否被 evidence_text 支撑，返回 unsupported 句子列表。"""
+    if not answer or not evidence_text:
+        return {"unsupported_sentences": [], "passed": True, "unsupported_rate": 0.0}
+
+    chunks_with_meta = [{"text": evidence_text, "chunk_id": "evidence-0"}]
+    report = sentence_level_grounding(
+        answer,
+        chunks_with_meta,
+        support_threshold=threshold,
+        prefer_embedding=False,
+        max_unsupported_rate=1.0,
+    )
+    unsupported_sentences = [sg.sentence for sg in report.sentences if sg.unsupported]
+    return {
+        "unsupported_sentences": unsupported_sentences,
+        "passed": report.passed,
+        "unsupported_rate": report.unsupported_sentence_rate,
+    }
+
+
 def strip_unsupported_sentences(text: str, context: str, threshold: float = 0.28) -> str:
     if not text or not context:
         return text

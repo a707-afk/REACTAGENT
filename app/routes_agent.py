@@ -46,6 +46,16 @@ def _ticket_response_from_result(
 async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgentResponse:
     tid = getattr(request.state, "trace_id", None)
     settings = get_settings()
+
+    # Harness unified mode: route /agent/ticket through Harness
+    if getattr(settings, "agent_harness_unified", False):
+        return await _agent_ticket_via_harness(req, settings, tid)
+
+    # Shadow mode: run Harness in parallel for comparison (fire-and-forget)
+    if getattr(settings, "agent_harness_shadow", False):
+        asyncio.ensure_future(_run_harness_shadow(req, settings))
+
+    # Default: LangGraph path
     timeout_s = getattr(settings, "api_agent_timeout_seconds", 120.0)
     try:
         uc_dict = req.user_context.model_dump() if req.user_context else {}
@@ -77,6 +87,75 @@ async def agent_ticket(req: TicketAgentRequest, request: Request) -> TicketAgent
         ),
     )
     return _ticket_response_from_result(req, result, tid)
+
+
+async def _agent_ticket_via_harness(
+    req: TicketAgentRequest, settings, tid: str | None
+) -> TicketAgentResponse:
+    """Route /agent/ticket through the unified Harness."""
+    from app.agent.harness import run_agent_harness
+
+    uc_dict = req.user_context.model_dump() if req.user_context else {}
+    result = await run_agent_harness(
+        objective=req.user_query,
+        tenant_id=uc_dict.get("tenant_id", "default"),
+        user_id=req.customer_id or "anonymous",
+        user_context=uc_dict,
+        session_id=req.session_id,
+        ticket_id=req.ticket_id,
+    )
+    return _harness_result_to_ticket_response(result, req, tid)
+
+
+def _harness_result_to_ticket_response(result, req: TicketAgentRequest, tid: str | None) -> TicketAgentResponse:
+    """Map AgentHarnessResult to TicketAgentResponse for frontend compatibility."""
+    # Status mapping
+    action_map = {
+        "completed": "draft_ready",
+        "waiting_approval": "await_human_review",
+        "failed": "error",
+        "terminated": "error",
+    }
+    final_action = action_map.get(result.status, result.status)
+
+    return TicketAgentResponse(
+        ticket_id=req.ticket_id,
+        user_query=req.user_query,
+        final_action=final_action,
+        human_review_required=result.human_review_required,
+        draft_reply=result.final_answer,
+        ticket_note=f"Harness run_id={result.run_id}" if result.errors else None,
+        retrieval_query=req.user_query,
+        routed_domains=[],
+        retrieved_chunks=[],
+        gate_passed=True,
+        gate_error_code=None,
+        router_trace=None,
+        policy_result=None,
+        audit_trace=result.audit_trace,
+        trace_id=tid,
+    )
+
+
+async def _run_harness_shadow(req: TicketAgentRequest, settings) -> None:
+    """Shadow mode: run Harness in parallel for comparison logging."""
+    try:
+        from app.agent.harness import run_agent_harness
+        uc_dict = req.user_context.model_dump() if req.user_context else {}
+        result = await run_agent_harness(
+            objective=req.user_query,
+            tenant_id=uc_dict.get("tenant_id", "default"),
+            user_id=req.customer_id or "anonymous",
+            user_context=uc_dict,
+            session_id=req.session_id,
+            ticket_id=req.ticket_id,
+        )
+        logger.info(
+            "HARNESS_SHADOW run_id=%s status=%s answer_len=%d",
+            result.run_id, result.status, len(result.final_answer or ""),
+        )
+    except Exception as e:
+        logger.warning("HARNESS_SHADOW failed: %s", e)
 
 
 async def _agent_ticket_stream_events(req: TicketAgentRequest, tid: str | None) -> AsyncIterator[str]:

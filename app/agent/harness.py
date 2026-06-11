@@ -17,11 +17,62 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
+# ── JSON extraction helpers ──────────────────────────────────────
+
+def _extract_json_object(text: str) -> dict[str, Any] | None:
+    """Robustly extract a JSON object from LLM output.
+
+    Tries multiple strategies: fenced code blocks, brace matching,
+    and full-text parsing.
+    """
+    import re
+    # Strategy 1: code fence
+    m = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except json.JSONDecodeError:
+            pass
+    # Strategy 2: outermost braces
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end > start:
+        try:
+            return json.loads(text[start:end + 1])
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def _extract_json_array(text: str) -> list | None:
+    """Robustly extract a JSON array from LLM output."""
+    import re
+    # Strategy 1: code fence
+    m = re.search(r'```(?:json)?\s*(\[.*?\])\s*```', text, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except json.JSONDecodeError:
+            pass
+    # Strategy 2: outermost brackets
+    start = text.find('[')
+    end = text.rfind(']')
+    if start != -1 and end > start:
+        try:
+            return json.loads(text[start:end + 1])
+        except json.JSONDecodeError:
+            pass
+    return None
+
 # Budget defaults
 DEFAULT_BUDGET = {
     "max_steps": 10,
     "max_tool_calls": 20,
     "max_latency_ms": 120_000,
+    "step_timeout_seconds": 30.0,
+    "max_transitions": 30,
+    "max_rewrite_attempts": 2,
 }
 
 
@@ -73,6 +124,10 @@ async def run_agent_harness(
     budget = budget or DEFAULT_BUDGET
     max_steps = budget.get("max_steps", 10)
     max_tool_calls = budget.get("max_tool_calls", 20)
+    max_latency_ms = budget.get("max_latency_ms", 120_000)
+    step_timeout = budget.get("step_timeout_seconds", 30.0)
+    max_transitions = budget.get("max_transitions", 30)
+    max_rewrite_attempts = budget.get("max_rewrite_attempts", 2)
 
     run_id = str(uuid.uuid4())
     user_context = user_context or {}
@@ -97,6 +152,7 @@ async def run_agent_harness(
     total_tool_calls = 0
     tool_error_count = 0
     perm_deny_count = 0
+    transition_count = 0
 
     steps: list[AgentStep] = []
     step_index = 0
@@ -129,8 +185,13 @@ async def run_agent_harness(
         _add_step("plan", {"action": "policy_pre_check"}, {"risk_level": run.risk_level})
         audit.append({"step": "policy_pre_check", "risk_level": run.risk_level})
 
+        # ── Step 1.5: Intent classification (pre-plan routing) ──
+        intent_info = _classify_intent(objective)
+        _add_step("plan", {"action": "intent_classify"}, intent_info)
+        audit.append({"step": "intent_classify", **intent_info})
+
         # ── Step 2: Understand & Plan ──
-        plan = _build_plan(objective, run.risk_level)
+        plan = _build_plan(objective, run.risk_level, intent_info=intent_info)
         _add_step("plan", {"action": "build_plan", "objective": objective}, {"plan": plan})
         run.plan_json = json.dumps(plan, ensure_ascii=False)
         audit.append({"step": "plan", "steps": len(plan)})
@@ -143,6 +204,20 @@ async def run_agent_harness(
         for i, step_def in enumerate(plan):
             if step_index >= max_steps:
                 errors.append({"step": i, "error": "max_steps_exceeded"})
+                plan_success = False
+                break
+
+            # Budget enforcement: max latency check
+            elapsed_ms = (time.perf_counter() - t_start) * 1000
+            if elapsed_ms > max_latency_ms:
+                errors.append({"step": i, "error": "max_latency_exceeded", "elapsed_ms": elapsed_ms})
+                plan_success = False
+                break
+
+            # Budget enforcement: max transitions
+            transition_count += 1
+            if transition_count > max_transitions:
+                errors.append({"step": i, "error": "max_transitions_exceeded"})
                 plan_success = False
                 break
 
@@ -184,12 +259,16 @@ async def run_agent_harness(
                     audit.append({"step": "execute", "tool": tool_name, "permission": "denied", "reason": perm.reason})
                     continue
 
-                # Execute tool
+                # Execute tool (with step-level timeout as safety net)
                 t0 = time.perf_counter()
                 try:
-                    result = await registry.execute(
-                        tool_name, params,
-                        user_context=user_context, tenant_id=tenant_id,
+                    import asyncio
+                    result = await asyncio.wait_for(
+                        registry.execute(
+                            tool_name, params,
+                            user_context=user_context, tenant_id=tenant_id,
+                        ),
+                        timeout=step_timeout,
                     )
                     latency = (time.perf_counter() - t0) * 1000
 
@@ -215,11 +294,16 @@ async def run_agent_harness(
                 except Exception as e:
                     latency = (time.perf_counter() - t0) * 1000
                     tool_error_count += 1
+                    error_msg = str(e)
+                    # Distinguish timeout from other errors
+                    import asyncio
+                    if isinstance(e, asyncio.TimeoutError):
+                        error_msg = f"harness_step_timeout ({step_timeout}s)"
                     _add_step("execute", {"tool": tool_name, "params": params}, {},
                               tool_name=tool_name, tool_params=params,
-                              permission="allowed", latency=latency, error=str(e))
-                    errors.append({"step": i, "tool": tool_name, "error": str(e)})
-                    audit.append({"step": "execute", "tool": tool_name, "error": str(e)})
+                              permission="allowed", latency=latency, error=error_msg)
+                    errors.append({"step": i, "tool": tool_name, "error": error_msg})
+                    audit.append({"step": "execute", "tool": tool_name, "error": error_msg})
 
             # Validate observation
             _add_step("observe", {"observations": all_observations[-3:] if all_observations else []},
@@ -230,13 +314,53 @@ async def run_agent_harness(
         _add_step("evaluate", {"action": "draft"}, {"draft": draft})
         audit.append({"step": "draft", "length": len(draft)})
 
-        # ── Step 5: Evaluate ──
+        # ── Step 4.5: OutputGuard check (between draft and evaluate) ──
+        try:
+            from app.input_sanitizer import OutputGuard
+            output_check = OutputGuard.check(draft)
+            if output_check.blocked:
+                draft = output_check.sanitized
+                audit.append({"step": "output_guard", "blocked": True, "threats": output_check.threats})
+        except Exception as e:
+            logger.debug("OutputGuard check failed (non-critical): %s", e)
+
+        # ── Step 5: Evaluate (with rewrite loop) ──
+        rewrite_count = 0
         eval_result = _evaluate_result(draft, all_observations, errors)
         _add_step("evaluate", {"action": "evaluate"}, eval_result)
         audit.append({"step": "evaluate", "passed": eval_result.get("passed", True)})
 
+        # Rewrite loop: if evaluation fails, augment query and retry
+        while (
+            not eval_result.get("passed", True)
+            and rewrite_count < max_rewrite_attempts
+            and "no_observations" not in eval_result.get("issues", [])
+        ):
+            rewrite_count += 1
+            augmented = f"{objective} (补充查询第{rewrite_count}次，请提供更多详情)"
+            draft = _generate_draft(augmented, all_observations, errors)
+            # Re-check OutputGuard
+            try:
+                output_check = OutputGuard.check(draft)
+                if output_check.blocked:
+                    draft = output_check.sanitized
+            except Exception:
+                pass
+            eval_result = _evaluate_result(draft, all_observations, errors)
+            _add_step("evaluate", {"action": f"rewrite_evaluate_{rewrite_count}"}, eval_result)
+            audit.append({"step": f"rewrite_{rewrite_count}", "passed": eval_result.get("passed", True)})
+
+        # If still not passed after rewrites, flag for human review
+        if not eval_result.get("passed", True) and rewrite_count >= max_rewrite_attempts:
+            audit.append({"step": "rewrite_exhausted", "forced_pass": True})
+
         # ── Step 6: HITL check ──
-        needs_human = run.risk_level in ("high", "critical") or bool(approvals) or not eval_result.get("passed", True)
+        needs_human = (
+            run.risk_level in ("high", "critical")
+            or bool(approvals)
+            or not eval_result.get("passed", True)
+            or (rewrite_count >= max_rewrite_attempts and not eval_result.get("passed", True))
+        )
         if needs_human:
             _add_step("approve", {"action": "request_approval"}, {"approvals": approvals})
             audit.append({"step": "hitl", "required": True, "approvals": len(approvals)})
@@ -325,7 +449,45 @@ def _assess_risk(objective: str) -> str:
     return "low"
 
 
-def _build_plan(objective: str, risk_level: str) -> list[dict]:
+def _classify_intent(objective: str) -> dict[str, Any]:
+    """Pre-plan intent classification reusing supervisor router logic."""
+    from app.supervisor.router import detect_emotion
+
+    EXCHANGE_KW = ["换货", "换个", "换成", "换一件", "换尺码", "换码", "太小", "太大", "尺寸不对", "尺码不合适", "想换"]
+    REFUND_KW = ["退款", "退货", "退钱", "不想要", "取消订单", "申请退"]
+    TRACKING_KW = ["物流", "快递", "到哪了", "几天到", "发货了吗", "运输", "签收", "查一下", "查快递", "查物流"]
+    COMPLAINT_KW = ["投诉", "差评", "举报", "骗子", "假货", "质量问题", "态度差", "要投诉", "太差了", "气死", "骗人"]
+
+    query = objective.strip()
+    def match(kw_list):
+        return any(kw in query for kw in kw_list)
+
+    if match(EXCHANGE_KW):
+        intent, confidence = "exchange", 0.95
+    elif match(REFUND_KW):
+        intent, confidence = "refund", 0.95
+    elif match(TRACKING_KW):
+        intent, confidence = "tracking", 0.95
+    elif match(COMPLAINT_KW):
+        intent, confidence = "complaint", 0.95
+    else:
+        intent, confidence = "unknown", 0.30
+
+    emotion = detect_emotion(query) if intent == "complaint" else None
+
+    # Extract product keyword
+    PRODUCT_KW = ["T恤", "衬衫", "裤子", "裙子", "卫衣", "外套", "鞋", "运动鞋", "包", "手机", "耳机", "手表"]
+    order_hint = next((kw for kw in PRODUCT_KW if kw in query), "")
+
+    return {
+        "intent": intent,
+        "confidence": confidence,
+        "emotion": emotion,
+        "order_hint": order_hint,
+    }
+
+
+def _build_plan(objective: str, risk_level: str, intent_info: dict[str, Any] | None = None) -> list[dict]:
     """Build an execution plan using LLM-based planning.
 
     The LLM receives the available tools and the objective, then produces
@@ -358,14 +520,11 @@ def _build_plan(objective: str, risk_level: str) -> list[dict]:
         )
 
         raw = chat_completion(system, user)
-        # Parse JSON from LLM response
-        import re
-        json_match = re.search(r'\[.*\]', raw, re.DOTALL)
-        if json_match:
-            plan = json.loads(json_match.group())
-            if isinstance(plan, list) and len(plan) > 0:
-                logger.info("LLM plan generated: %d steps for '%s'", len(plan), objective[:50])
-                return plan
+        # Parse JSON from LLM response (robust extraction)
+        plan = _extract_json_array(raw)
+        if plan:
+            logger.info("LLM plan generated: %d steps for '%s'", len(plan), objective[:50])
+            return plan
 
         logger.warning("LLM plan parse failed, falling back to rule-based")
     except Exception as e:
@@ -376,21 +535,22 @@ def _build_plan(objective: str, risk_level: str) -> list[dict]:
 
 
 def _build_plan_rule_based(objective: str, risk_level: str) -> list[dict]:
-    """Rule-based fallback planner when LLM is unavailable."""
-    plan = [{"type": "retrieve", "description": "Search knowledge base for relevant policies"}]
+    """Rule-based fallback planner using composite tools."""
     low = objective.lower()
-    if any(w in low for w in ["退款", "refund"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
-        plan.append({"type": "execute", "tool": "policy_check", "params": {"order_id": "from_order_lookup", "return_reason": "申请退款"}})
-    elif any(w in low for w in ["换货", "exchange", "尺码"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
-        plan.append({"type": "execute", "tool": "inventory_query", "params": {"sku": "from_order", "size": "L"}})
-    elif any(w in low for w in ["物流", "track", "快递", "包裹"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
-        plan.append({"type": "execute", "tool": "track_shipment", "params": {"order_id": "from_order_lookup"}})
-    elif any(w in low for w in ["投诉", "complaint"]):
-        plan.append({"type": "execute", "tool": "order_lookup", "params": {"user_id": "current_user"}})
-    return plan
+    # Use composite tools for known intents
+    if any(w in low for w in ["退款", "refund", "退货", "退钱", "不想要"]):
+        return [{"type": "execute", "tool": "process_refund", "params": {"user_id": "current_user", "keyword": objective[:15]}}]
+    elif any(w in low for w in ["换货", "exchange", "尺码", "太小", "太大", "想换"]):
+        return [{"type": "execute", "tool": "process_exchange", "params": {"user_id": "current_user", "keyword": objective[:15], "query_text": objective}}]
+    elif any(w in low for w in ["物流", "track", "快递", "包裹", "到哪了"]):
+        return [{"type": "execute", "tool": "process_tracking", "params": {"user_id": "current_user", "keyword": objective[:15]}}]
+    elif any(w in low for w in ["投诉", "complaint", "举报", "骗子"]):
+        from app.supervisor.router import detect_emotion
+        emotion = detect_emotion(objective)
+        return [{"type": "execute", "tool": "process_complaint", "params": {"user_id": "current_user", "keyword": objective[:15], "emotion": emotion, "query_text": objective}}]
+    else:
+        # Fallback: retrieve from knowledge base
+        return [{"type": "retrieve", "description": "Search knowledge base for relevant policies"}]
 
 
 def _generate_draft(objective: str, observations: list[dict], errors: list[dict]) -> str:
@@ -484,10 +644,8 @@ def _evaluate_result(draft: str, observations: list[dict], errors: list[dict]) -
             "请评估 (JSON):"
         )
         raw = chat_completion(system, user)
-        import re
-        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
-        if json_match:
-            eval_data = json.loads(json_match.group())
+        eval_data = _extract_json_object(raw)
+        if eval_data:
             grounded = eval_data.get("grounded", False)
             safe = eval_data.get("safe", True)
             unsupported = eval_data.get("unsupported_claims", [])

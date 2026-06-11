@@ -1,6 +1,7 @@
 """Async SQLAlchemy engine — SQLite for local dev, PostgreSQL for production."""
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -43,6 +44,19 @@ def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency: yield an async DB session per request."""
+    sm = get_sessionmaker()
+    async with sm() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+
+
+@asynccontextmanager
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """Async context manager for use in workers/tasks (non-FastAPI contexts)."""
     sm = get_sessionmaker()
     async with sm() as session:
         try:

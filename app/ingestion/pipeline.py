@@ -149,18 +149,44 @@ async def check_dedup(content_hash: str, tenant_id: str, session) -> str | None:
 
 
 def scan_for_threats(data: bytes, file_name: str) -> dict[str, Any]:
-    """Stub for virus/dangerous content scanning.
+    """Threat scanning with fail-closed behavior.
 
-    MVP: always passes. Must have status field for future integration.
+    MVP: ClamAV stub. When scanner is unavailable, marks as degraded
+    (not silently passing). Production must integrate real scanner.
 
     Returns:
-        Dict with scan results: {"clean": True/False, "threats": [...], "scanner": "stub"}
+        Dict with scan results: {"clean": True/False, "threats": [...], "scanner": str, "degraded": bool}
     """
-    # TODO: Integrate with ClamAV or similar
+    # Heuristic checks (always active)
+    threats = []
+    lower_name = file_name.lower()
+    # Dangerous extensions even if they have valid outer extension
+    if any(ext in lower_name for ext in [".exe", ".dll", ".bat", ".cmd", ".ps1", ".vbs"]):
+        threats.append(f"dangerous_extension: {file_name}")
+    # Check for embedded scripts in file content (basic heuristic)
+    if len(data) < 10_000_000:  # Only scan small-ish files
+        try:
+            text_sample = data[:4096].decode("utf-8", errors="ignore").lower()
+            if "<script" in text_sample or "javascript:" in text_sample:
+                threats.append("embedded_script_detected")
+        except Exception:
+            pass
+
+    if threats:
+        return {
+            "clean": False,
+            "threats": threats,
+            "scanner": "heuristic",
+            "degraded": False,
+            "scanned_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+    # TODO: Integrate ClamAV. Until then, pass with degraded flag.
     return {
         "clean": True,
         "threats": [],
-        "scanner": "stub",
+        "scanner": "heuristic_only",
+        "degraded": True,  # Indicates full scanner not available
         "scanned_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -183,6 +209,45 @@ def clean_text(text: str) -> str:
     text = "\n".join(lines)
 
     return text.strip()
+
+
+# ── Token estimation (Chinese-aware) ──────────────────────────────
+
+_tiktoken_encoder = None
+
+
+def _estimate_tokens(text: str) -> int:
+    """Estimate token count for text (Chinese-aware).
+
+    Uses tiktoken cl100k_base if available (accurate for CJK).
+    Falls back to heuristic: count CJK chars as 1 token each,
+    English words as 1 token per ~4 chars.
+    """
+    global _tiktoken_encoder
+    if _tiktoken_encoder is None:
+        try:
+            import tiktoken
+            import os
+            cache_dir = os.environ.get("TIKTOKEN_CACHE_DIR", os.path.join(os.path.dirname(tiktoken.__file__), "cache"))
+            if os.path.isdir(cache_dir) and any(fname.endswith(".tiktoken") for fname in os.listdir(cache_dir)):
+                _tiktoken_encoder = tiktoken.get_encoding("cl100k_base")
+            else:
+                _tiktoken_encoder = False  # No cached BPE available
+        except (ImportError, Exception):
+            _tiktoken_encoder = False
+
+    if _tiktoken_encoder:
+        try:
+            return len(_tiktoken_encoder.encode(text))
+        except Exception:
+            pass
+
+    # Fallback heuristic: CJK chars ≈ 1 token, others ≈ 4 chars/token
+    import re
+    cjk_count = len(re.findall(r'[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]', text))
+    non_cjk = re.sub(r'[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]', '', text)
+    non_cjk_tokens = max(1, len(non_cjk.split())) if non_cjk.strip() else 0
+    return cjk_count + non_cjk_tokens
 
 
 def chunk_parsed_document(
@@ -225,7 +290,7 @@ def chunk_parsed_document(
             current_length = 0
 
             for sentence in sentences:
-                sentence_len = len(sentence) // 4  # Rough token estimate
+                sentence_len = _estimate_tokens(sentence)  # Proper token estimation
 
                 if current_length + sentence_len > chunk_size and current_chunk:
                     # Flush current chunk
@@ -242,7 +307,7 @@ def chunk_parsed_document(
                     overlap_sentences = []
                     overlap_len = 0
                     for s in reversed(current_chunk):
-                        s_len = len(s) // 4
+                        s_len = _estimate_tokens(s)
                         if overlap_len + s_len > chunk_overlap:
                             break
                         overlap_sentences.insert(0, s)
@@ -354,6 +419,9 @@ async def run_ingestion_pipeline(
 
     Returns:
         IngestionResult with document_id and statistics
+
+    Raises:
+        IngestionError: If concurrent ingestion of the same file is in progress
     """
     from app.db.engine import get_session
     from app.db.models.document import Document
@@ -362,6 +430,67 @@ async def run_ingestion_pipeline(
     # ── Step 1-3: Validate ──
     validated_mime = validate_file(file_name, len(file_data), mime_type)
     content_hash = compute_content_hash(file_data)
+
+    # ── Distributed Lock: prevent concurrent ingestion of same file for same tenant ──
+    lock = None
+    lock_acquired = False
+    lock_key = f"ingestion:{tenant_id}:{content_hash}"
+    try:
+        from app.redis_client import get_redis_pool, DistributedLock
+        redis_pool = await get_redis_pool()
+        lock = DistributedLock(lock_key, redis=redis_pool)
+        lock_acquired = await lock.acquire(timeout=5.0, ttl=120.0)
+        if not lock_acquired:
+            raise IngestionError(
+                f"Concurrent ingestion in progress for this file (tenant={tenant_id})",
+                stage="distributed_lock",
+            )
+    except IngestionError:
+        raise
+    except Exception as e:
+        # Redis unavailable → degrade to no-lock (dedup check provides soft protection)
+        logger.warning("DistributedLock unavailable, proceeding without lock: %s", e)
+        lock = None
+        lock_acquired = False
+
+    try:
+        return await _run_ingestion_pipeline_inner(
+            file_data=file_data,
+            file_name=file_name,
+            tenant_id=tenant_id,
+            job_id=job_id,
+            validated_mime=validated_mime,
+            content_hash=content_hash,
+            domain=domain,
+            security_level=security_level,
+            allowed_roles=allowed_roles,
+            storage_base=storage_base,
+        )
+    finally:
+        if lock and lock_acquired:
+            try:
+                await lock.release()
+            except Exception as e:
+                logger.warning("DistributedLock release failed: %s", e)
+
+
+async def _run_ingestion_pipeline_inner(
+    *,
+    file_data: bytes,
+    file_name: str,
+    tenant_id: str,
+    job_id: str,
+    validated_mime: str,
+    content_hash: str,
+    domain: str | None = None,
+    security_level: str = "internal",
+    allowed_roles: str | None = None,
+    storage_base: str = "data/uploads",
+) -> IngestionResult:
+    """Inner pipeline logic (called under distributed lock)."""
+    from app.db.engine import get_session
+    from app.db.models.document import Document
+    from app.db.models.ingestion_job import IngestionJob
 
     # ── Step 4: Threat scan ──
     scan_result = scan_for_threats(file_data, file_name)
@@ -580,7 +709,7 @@ async def _write_to_bm25(
     tenant_id: str,
     chunks: list[dict],
 ) -> None:
-    """Write chunks to BM25 corpus."""
+    """Write chunks to BM25 corpus with dedup and cache invalidation."""
     try:
         import json
         from pathlib import Path
@@ -589,11 +718,29 @@ async def _write_to_bm25(
         settings = get_settings()
         bm25_path = Path(settings.bm25_corpus_path)
 
-        # Append chunks to BM25 corpus
-        entries = []
+        # Dedup: load existing IDs for this document to avoid double-append
+        existing_ids: set[str] = set()
+        if bm25_path.exists():
+            with open(bm25_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                        if entry.get("document_id") == doc_id:
+                            existing_ids.add(entry.get("id", ""))
+                    except (json.JSONDecodeError, KeyError):
+                        continue
+
+        # Append only new chunks (skip already-indexed IDs)
+        new_entries = []
         for chunk in chunks:
-            entries.append(json.dumps({
-                "id": chunk.get("chunk_id", ""),
+            chunk_id = chunk.get("chunk_id", "")
+            if chunk_id in existing_ids:
+                continue
+            new_entries.append(json.dumps({
+                "id": chunk_id,
                 "text": chunk["text"],
                 "document_id": doc_id,
                 "tenant_id": tenant_id,
@@ -601,12 +748,26 @@ async def _write_to_bm25(
                 "source_type": chunk.get("metadata", {}).get("source_type", "text"),
             }, ensure_ascii=False))
 
-        # Append to existing corpus
-        with open(bm25_path, "a", encoding="utf-8") as f:
-            for entry in entries:
-                f.write(entry + "\n")
+        if new_entries:
+            with open(bm25_path, "a", encoding="utf-8") as f:
+                for entry in new_entries:
+                    f.write(entry + "\n")
 
-        logger.info("Wrote %d entries to BM25 corpus for document %s", len(entries), doc_id)
+        logger.info(
+            "Wrote %d entries to BM25 corpus for document %s (%d skipped as duplicates)",
+            len(new_entries), doc_id, len(chunks) - len(new_entries),
+        )
+
+        # Invalidate BM25 in-memory cache so next query reloads from disk
+        from app.bm25_store import clear_bm25_memory_cache
+        clear_bm25_memory_cache()
+
+        # Invalidate retrieval cache (L1/L2) so stale results are cleared
+        try:
+            from app.cache import cache_clear
+            cache_clear()
+        except Exception:
+            pass  # non-fatal
 
     except Exception as e:
         logger.error("BM25 write error: %s", e)

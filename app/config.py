@@ -371,13 +371,18 @@ class Settings(BaseSettings):
     # 检索结果缓存（L1 精确 LRU + 可选 L2 语义；进程内，reindex 后 cache_clear）
     # HTTP ???????????? IP ? API Key ???
     api_auth_enabled: bool = Field(
-        default=False,
+        default=True,
         validation_alias=AliasChoices("API_AUTH_ENABLED"),
     )
     api_keys: str = Field(
         default="",
         validation_alias=AliasChoices("API_KEYS"),
         description="API 认证密钥，逗号分隔多个 key",
+    )
+    input_guard_endpoint_enabled: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("INPUT_GUARD_ENDPOINT_ENABLED"),
+        description="端点级 InputGuard 检查（defense-in-depth，与 HTTP middleware 共存）",
     )
     api_rate_limit_rpm: int = Field(
         default=120,
@@ -405,10 +410,22 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("CACHE_MAX_ENTRIES"),
         description="L1 LRU 最大条目数",
     )
+    cache_redis_enabled: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("CACHE_REDIS_ENABLED"),
+        description="L2-Redis 分布式缓存（跨进程共享，Redis 不可用时自动降级到 L1-only）",
+    )
+    cache_redis_ttl_seconds: int = Field(
+        default=600,
+        ge=60,
+        le=3600,
+        validation_alias=AliasChoices("CACHE_REDIS_TTL_SECONDS"),
+        description="L2-Redis 缓存 TTL（秒）",
+    )
     cache_semantic_enabled: bool = Field(
         default=False,
         validation_alias=AliasChoices("CACHE_SEMANTIC_ENABLED"),
-        description="L2：query embedding 余弦相似度命中（需加载 embedding 模型）",
+        description="L3：query embedding 余弦相似度命中（需加载 embedding 模型）",
     )
     cache_semantic_threshold: float = Field(
         default=0.92,
@@ -422,6 +439,38 @@ class Settings(BaseSettings):
         ge=8,
         le=5000,
         validation_alias=AliasChoices("CACHE_SEMANTIC_MAX_ENTRIES"),
+    )
+
+    # ── Agent Harness 统一配置 ─────────────────────────────────
+    agent_harness_unified: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("AGENT_HARNESS_UNIFIED"),
+        description="/agent/ticket 是否统一走 Harness（True=Harness, False=LangGraph）",
+    )
+    agent_harness_shadow: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("AGENT_HARNESS_SHADOW"),
+        description="Shadow 模式：并行跑 Harness 但不返回结果，仅日志对比",
+    )
+    agent_refund_hitl_threshold: float = Field(
+        default=500.0,
+        ge=0,
+        validation_alias=AliasChoices("AGENT_REFUND_HITL_THRESHOLD"),
+        description="退款金额超过此阈值触发 HITL 审批",
+    )
+    agent_max_rewrite_attempts: int = Field(
+        default=2,
+        ge=0,
+        le=5,
+        validation_alias=AliasChoices("AGENT_MAX_REWRITE_ATTEMPTS"),
+        description="Harness 评估失败后最大 rewrite 重试次数",
+    )
+    agent_step_timeout_seconds: float = Field(
+        default=30.0,
+        ge=5,
+        le=120,
+        validation_alias=AliasChoices("AGENT_STEP_TIMEOUT_SECONDS"),
+        description="Harness 单步工具执行超时（秒）",
     )
 
     @model_validator(mode="after")

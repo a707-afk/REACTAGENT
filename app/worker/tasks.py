@@ -27,13 +27,13 @@ async def ingest_document(ctx: dict[str, Any], *, job_id: str, tenant_id: str, d
     This task reads the uploaded file from storage and runs the full
     ingestion pipeline defined in app.ingestion.pipeline.
     """
-    from app.db.engine import get_session
+    from app.db.engine import get_db_session
     from app.db.models.ingestion_job import IngestionJob
     from app.db.models.document import Document
 
     logger.info("ingest_document started: job_id=%s document_id=%s", job_id, document_id)
 
-    async with get_session() as session:
+    async with get_db_session() as session:
         job = await session.get(IngestionJob, job_id)
         if job is None:
             logger.error("IngestionJob %s not found", job_id)
@@ -116,12 +116,12 @@ async def run_eval(ctx: dict[str, Any], *, job_id: str, tenant_id: str, eval_con
     - dry_run: whether to run in dry-run mode (default: False)
     - output_prefix: prefix for report filenames
     """
-    from app.db.engine import get_session
+    from app.db.engine import get_db_session
     from app.db.models.ingestion_job import IngestionJob
 
     logger.info("run_eval started: job_id=%s config=%s", job_id, eval_config)
 
-    async with get_session() as session:
+    async with get_db_session() as session:
         job = await session.get(IngestionJob, job_id)
         if job is None:
             return {"status": "failed", "error": "job not found"}
@@ -145,7 +145,7 @@ async def run_eval(ctx: dict[str, Any], *, job_id: str, tenant_id: str, eval_con
         dry_run = (eval_config or {}).get("dry_run", True)
 
         # Update progress
-        async with get_session() as session:
+        async with get_db_session() as session:
             job = await session.get(IngestionJob, job_id)
             if job:
                 job.progress = 15
@@ -157,7 +157,7 @@ async def run_eval(ctx: dict[str, Any], *, job_id: str, tenant_id: str, eval_con
         logger.info("run_eval: loaded %d cases for category=%s", len(cases), category or "all")
 
         # Update progress
-        async with get_session() as session:
+        async with get_db_session() as session:
             job = await session.get(IngestionJob, job_id)
             if job:
                 job.progress = 30
@@ -174,7 +174,7 @@ async def run_eval(ctx: dict[str, Any], *, job_id: str, tenant_id: str, eval_con
         )
 
         # Mark completed
-        async with get_session() as session:
+        async with get_db_session() as session:
             job = await session.get(IngestionJob, job_id)
             if job:
                 job.status = "completed"
@@ -203,12 +203,12 @@ async def run_eval(ctx: dict[str, Any], *, job_id: str, tenant_id: str, eval_con
 
 async def process_agent_job(ctx: dict[str, Any], *, job_id: str, tenant_id: str, ticket_id: str, user_query: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
     """Run an async agent job (long-running ticket processing)."""
-    from app.db.engine import get_session
+    from app.db.engine import get_db_session
     from app.db.models.ingestion_job import IngestionJob
 
     logger.info("process_agent_job started: job_id=%s ticket_id=%s", job_id, ticket_id)
 
-    async with get_session() as session:
+    async with get_db_session() as session:
         job = await session.get(IngestionJob, job_id)
         if job is None:
             return {"status": "failed", "error": "job not found"}
@@ -226,7 +226,7 @@ async def process_agent_job(ctx: dict[str, Any], *, job_id: str, tenant_id: str,
 
         await _simulate_progress(ctx, job_id, steps=4)
 
-        async with get_session() as session:
+        async with get_db_session() as session:
             job = await session.get(IngestionJob, job_id)
             if job:
                 job.status = "completed"
@@ -247,12 +247,12 @@ async def process_agent_job(ctx: dict[str, Any], *, job_id: str, tenant_id: str,
 async def _simulate_progress(ctx: dict[str, Any], job_id: str, steps: int = 5) -> None:
     """Simulate progress by updating the job's progress field."""
     import asyncio
-    from app.db.engine import get_session
+    from app.db.engine import get_db_session
     from app.db.models.ingestion_job import IngestionJob
 
     for i in range(1, steps + 1):
         progress = int(100 * i / steps)
-        async with get_session() as session:
+        async with get_db_session() as session:
             job = await session.get(IngestionJob, job_id)
             if job and job.status == "running":
                 job.progress = progress
@@ -263,10 +263,10 @@ async def _simulate_progress(ctx: dict[str, Any], job_id: str, steps: int = 5) -
 
 async def _mark_job_failed(job_id: str, error_message: str) -> None:
     """Mark a job as failed in the DB."""
-    from app.db.engine import get_session
+    from app.db.engine import get_db_session
     from app.db.models.ingestion_job import IngestionJob
 
-    async with get_session() as session:
+    async with get_db_session() as session:
         job = await session.get(IngestionJob, job_id)
         if job:
             job.status = "failed"

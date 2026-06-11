@@ -42,12 +42,28 @@ def vector_retrieve_access_filtered(
     security_clearance: int = 0,
     allowed_ids: frozenset[str] | None = None,
 ) -> list[NodeWithScore]:
-    """Query Qdrant via llama_index VectorStoreIndex with optional node_id pre-filter."""
+    """Query Qdrant via llama_index VectorStoreIndex with optional node_id pre-filter.
+
+    When *allowed_ids* is provided, only results whose node_id is in the set
+    are returned — this enforces tenant/role-based access control on retrieval.
+    """
     if top_k < 1:
         return []
     try:
-        retriever = index.as_retriever(similarity_top_k=top_k)
-        return retriever.retrieve(query)
+        # Request extra candidates so post-filter still yields enough results
+        fetch_k = top_k * 3 if allowed_ids else top_k
+        retriever = index.as_retriever(similarity_top_k=fetch_k)
+        results = retriever.retrieve(query)
+
+        # ── Access control: filter by allowed node IDs ──
+        if allowed_ids is not None:
+            results = [r for r in results if r.node.node_id in allowed_ids]
+            logger.debug(
+                "access_prefilter: %d/%d results passed access check",
+                len(results), fetch_k,
+            )
+
+        return results[:top_k]
     except Exception as e:
         logger.warning("Qdrant vector retrieve failed: %s", e)
         return []

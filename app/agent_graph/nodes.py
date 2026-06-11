@@ -171,13 +171,14 @@ def node_evidence_gate(state: TicketAgentState, *, settings: Settings | None = N
         )
 
     if not scored:
-        # If a worker node already generated a response, preserve it
-        existing_draft = state.get("draft_reply")
-        if existing_draft and state.get("grader_passed"):
+        # If a worker node provided a worker_draft, pass through with human review flag
+        worker_draft = state.get("worker_draft")
+        if worker_draft:
             return {
                 "gate_passed": True,
                 "gate_error_code": None,
-                "audit_trace": _append_audit(state, "gate", {"skipped": True, "reason": "worker_prefilled"}),
+                "human_review_required": True,
+                "audit_trace": _append_audit(state, "gate", {"skipped": True, "reason": "worker_draft_no_evidence"}),
             }
         return {
             "gate_passed": False,
@@ -216,12 +217,20 @@ def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> 
     """Generate draft reply with LLM circuit breaker protection."""
     settings = settings or get_settings()
 
-    # Worker nodes (refund_flow/complaint_flow/etc.) already set draft_reply directly — pass through
+    # Worker nodes (refund_flow/complaint_flow/etc.) provide worker_draft — use it directly
+    worker_draft = state.get("worker_draft")
+    if worker_draft:
+        return {
+            "draft_reply": worker_draft,
+            "audit_trace": _append_audit(state, "draft", {"chars": len(worker_draft), "source": "worker_node"}),
+        }
+
+    # Legacy: draft_reply already set and grader passed
     existing = state.get("draft_reply")
     if existing and state.get("grader_passed"):
         return {
             "draft_reply": existing,
-            "audit_trace": _append_audit(state, "draft", {"chars": len(existing), "source": "worker_node"}),
+            "audit_trace": _append_audit(state, "draft", {"chars": len(existing), "source": "legacy"}),
         }
 
     if state.get("policy_skip_rag") or not state.get("gate_passed") or not state.get("grader_passed"):
@@ -301,7 +310,9 @@ def node_grader(state: TicketAgentState, *, settings: Settings | None = None) ->
     chunk_count = len(chunks)
 
     # Simplified: gate passed + has chunks → pass
-    passed = gate_passed and chunk_count >= 1
+    # Or: worker_draft present → pass (worker generated response without RAG evidence)
+    worker_draft = state.get("worker_draft")
+    passed = (gate_passed and chunk_count >= 1) or bool(worker_draft)
 
     return {
         "grader_passed": passed,
@@ -468,9 +479,14 @@ def route_after_gate(state: TicketAgentState) -> str:
 
 
 def route_after_grader(state: TicketAgentState) -> str:
-    """Always go to draft - simplified for demo (no rewrite loop)."""
+    """Route after grader: rewrite if grading failed and retries remain, else draft."""
     if state.get("policy_skip_rag"):
         return "finalize"
+    grader_passed = state.get("grader_passed", True)
+    iterations = state.get("rewrite_iterations", 0)
+    max_iterations = 2
+    if not grader_passed and iterations < max_iterations:
+        return "rewrite_query"
     return "draft"
 
 def route_after_hallucination(state: TicketAgentState) -> str:
@@ -527,8 +543,7 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
 
     if not orders:
         return {
-            "draft_reply": "请问您是想换哪个订单的商品？能告诉我商品名称或订单号吗？",
-            "grader_passed": True, "gate_passed": True,
+            "worker_draft": "请问您是想换哪个订单的商品？能告诉我商品名称或订单号吗？",
             "audit_trace": _append_audit(state, "exchange_parallel", {"result": "order_not_found"}),
         }
 
@@ -596,10 +611,8 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
         "logistics_result": logistics_data,
         "exchange_ready": all_ok,
         "exchange_summary": summary,
-        "grader_passed": True,
-        # NOT setting retrieved_chunks — evidence comes from RAG pipeline
+        # NOT bypassing gate/grader — evidence comes from RAG pipeline
         "routed_domains": ["exchange"],
-        "gate_passed": True,
         "audit_trace": _append_audit(state, "exchange_parallel", {
             "policy_ok": not isinstance(policy_r, Exception),
             "inventory_ok": not isinstance(inventory_r, Exception),
@@ -631,9 +644,7 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
 
     if not orders:
         return {
-            "draft_reply": "暂时找不到您的订单，请提供订单号或商品名称，我来帮您处理退款申请。",
-            "grader_passed": True, "gate_passed": True,
-            # NOT setting retrieved_chunks — evidence comes from RAG pipeline
+            "worker_draft": "暂时找不到您的订单，请提供订单号或商品名称，我来帮您处理退款申请。",
             "audit_trace": _append_audit(state, "refund_flow", {"result": "order_not_found"}),
         }
 
@@ -647,7 +658,7 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
     if not policy.get("eligible"):
         reply = f"很抱歉，订单 {order_id}（{order.get('product','')}）{policy.get('reason','不符合退款条件')}。\n如有疑问请联系人工客服。"
         _exec("create_after_sale_ticket", state, {"type":"refund","priority":"p3_low","order_id":order_id,"detail":f"退款被拒：{policy.get('reason','')}"})
-        return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+        return {"worker_draft": reply,
                 "audit_trace": _append_audit(state, "refund_flow", {"result": "denied"})}
 
     deduction_rate = policy.get("deduction_rate", 0)
@@ -662,7 +673,7 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
 
     reply = f"退款申请已提交！\n订单：{order_id}（{order.get('product','')}）\n退款金额：¥{refund_amount:.2f}{deduction_note}\n工单号：{ticket.get('ticket_id','AS-未知')}\n预计 3-5 个工作日原路退回。"
 
-    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+    return {"worker_draft": reply,
             "audit_trace": _append_audit(state, "refund_flow", {"order_id": order_id, "refund_amount": refund_amount})}
 
 
@@ -701,7 +712,7 @@ def node_complaint_flow(state: TicketAgentState, *, settings: Settings | None = 
     else:
         reply = f"感谢反馈，已记录投诉（{tid}），{sla_desc}内联系您。补偿 ¥{compensation} 优惠券。"
 
-    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+    return {"worker_draft": reply,
             "audit_trace": _append_audit(state, "complaint_flow", {"emotion": emotion, "priority": priority})}
 
 
@@ -719,7 +730,7 @@ def node_tracking_flow(state: TicketAgentState, *, settings: Settings | None = N
 
     if not orders:
         reply = "暂时找不到您的订单，请提供订单号或商品名称，我来帮您查询物流状态。"
-        return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+        return {"worker_draft": reply,
                 "audit_trace": _append_audit(state, "tracking_flow", {"result": "order_not_found"})}
 
     order = orders[0]
@@ -736,5 +747,5 @@ def node_tracking_flow(state: TicketAgentState, *, settings: Settings | None = N
     else:
         reply = f"包裹（{order_id}，{order.get('product','')}）\n状态：{status}\n承运商：{logistics.get('carrier','未知')}\n最新：{logistics.get('last_update','未知')}\n预计：{logistics.get('estimated_delivery','未知')}"
 
-    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+    return {"worker_draft": reply,
             "audit_trace": _append_audit(state, "tracking_flow", {"order_id": order_id, "status": status})}

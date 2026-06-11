@@ -28,7 +28,7 @@ def main() -> None:
     get_settings.cache_clear()
     settings = get_settings()
     from app.qdrant_index_store import get_qdrant_client
-client = get_qdrant_client(settings)
+    client = get_qdrant_client(settings)
     coll_name = settings.qdrant_collection_name
     coll = client.get_collection(coll_name)
     sample = coll.get(limit=50, include=["metadatas"])

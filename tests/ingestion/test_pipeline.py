@@ -82,7 +82,7 @@ class TestThreatScanning(unittest.TestCase):
         result = scan_for_threats(b"benign data", "test.pdf")
         assert result["clean"] is True
         assert result["threats"] == []
-        assert result["scanner"] == "stub"
+        assert result["scanner"] == "heuristic_only"
         assert "scanned_at" in result
 
 

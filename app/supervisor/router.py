@@ -99,7 +99,7 @@ def _llm_classify_intent(query: str) -> tuple[str, float]:
             return result, 0.80
     except Exception:
         pass
-    return "refund", 0.30  # 兜底：不确定时默认走退款流程（最常见）
+    return "unknown", 0.30  # 兆底走通用 RAG，不走高风险退款流程
 
 
 def route_after_supervisor(state: TicketAgentState) -> str:

@@ -41,6 +41,7 @@ class TicketAgentState(TypedDict, total=False):
     loop_detected: bool
 
     draft_reply: str | None
+    worker_draft: str | None               # pre-filled draft from worker nodes (refund/complaint/etc.)
     required_fields: list[str]
     human_review_required: bool
     final_action: str

@@ -2,9 +2,9 @@ name: Lint
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
-    branches: [main]
+    branches: ["**"]
 
 jobs:
   lint:
@@ -14,3 +14,6 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: "check --select E,F,I,N --ignore E501"
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check app tests scripts"
