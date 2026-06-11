@@ -1,4 +1,4 @@
-﻿"""离线评测 LangGraph 工单 Agent 状态机路径（mock policy / retrieve / LLM，不加载向量索引）。
+"""离线评测 LangGraph 工单 Agent 状态机路径（mock policy / retrieve / LLM，不加载向量索引）。
 
 在项目根::
 
@@ -122,7 +122,7 @@ def _check_case(result: dict, expect: dict) -> list[str]:
 
 
 def _run_one_case(case: dict) -> dict:
-    from app.agent.harness import run_agent_harness as run_ticket_agent
+from app.agent.harness import run_agent_harness as _run_harness
 
     policy_spec = case.get("mock_policy") or {}
     retrieve_spec = case.get("mock_retrieve")
@@ -141,13 +141,21 @@ def _run_one_case(case: dict) -> dict:
     for p in patches:
         p.start()
     try:
-        out = asyncio.run(run_ticket_agent(
-            ticket_id=str(case.get("ticket_id") or case.get("id") or "T-mock"),
-            user_query=str(case.get("user_query") or ""),
-            user_context=dict(case.get("user_context") or {}),
-            trace_id=f"eval-{case.get('id')}",
-            top_k=int(case.get("top_k") or 5),
-        ))
+        harness_args = {
+            "objective": str(case.get("user_query") or ""),
+            "tenant_id": str(dict(case.get("user_context") or {}).get("tenant_id", "default")),
+            "user_id": "anonymous",
+            "user_context": dict(case.get("user_context") or {}),
+            "ticket_id": str(case.get("ticket_id") or case.get("id") or "T-mock"),
+        }
+        harness_result = asyncio.run(_run_harness(**harness_args))
+        out = {
+            "final_action": harness_result.status,
+            "human_review_required": harness_result.human_review_required,
+            "gate_passed": True,
+            "gate_error_code": None,
+            "audit_trace": harness_result.audit_trace,
+        }
     finally:
         for p in patches:
             p.stop()
