@@ -1,4 +1,4 @@
-"""工单 Agent 真实联调评测（Chroma 企业索引 + 真实 policy/retrieve/gate，LLM 可占位）。
+﻿"""工单 Agent 真实联调评测（Chroma 企业索引 + 真实 policy/retrieve/gate，LLM 可占位）。
 
 用法（仓库根目录，与 access eval 相同企业索引变量）::
 
@@ -91,7 +91,7 @@ def _preflight_index() -> str | None:
 
 
 def _run_one_case(case: dict) -> dict:
-    from app.agent_graph.graph import run_ticket_agent
+    from app.agent.harness import run_agent_harness as run_ticket_agent
 
     try:
         out = run_ticket_agent(

@@ -1,4 +1,4 @@
-"""离线评测 LangGraph 工单 Agent 状态机路径（mock policy / retrieve / LLM，不加载向量索引）。
+﻿"""离线评测 LangGraph 工单 Agent 状态机路径（mock policy / retrieve / LLM，不加载向量索引）。
 
 在项目根::
 
@@ -122,7 +122,7 @@ def _check_case(result: dict, expect: dict) -> list[str]:
 
 
 def _run_one_case(case: dict) -> dict:
-    from app.agent_graph.graph import run_ticket_agent
+    from app.agent.harness import run_agent_harness as run_ticket_agent
 
     policy_spec = case.get("mock_policy") or {}
     retrieve_spec = case.get("mock_retrieve")
@@ -132,9 +132,9 @@ def _run_one_case(case: dict) -> dict:
     retrieve_mock = _retrieve_mock_from_spec(retrieve_spec)
 
     patches = [
-        patch("app.agent_graph.nodes.evaluate_policy", return_value=policy_mock),
-        patch("app.agent_graph.nodes.retrieve_scored_nodes", return_value=retrieve_mock),
-        patch("app.agent_graph.nodes.get_vector_index", return_value=MagicMock()),
+        patch("app.policy.engine.evaluate_policy", return_value=policy_mock),
+        patch("app.retrieval_pipeline.retrieve", return_value=retrieve_mock),
+        patch("app.vector_index.get_vector_index", return_value=MagicMock()),
         patch("app.llm.chat_completion", return_value=llm_reply),
     ]
 

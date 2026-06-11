@@ -1,4 +1,4 @@
-"""EcomAgent tools: 6 e-commerce after-sales tools (OpenAI function-calling format)."""
+﻿"""EcomAgent tools: 6 e-commerce after-sales tools (OpenAI function-calling format)."""
 from __future__ import annotations
 
 import asyncio
@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from app.agent_graph.state import TicketAgentState
+from app.agent.state import TicketAgentState
 
 logger = logging.getLogger(__name__)
 

@@ -217,12 +217,21 @@ async def process_agent_job(ctx: dict[str, Any], *, job_id: str, tenant_id: str,
         await session.commit()
 
     try:
-        # Run the ticket agent graph
-        from app.agent_graph.graph import run_ticket_agent
-        result = await run_ticket_agent(
+        # Run the ticket through unified Agent Harness
+        from app.agent.harness import run_agent_harness
+        harness_result = await run_agent_harness(
+            objective=user_query,
+            tenant_id=tenant_id,
+            user_id=params.get("customer_id", "anonymous") if params else "anonymous",
             ticket_id=ticket_id,
-            user_query=user_query,
         )
+        result = {
+            "status": harness_result.status,
+            "final_action": harness_result.final_action,
+            "draft_reply": harness_result.final_answer,
+            "human_review_required": harness_result.human_review_required,
+            "trace_id": harness_result.run_id,
+        }
 
         await _simulate_progress(ctx, job_id, steps=4)
 

@@ -1,4 +1,4 @@
-"""Composite Tools: high-level business flows exposed as Harness-callable tools.
+﻿"""Composite Tools: high-level business flows exposed as Harness-callable tools.
 
 Each composite tool encapsulates a complete after-sales workflow:
 - process_exchange: parallel policy + inventory + pickup
@@ -6,7 +6,7 @@ Each composite tool encapsulates a complete after-sales workflow:
 - process_complaint: emotion-graded ticket + compensation
 - process_tracking: order → shipment status
 
-These are extracted from the LangGraph worker nodes (agent_graph/nodes.py:514-751)
+These replace the legacy LangGraph worker nodes
 to enable the unified Harness architecture.
 """
 from __future__ import annotations
