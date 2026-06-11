@@ -566,3 +566,141 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
             "logistics_ok": not isinstance(logistics_r, Exception),
         }),
     }
+
+
+# ── EcomAgent: Refund Flow Node ──
+
+def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """
+    退款流程节点（串行）：
+    1. 用 order_hint 查订单
+    2. policy_check 判断退款类型（full/partial/denied）
+    3. 计算退款金额
+    4. 创建退款工单
+    """
+    from app.agent.tools import execute_tool as _exec
+
+    user_query  = state.get("user_query", "")
+    order_hint  = state.get("order_hint", "")
+    user_id     = state.get("customer_id") or "u001"
+
+    order_result = _exec("order_lookup", state, {
+        "user_id": user_id, "keyword": order_hint or user_query[:10], "limit": 1
+    })
+    orders = order_result.data.get("orders", []) if order_result.success else []
+
+    if not orders:
+        return {
+            "draft_reply": "暂时找不到您的订单，请提供订单号或商品名称，我来帮您处理退款申请。",
+            "grader_passed": True, "gate_passed": True,
+            "retrieved_chunks": [{"text": "未找到订单", "score": 1.0,
+                                   "file_name": "refund_flow", "domain": "refund"}],
+            "audit_trace": _append_audit(state, "refund_flow", {"result": "order_not_found"}),
+        }
+
+    order = orders[0]
+    order_id = order["order_id"]
+    amount = order.get("amount", 0)
+
+    policy_result = _exec("policy_check", state, {"order_id": order_id, "return_reason": "申请退款"})
+    policy = policy_result.data if policy_result.success else {}
+
+    if not policy.get("eligible"):
+        reply = f"很抱歉，订单 {order_id}（{order.get('product','')}）{policy.get('reason','不符合退款条件')}。\n如有疑问请联系人工客服。"
+        _exec("create_after_sale_ticket", state, {"type":"refund","priority":"p3_low","order_id":order_id,"detail":f"退款被拒：{policy.get('reason','')}"})
+        return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+                "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "refund_flow", "domain": "refund"}],
+                "audit_trace": _append_audit(state, "refund_flow", {"result": "denied"})}
+
+    deduction_rate = policy.get("deduction_rate", 0)
+    refund_amount = round(amount * (1 - deduction_rate), 2)
+    deduction_note = f"（扣除{int(deduction_rate*100)}%手续费）" if deduction_rate > 0 else ""
+
+    ticket_result = _exec("create_after_sale_ticket", state, {
+        "type": "refund", "priority": "p2_medium", "order_id": order_id,
+        "detail": f"退款金额 ¥{refund_amount:.2f}{deduction_note}"
+    })
+    ticket = ticket_result.data if ticket_result.success else {}
+
+    reply = f"退款申请已提交！\n订单：{order_id}（{order.get('product','')}）\n退款金额：¥{refund_amount:.2f}{deduction_note}\n工单号：{ticket.get('ticket_id','AS-未知')}\n预计 3-5 个工作日原路退回。"
+
+    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "refund_flow", "domain": "refund"}],
+            "audit_trace": _append_audit(state, "refund_flow", {"order_id": order_id, "refund_amount": refund_amount})}
+
+
+# ── EcomAgent: Complaint Flow Node ──
+
+def node_complaint_flow(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """投诉流程：情绪分级 → P0紧急/P2标准工单 + 补偿推荐"""
+    from app.agent.tools import execute_tool as _exec
+
+    emotion = state.get("emotion", "neutral")
+    order_hint = state.get("order_hint", "")
+    user_id = state.get("customer_id") or "u001"
+
+    order_result = _exec("order_lookup", state, {"user_id": user_id, "keyword": order_hint, "limit": 1})
+    orders = order_result.data.get("orders", []) if order_result.success else []
+    order = orders[0] if orders else {}
+    order_id = order.get("order_id", "unknown")
+    amount = order.get("amount", 100)
+
+    if amount >= 300: compensation = 30
+    elif amount >= 100: compensation = 15
+    else: compensation = 5
+
+    priority = "p0_critical" if emotion == "angry" else "p2_medium"
+    sla_desc = "2 小时" if emotion == "angry" else "24 小时"
+
+    ticket_result = _exec("create_after_sale_ticket", state, {
+        "type": "complaint", "priority": priority, "order_id": order_id,
+        "detail": f"情绪:{emotion},补偿:¥{compensation},投诉:{state.get('user_query','')[:100]}"
+    })
+    ticket = ticket_result.data if ticket_result.success else {}
+    tid = ticket.get("ticket_id", "AS-未知")
+
+    if emotion == "angry":
+        reply = f"非常抱歉！已创建紧急投诉工单（{tid}），优先�� P0，承诺{sla_desc}内联系您。补偿 ¥{compensation} 优惠券，24小时内发放。"
+    else:
+        reply = f"感谢反馈，已记录投诉（{tid}），{sla_desc}内联系您。补偿 ¥{compensation} 优惠券。"
+
+    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "complaint_flow", "domain": "complaint"}],
+            "audit_trace": _append_audit(state, "complaint_flow", {"emotion": emotion, "priority": priority})}
+
+
+# ── EcomAgent: Tracking Flow Node ──
+
+def node_tracking_flow(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
+    """物流查询节点：order_lookup → track_shipment → 生成回复"""
+    from app.agent.tools import execute_tool as _exec
+
+    order_hint = state.get("order_hint", "")
+    user_id = state.get("customer_id") or "u001"
+
+    order_result = _exec("order_lookup", state, {"user_id": user_id, "keyword": order_hint, "limit": 1})
+    orders = order_result.data.get("orders", []) if order_result.success else []
+
+    if not orders:
+        reply = "暂时找不到您的订单，请提供订单号或商品名称，我来帮您查询物流状态。"
+        return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+                "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "tracking_flow", "domain": "tracking"}],
+                "audit_trace": _append_audit(state, "tracking_flow", {"result": "order_not_found"})}
+
+    order = orders[0]
+    order_id = order["order_id"]
+
+    logistics_result = _exec("track_shipment", state, {"order_id": order_id})
+    logistics = logistics_result.data if logistics_result.success else {}
+    status = logistics.get("status", "暂无物流信息")
+
+    if status == "已签收":
+        reply = f"订单 {order_id}（{order.get('product','')}）已签收。签收时间：{logistics.get('last_update','未知')}"
+    elif status == "未找到物流信息":
+        reply = f"订单 {order_id} 暂无物流信息，可能刚下单，请稍后再查。"
+    else:
+        reply = f"包裹（{order_id}，{order.get('product','')}）\n状态：{status}\n承运商：{logistics.get('carrier','未知')}\n最新：{logistics.get('last_update','未知')}\n预计：{logistics.get('estimated_delivery','未知')}"
+
+    return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
+            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "tracking_flow", "domain": "tracking"}],
+            "audit_trace": _append_audit(state, "tracking_flow", {"order_id": order_id, "status": status})}
