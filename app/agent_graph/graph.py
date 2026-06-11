@@ -62,9 +62,18 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
     g.add_node("finalize", nodes.node_finalize)
 
     # EcomAgent: add exchange parallel node
-    from app.agent_graph.nodes import node_exchange_parallel
+    # EcomAgent: Supervisor-Worker nodes
+    from app.agent_graph.nodes import (
+        node_exchange_parallel,
+        node_refund_flow,
+        node_complaint_flow,
+        node_tracking_flow,
+    )
     from app.supervisor.router import route_after_supervisor
     g.add_node("exchange_parallel", node_exchange_parallel)
+    g.add_node("refund_flow",       node_refund_flow)
+    g.add_node("complaint_flow",    node_complaint_flow)
+    g.add_node("tracking_flow",     node_tracking_flow)
 
     # Edges
     g.add_edge(START, "policy")
@@ -72,13 +81,19 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
         "retrieve": "reason",
         "finalize": "finalize",
     })
-    # Supervisor routes: exchange_parallel / retrieve / finalize
+    # Supervisor routes to 4 intent-specific worker nodes + retrieve fallback
     g.add_conditional_edges("reason", route_after_supervisor, {
         "exchange_parallel": "exchange_parallel",
-        "retrieve": "retrieve",
+        "refund_flow":       "refund_flow",
+        "complaint_flow":    "complaint_flow",
+        "tracking_flow":     "tracking_flow",
+        "retrieve":          "retrieve",
     })
-    # After exchange_parallel, go to draft (skip retrieve/gate/grader)
+    # All worker nodes go directly to draft (skip retrieve/gate/grader pipeline)
     g.add_edge("exchange_parallel", "draft")
+    g.add_edge("refund_flow",       "draft")
+    g.add_edge("complaint_flow",    "draft")
+    g.add_edge("tracking_flow",     "draft")
     g.add_edge("retrieve", "gate")
     g.add_conditional_edges("gate", nodes.route_after_gate, {
         "grader": "grader",
