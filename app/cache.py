@@ -192,7 +192,7 @@ def _l2_get(
     try:
         from app.embeddings import get_embedding_model
 
-        emb = get_embedding_model().get_query_embedding(query)
+        emb = get_embedding_model().encode_sync(query)
     except Exception as exc:
         logger.debug("semantic cache embed skip: %s", exc)
         return None, None
@@ -220,7 +220,7 @@ def _l2_put(key: str, query: str, sr: ScoredRetrieval, settings: Settings) -> No
     try:
         from app.embeddings import get_embedding_model
 
-        emb = get_embedding_model().get_query_embedding(query)
+        emb = get_embedding_model().encode_sync(query)
     except Exception as exc:
         logger.debug("semantic cache embed put skip: %s", exc)
         return

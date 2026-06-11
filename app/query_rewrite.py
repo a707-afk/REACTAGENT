@@ -92,7 +92,7 @@ def resolve_retrieval_query(
             logger.debug("query rewrite auto: skip rewrite for %r", text[:160])
             return text
 
-    if not settings.zhipuai_api_key:
+    if not settings.sensenova_api_keys:
         if force_llm or mode == "on":
             logger.warning("已启用 query rewrite 但未配置智谱 API Key，跳过改写")
         return text

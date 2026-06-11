@@ -172,8 +172,8 @@ def _embedding_sentence_scores(
         chunk_texts = [str(c.get("text") or "") for c in chunks]
         chunk_ids = [_chunk_id(c, i) for i, c in enumerate(chunks)]
 
-        sent_vecs = [model.get_text_embedding(s) for s in sentences]
-        chunk_vecs = [model.get_text_embedding(t) for t in chunk_texts]
+        sent_vecs = [model.encode_sync(s) for s in sentences]
+        chunk_vecs = [model.encode_sync(t) for t in chunk_texts]
 
         results: list[tuple[float, str | None]] = []
         for sv in sent_vecs:

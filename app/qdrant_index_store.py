@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import logging
 from pathlib import Path
 
 from llama_index.core import StorageContext, VectorStoreIndex
@@ -10,7 +11,7 @@ from qdrant_client import QdrantClient
 
 from app.chunking import build_nodes, load_documents
 from app.config import Settings, get_settings
-from app.embeddings import get_embedding_model
+from app.embeddings import get_embedding_model, get_llamaindex_embedding, get_llamaindex_embedding
 from app.bm25_store import persist_bm25_corpus
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def _qdrant_client(settings: Settings) -> QdrantClient:
     key = settings.qdrant_path or settings.qdrant_url
     if _client is not None and _client_key == key:
         return _client
-    if settings.qdrant_path:
+    if settings.qdrant_path and not settings.qdrant_url:
         _client = QdrantClient(path=settings.qdrant_path)
     else:
         kwargs: dict = {"url": settings.qdrant_url}
@@ -54,7 +55,7 @@ def rebuild_index() -> int:
     for i, node in enumerate(nodes):
         if node.embedding is None:
             text = node.get_content(metadata_mode="none") or ""
-            node.embedding = embed_model.get_text_embedding(text)
+            node.embedding = embed_model.encode_sync(text)
         if (i + 1) % 50 == 0:
             logger.info("embedding 进度 %s/%s", i + 1, len(nodes))
 
@@ -70,10 +71,11 @@ def rebuild_index() -> int:
         collection_name=coll_name,
     )
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    li_embed = get_llamaindex_embedding()
     idx = VectorStoreIndex(
         nodes,
         storage_context=storage_context,
-        embed_model=embed_model,
+        embed_model=li_embed,
         show_progress=False,
     )
     persist_bm25_corpus(nodes, settings)
@@ -96,7 +98,7 @@ def get_vector_index() -> VectorStoreIndex:
             f"Qdrant 集合 {coll_name!r} 不存在，请先 VECTOR_BACKEND=qdrant python scripts/reindex.py"
         ) from e
 
-    embed_model = get_embedding_model()
+    li_embed = get_llamaindex_embedding()
     vector_store = QdrantVectorStore(
         client=client,
         collection_name=coll_name,
@@ -105,7 +107,7 @@ def get_vector_index() -> VectorStoreIndex:
     _index = VectorStoreIndex.from_vector_store(
         vector_store,
         storage_context=storage_context,
-        embed_model=embed_model,
+        embed_model=li_embed,
     )
     return _index
 
@@ -125,7 +127,7 @@ def get_vector_index_cn() -> VectorStoreIndex:
             f"Qdrant 中文集合 {coll_name!r} 不存在，请先运行 python scripts/build_cn_index.py"
         ) from e
 
-    embed_model = get_embedding_model()
+    li_embed = get_llamaindex_embedding()
     vector_store = QdrantVectorStore(
         client=client,
         collection_name=coll_name,
@@ -134,7 +136,7 @@ def get_vector_index_cn() -> VectorStoreIndex:
     _index_cn = VectorStoreIndex.from_vector_store(
         vector_store,
         storage_context=storage_context,
-        embed_model=embed_model,
+        embed_model=li_embed,
     )
     logger.info("中文索引加载完成: %s", coll_name)
     return _index_cn
