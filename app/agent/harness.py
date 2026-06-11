@@ -181,6 +181,25 @@ async def run_agent_harness(
         return step
 
     try:
+        # Step 0.5: Input injection detection
+        injection_check = _input_injection_detection(objective)
+        if injection_check["blocked"]:
+            _add_step("plan", {"action": "input_sanitize"}, {"blocked": True, "reason": injection_check["reason"]})
+            audit.append({"step": "input_sanitize", "blocked": True, "reason": injection_check["reason"]})
+            draft = "您的请求因安全原因被拦截：" + injection_check["reason"]
+            _add_step("evaluate", {"action": "draft"}, {"draft": draft})
+            run.status = "completed"
+            run.final_answer = draft
+            run.final_action = "input_blocked"
+            total_latency = (time.perf_counter() - t_start) * 1000
+            async with get_sessionmaker()() as session:
+                run.total_steps = len(steps)
+                run.total_latency_ms = total_latency
+                run.audit_trace_json = json.dumps(audit, ensure_ascii=False)
+                session.add(run)
+                for s in steps: session.add(s)
+                await session.commit()
+            return AgentHarnessResult(run_id=run_id, status="completed", final_answer=draft, total_steps=len(steps), audit_trace=audit)
         # ── Step 1: Policy pre-check ──
         _add_step("plan", {"action": "policy_pre_check"}, {"risk_level": run.risk_level})
         audit.append({"step": "policy_pre_check", "risk_level": run.risk_level})
@@ -436,6 +455,39 @@ async def run_agent_harness(
 
 
 # ── Internal helpers ───────────────────────────────────────────────
+
+def _input_injection_detection(objective: str) -> dict:
+    """Detect prompt injection / security bypass attempts."""
+    low = objective.strip().lower()
+    OVERRIDE_PATTERNS = [
+        "ignore previous instructions", "ignore all instructions",
+        "ignore all prior instructions", "ignore all previous instructions",
+        "you are now a system administrator", "you are now admin",
+        "override your instructions", "override system prompt",
+        "you are now a different", "act as a system administrator",
+        "ignore everything above", "reset your memory",
+        "now you are a", "pretend you are", "disregard previous",
+    ]
+    for p in OVERRIDE_PATTERNS:
+        if p in low:
+            return {"blocked": True, "reason": "检测到系统指令覆盖攻击 (匹配: " + p + ")"}
+    CROSS_USER_PATTERNS = [
+        "给用户", "帮别人", "别人的订单",
+        "for user", "for another", "other user", "someone else",
+        "不用走审批", "跳过审批", "不需要审批", "bypass approval",
+        "不用审核", "skip review", "无需确认",
+    ]
+    for p in CROSS_USER_PATTERNS:
+        if p in low:
+            return {"blocked": True, "reason": "安全策略禁止对其他用户进行操作 (匹配: " + p + ")"}
+    EXPLOIT_PATTERNS = [
+        "' or '", "' or 1=1", "' -- ", "1=1 --", "union select",
+        "drop table", "delete from", "truncate table",
+    ]
+    for p in EXPLOIT_PATTERNS:
+        if p in low:
+            return {"blocked": True, "reason": "检测到数据库注入尝试 (匹配: " + p + ")"}
+    return {"blocked": False, "reason": ""}
 
 def _assess_risk(objective: str) -> str:
     """Assess initial risk level from the objective text."""
