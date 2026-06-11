@@ -207,6 +207,15 @@ def node_evidence_gate(state: TicketAgentState, *, settings: Settings | None = N
 def node_draft(state: TicketAgentState, *, settings: Settings | None = None) -> dict[str, Any]:
     """Generate draft reply with LLM circuit breaker protection."""
     settings = settings or get_settings()
+
+    # Worker nodes (refund_flow/complaint_flow/etc.) already set draft_reply directly — pass through
+    existing = state.get("draft_reply")
+    if existing and state.get("grader_passed"):
+        return {
+            "draft_reply": existing,
+            "audit_trace": _append_audit(state, "draft", {"chars": len(existing), "source": "worker_node"}),
+        }
+
     if state.get("policy_skip_rag") or not state.get("gate_passed") or not state.get("grader_passed"):
         return {"audit_trace": _append_audit(state, "draft", {"skipped": True})}
 
