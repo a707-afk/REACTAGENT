@@ -157,7 +157,24 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 | LLM | Zhipu GLM-4-Flash (API) |
 | Database | SQLite (dev) / PostgreSQL 16 (prod) |
 | Frontend | React 18 + Vite + TypeScript |
-| Testing | Locust (load), pytest |
+| Testing | Python bench (load), Locust (planned), pytest |
+
+## Performance
+
+> Measured on Intel i7 CPU (no GPU), 5 concurrent users, 16 requests.
+
+| Metric | Value |
+|--------|-------|
+| P50 Latency | 169ms |
+| P95 Latency | 5464ms |
+| P99 Latency | 5464ms |
+| RPS (5 users) | 2.9 req/s |
+| Failure rate | 0% |
+| FAQ entries | 50 Q&A (106 vectors) |
+| Intent accuracy (keyword) | >95% |
+
+> Note: P95/P99 reflects LLM draft generation via SenseNova DeepSeek-V4 API (15-20s RTT per request).
+> Exchange flow completes in <200ms (no LLM, mock data). Circuit breaker triggers at 2 consecutive LLM failures and degrades to cached response.
 
 ## License
 
