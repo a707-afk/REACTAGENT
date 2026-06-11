@@ -1,13 +1,16 @@
 """API dependencies: auth, DB session, rate limiting."""
 from __future__ import annotations
 
+from typing import AsyncGenerator
+
 from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 
 
-async def get_db_session():
-    """Yield an async DB session. Falls back gracefully if DB is not configured."""
+async def get_db_session() -> AsyncGenerator[AsyncSession | None, None]:
+    """Yield an async DB session. Returns None if DB is not configured."""
     try:
         from app.db.engine import get_session
         async for session in get_session():

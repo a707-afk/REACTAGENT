@@ -10,9 +10,9 @@ type AgentDone = {
   retrieved_chunks?: Array<{ text?: string; file_name?: string }>;
 };
 
-export function AgentStreamTab({ presetQuery }: { presetQuery?: string }) {
+export function AgentStreamTab({ presetQuery }: { presetQuery?: string } = {}) {
   const [ticketId, setTicketId] = useState(() => `T-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`);
-  const [query, setQuery] = useState(presetQuery?.trim() || "输入电商售后问题...");
+  const [query, setQuery] = useState(presetQuery?.trim() || "");
   const [steps, setSteps] = useState<AuditStep[]>([]);
   const [draft, setDraft] = useState("");
   const [done, setDone] = useState<AgentDone | null>(null);

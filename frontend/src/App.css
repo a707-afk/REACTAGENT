@@ -1,32 +1,56 @@
 .app {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 header h1 {
   margin: 0 0 0.25rem;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
 
 header p {
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem;
   color: #555;
+  font-size: 0.85rem;
 }
 
+/* ── API Key bar ── */
+.apikey-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+.apikey-input {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 220px;
+}
+
+/* ── Tabs ── */
 .tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .tabs button {
-  padding: 0.5rem 1rem;
+  padding: 7px 14px;
   border: 1px solid #ccc;
   background: #fff;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 13px;
 }
+
+.tabs button:hover { background: #f0f0f0; }
 
 .tabs button.active {
   background: #2563eb;
@@ -34,13 +58,16 @@ header p {
   border-color: #2563eb;
 }
 
+/* ── Panel ── */
 .panel {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 1rem;
+  min-height: 300px;
 }
 
+/* ── Forms ── */
 .field {
   display: flex;
   flex-direction: column;
@@ -54,7 +81,8 @@ header p {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -64,25 +92,38 @@ header p {
   margin-bottom: 1rem;
 }
 
-.actions button {
-  padding: 0.55rem 1.2rem;
+/* ── Buttons ── */
+.btn {
+  padding: 0.5rem 1rem;
   background: #2563eb;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 13px;
 }
 
-.actions button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.btn:hover { background: #1d4ed8; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 12px; }
+.btn-danger { background: #dc2626; }
+.btn-danger:hover { background: #b91c1c; }
+
+/* ── Messages ── */
 .error {
   color: #b91c1c;
   margin: 0.5rem 0;
+  font-size: 13px;
 }
 
+.info {
+  color: #2563eb;
+  margin: 0.5rem 0;
+  font-size: 13px;
+}
+
+/* ── Output ── */
 .output {
   white-space: pre-wrap;
   background: #f8fafc;
@@ -90,8 +131,33 @@ header p {
   border-radius: 6px;
   padding: 0.75rem;
   min-height: 4rem;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
+/* ── Tables ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  font-weight: 600;
+}
+
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.data-table tr:hover { background: #f8fafc; }
+
+/* ── Chunks ── */
 .chunk-list {
   list-style: none;
   padding: 0;
@@ -103,9 +169,7 @@ header p {
   padding: 0.75rem 0;
 }
 
-.chunk-list li:last-child {
-  border-bottom: none;
-}
+.chunk-list li:last-child { border-bottom: none; }
 
 .meta {
   font-size: 0.85rem;
@@ -113,6 +177,7 @@ header p {
   margin-bottom: 0.35rem;
 }
 
+/* ── Timeline ── */
 .timeline {
   list-style: none;
   padding: 0;
@@ -123,6 +188,7 @@ header p {
 .timeline li {
   padding: 0.5rem 0 0.5rem 1rem;
   position: relative;
+  font-size: 13px;
 }
 
 .timeline li::before {
@@ -141,12 +207,28 @@ header p {
   margin: 1rem 0 0.5rem;
 }
 
+/* ── Badges ── */
 .badge {
   display: inline-block;
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  background: #e0e7ff;
-  color: #3730a3;
   margin-left: 0.5rem;
 }
+
+.badge-draft, .badge-queued { background: #e0e7ff; color: #3730a3; }
+.badge-active, .badge-running { background: #d1fae5; color: #065f46; }
+.badge-completed { background: #d1fae5; color: #065f46; }
+.badge-failed { background: #fee2e2; color: #991b1b; }
+.badge-deleted, .badge-archived { background: #f3f4f6; color: #6b7280; }
+.badge-open { background: #fef3c7; color: #92400e; }
+.badge-in_progress { background: #dbeafe; color: #1e40af; }
+.badge-resolved { background: #d1fae5; color: #065f46; }
+.badge-closed { background: #e5e7eb; color: #374151; }
+.badge-high, .badge-p0_critical { background: #fee2e2; color: #991b1b; }
+.badge-medium, .badge-p1_high { background: #fef3c7; color: #92400e; }
+.badge-low, .badge-p3_low { background: #d1fae5; color: #065f46; }
+.badge-critical { background: #fecaca; color: #7f1d1d; font-weight: bold; }
+.badge-pending { background: #e0e7ff; color: #3730a3; }
+.badge-approved { background: #d1fae5; color: #065f46; }
+.badge-rejected { background: #fee2e2; color: #991b1b; }

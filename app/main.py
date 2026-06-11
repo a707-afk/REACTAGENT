@@ -18,6 +18,9 @@ from app.config import get_settings
 from app.logging_config import setup_logging
 from app.api.chat import router as api_chat_router
 from app.api.tickets import router as api_tickets_router
+from app.api.jobs import router as api_jobs_router
+from app.api.documents import router as api_documents_router
+from app.api.approvals import router as api_approvals_router
 from app.routes_agent import router as agent_router
 from app.routes_rag import router as rag_router
 
@@ -100,6 +103,9 @@ def create_app() -> FastAPI:
     app.include_router(rag_router)
     app.include_router(api_chat_router)
     app.include_router(api_tickets_router)
+    app.include_router(api_jobs_router)
+    app.include_router(api_documents_router)
+    app.include_router(api_approvals_router)
     app.include_router(agent_router)
 
     @app.get("/health")
@@ -157,7 +163,7 @@ def create_app() -> FastAPI:
     if STATIC_DIR.is_dir():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    # 阶段 K：React 构建产物（npm run build → static/app/）
+    # 阶段 K：React 构建产物（npm run build ↂ static/app/＂
     if APP_STATIC_DIR.is_dir():
         app.mount("/app", StaticFiles(directory=str(APP_STATIC_DIR), html=True), name="app_ui")
 

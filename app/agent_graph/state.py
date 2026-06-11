@@ -22,6 +22,7 @@ class TicketAgentState(TypedDict, total=False):
     retrieval_query: str | None
     routed_domains: list[str]
     retrieved_chunks: list[dict[str, Any]]
+    evidence_sources: list[dict[str, Any]]  # Worker-generated context (NOT retrieved evidence)
     router_trace: dict[str, Any] | None
 
     gate_passed: bool

@@ -90,6 +90,10 @@ class Ticket(UUIDMixin, TimestampMixin, Base):
 
     # Relationships
     customer = relationship("Customer", back_populates="tickets", lazy="selectin")
+    events = relationship(
+        "TicketEvent", back_populates="ticket", lazy="selectin",
+        order_by="TicketEvent.created_at", cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         return f"<Ticket {self.id[:8]} [{self.status.value}] {self.title[:40]}>"

@@ -1,6 +1,6 @@
 # EcomAgent — Docker Compose (dev)
-# Start: docker compose up -d qdrant postgres
-# Includes: App server, PostgreSQL, Qdrant (server mode for concurrent access)
+# Start: docker compose up -d qdrant postgres redis
+# Includes: App server, Worker, PostgreSQL, Redis, Qdrant (server mode)
 
 services:
   qdrant:
@@ -12,21 +12,55 @@ services:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
   app:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://csagent:csagent@postgres:5432/csagent
-      - QDRANT_PATH=/data/qdrant_local
-      - ZHIPUAI_API_KEY=${ZHIPUAI_API_KEY:-}
+      - DATABASE_URL=postgresql+asyncpg://ecomagent:ecomagent@postgres:5432/ecomagent
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/0
+      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:-}
       - QWEN_EMBEDDING_MODEL_PATH=/models/qwen3-embedding
       - INFERENCE_DEVICE=cpu
       - DEBUG=false
     volumes:
       - ./data:/data
-      - qdrant_data:/data/qdrant_local
     depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker.worker"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://ecomagent:ecomagent@postgres:5432/ecomagent
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/0
+      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:-}
+      - QWEN_EMBEDDING_MODEL_PATH=/models/qwen3-embedding
+      - INFERENCE_DEVICE=cpu
+    volumes:
+      - ./data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     restart: unless-stopped
@@ -34,15 +68,15 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      - POSTGRES_USER=csagent
-      - POSTGRES_PASSWORD=csagent
-      - POSTGRES_DB=csagent
+      - POSTGRES_USER=ecomagent
+      - POSTGRES_PASSWORD=ecomagent
+      - POSTGRES_DB=ecomagent
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U csagent"]
+      test: ["CMD-SHELL", "pg_isready -U ecomagent"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -51,3 +85,4 @@ services:
 volumes:
   pgdata:
   qdrant_data:
+  redis_data:

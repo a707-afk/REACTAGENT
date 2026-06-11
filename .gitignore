@@ -27,3 +27,9 @@ data/raw/
 
 # 本地模型文件（通过 models/download_models.py 下载）
 models/
+
+# Upload artifacts (test-generated)
+data/uploads/
+
+# Eval results (generated)
+data/eval/results/

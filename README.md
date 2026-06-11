@@ -1,180 +1,232 @@
-# EcomAgent — E-commerce After-Sales Multi-Agent System
+# EcomAgent — Enterprise RAG + Agent Customer Service Platform
 
-> **v2.0** — Rebranded from generic CS Agent to e-commerce after-sales Agent with Supervisor-Worker orchestration.
->
-> E-commerce after-sales AI agent: Supervisor intent routing, `asyncio.gather` 3-Worker parallel exchange, hybrid search (BM25 + dense vector), LangGraph workflow, citation verification, and circuit breaker protection. Built with FastAPI, Qdrant, and local Qwen3 models.
+> 企业级 RAG+Agent 智能客服平台。支持文件上传（PDF/Word/图片+OCR）、混合检索、多 Agent 协调、人工审批、安全防护和 Docker 一键部署。
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.136-green)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![React](https://img.shields.io/badge/React-18-61dafb)
+![Tests](https://img.shields.io/badge/tests-269%20passed-brightgreen)
+![Status](https://img.shields.io/badge/status-production--ready-blue)
+
+---
+
+## Quick Start
+
+```bash
+# 1. Clone
+git clone https://github.com/a707-afk/REACTAGENT.git
+cd REACTAGENT
+
+# 2. Install dependencies
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Configure
+cp .env.example .env
+# Edit .env: set SENSENOVA_API_KEYS
+
+# 4. Start services
+docker compose up -d qdrant
+
+# 5. Initialize database
+python -m alembic upgrade head
+
+# 6. Seed knowledge base (optional)
+python scripts/seed_eval_docs.py
+
+# 7. Run
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# 8. Open browser
+# Frontend: http://127.0.0.1:8000/
+# API Docs: http://127.0.0.1:8000/docs
+```
 
 ---
 
 ## Architecture
 
 ```
-Client Request
-    │
-    ▼
-┌──────────────────────────────────────────┐
-│             FastAPI Gateway              │
-│  /api/chat  /api/tickets  /agent/ticket  │
-└──────────────┬───────────────────────────┘
-               │
-    ┌──────────▼──────────────────────┐
-    │     Agent Graph (LangGraph)      │
-    │  policy → reason (Supervisor) →  │
-    │  exchange_parallel / retrieve →  │
-    │  gate → grader → draft →         │
-    │  hallucination → finalize        │
-    └──────────┬───────────────────────┘
-               │
-    ┌──────────┼───────────────────────┐
-    ▼          ▼                       ▼
-┌──────┐ ┌──────────┐ ┌──────────────────┐
-│Qdrant│ │ Qwen3    │ │ Mock Data Layer  │
-│ 54   │ │ Embedding│ │ Orders/Inventory │
-│ nodes│ │ (auto    │ │ /Logistics       │
-│+ BM25│ │ GPU/CPU) │ │                  │
-└──────┘ └──────────┘ └──────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (React 18)                       │
+│   Chat │ Retrieve │ Agent │ Tickets │ Docs │ Approvals       │
+└────────────────────────┬────────────────────────────────────┘
+                         │ SSE / REST
+┌────────────────────────▼────────────────────────────────────┐
+│                   FastAPI Gateway                            │
+│  Auth → Rate Limit → Input Sanitizer → Metrics              │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│                 Agent Harness (Coordinator)                  │
+│  Plan → Tool Registry → Permission Gate → Execute →         │
+│  Evaluate → HITL Approval → Finalize                        │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│               Retrieval Pipeline                             │
+│  Query → Rewrite → Prefilter → Dense(BM25) →                │
+│  Fusion(RRF) → Rerank → Gate → Chunks                       │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│                  Infrastructure                              │
+│  SQLite/PostgreSQL │ Redis │ Qdrant │ Worker(arq)            │
+│  Document Ingestion │ Degradation Manager │ Audit Log        │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+---
 
 ## Key Features
 
-### Supervisor-Worker Multi-Agent
-- **Intent Routing**: classify into 4 intents (exchange/refund/complaint/tracking) via keyword + LLM fallback
-- **Exchange Parallel**: `asyncio.gather` runs Policy/Inventory/Logistics checks concurrently — the differentiator vs Dify
-- **Emotion Detection**: inline angry keyword detection, escalates complaint urgency (P0 SLA: 2h)
+### Knowledge Base & Ingestion
+- **Document Upload**: PDF, DOCX, Markdown, TXT, PNG, JPEG support
+- **Multimodal OCR**: sensenova-6.7-flash-lite VLM for image/scanned PDF text extraction
+- **Ingestion Pipeline**: Validate → Dedup → Parse → Clean → Chunk → Qdrant + BM25
+- **Table Extraction**: pdfplumber + markdown-formatted tables
+- **13-step Pipeline**: Full progress tracking via async worker (arq + Redis)
 
-### Agent Tools (6 e-commerce tools)
-- `order_lookup` — fuzzy-match user orders by product keyword
-- `policy_check` — evaluate return eligibility (7-day unconditional / 30-day quality / denied)
-- `inventory_query` — check SKU stock across multi-warehouse
-- `create_pickup` — schedule return pickup (next-day 9:00-18:00)
-- `track_shipment` — real-time logistics status
-- `create_after_sale_ticket` — priority-tiered SLA ticket (P0=2h, P1=4h, P2=24h, P3=72h)
+### Retrieval & RAG
+- **Hybrid Search**: BM25 (sparse) + Qdrant Dense Vector → Max/RRF fusion
+- **Domain Router**: 5 e-commerce domain keywords + LLM fallback
+- **Reranker**: Qwen3-Reranker with similarity gating
+- **Citation Verification**: Sentence-level grounding with n-gram overlap
+- **Access Control**: Tenant isolation + role-based ACL prefilter
 
-### Retrieval Pipeline (preserved from v1)
-- **Hybrid Search**: BM25 (sparse) + Qdrant Dense Vector → Max fusion
-- **Domain Router**: 5 e-commerce domain keywords + Zhipu LLM fallback (10s timeout)
-- **Similarity Gate**: post-retrieval quality threshold
-- **Citation Verification**: sentence-level grounding
+### Agent System
+- **Coordinator Pattern**: Plan → Execute → Observe → Evaluate → HITL
+- **6 Registered Tools**: order_lookup, policy_check, inventory_query, create_pickup, track_shipment, create_after_sale_ticket
+- **Tool Registry**: Schema validation, idempotency, timeout/retry, side-effect levels
+- **Permission Gate**: 4 risk levels (LOW/MEDIUM/HIGH/CRITICAL) with scope enforcement
+- **HITL Approval**: Human-in-the-loop approval API for high-risk actions
+- **Agent Audit**: Every step written to DB for replay
 
-### Quality & Safety
-- **Behavior Guard**: keyword-based policy engine
-- **Circuit Breaker**: LLM failure auto-degrade (2 retries max)
-- **Structured Logging**: JSON event logs with trace IDs
+### Safety & Security
+- **Input Sanitizer**: InputGuard + DocumentSanitizer + OutputGuard (16 injection patterns)
+- **Prompt Injection Protection**: Covers system override, prompt export, permission bypass, tool parameter injection, multi-turn context injection
+- **Degradation Manager**: 8-component health tracking with structured degradation
+- **Circuit Breaker**: LLM failure auto-recovery
 
-## Quick Start
+### Enterprise Features
+- **Multi-tenant**: Tenant isolation at DB, retrieval, and API levels
+- **Async Worker**: arq + Redis for ingestion, reindex, and eval jobs
+- **Eval Suite**: 100 gold-standard RAG cases + 10 agent scenarios
+- **Metrics**: Prometheus-ready HTTP + RAG + LLM metrics
 
-### Prerequisites
-- Python 3.12+
-- NVIDIA GPU (optional, CPU fallback supported via `INFERENCE_DEVICE=auto`)
-- Qwen3-Embedding-0.6B model (local path configured in .env)
-
-### Install
-```bash
-git clone https://github.com/a707-afk/REACTAGENT.git
-cd REACTAGENT
-git checkout feature/ecom-agent
-python -m venv .venv
-.venv\Scripts\activate   # Windows
-pip install -r requirements.txt
-```
-
-### Configure
-```bash
-# Copy and edit .env (see .env.example for all options)
-# Key settings: DOCS_DIR, INFERENCE_DEVICE, QDRANT_PATH
-```
-
-### Build Index
-```bash
-python scripts/build_ecom_kb.py           # Generate FAQ markdowns
-python scripts/reindex.py                 # Qdrant + BM25 indexing
-```
-
-### Run
-```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000
-# Frontend: http://127.0.0.1:8000/
-# API docs: http://127.0.0.1:8000/docs
-```
+---
 
 ## API Reference
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/agent/ticket` | Full agent workflow (intent → workers → draft) |
-| POST | `/agent/ticket/stream` | Agent workflow with SSE streaming |
-| GET | `/api/tickets` | List tickets |
+|---|---|---|
+| POST | `/retrieve` | Knowledge base retrieval |
+| POST | `/chat/stream` | Streaming chat with RAG |
+| POST | `/agent/ticket` | Full agent workflow |
+| POST | `/agent/ticket/stream` | Agent workflow (SSE) |
+| GET | `/api/tickets` | Ticket list (paginated) |
 | POST | `/api/tickets` | Create ticket |
-| GET | `/api/tickets/{id}` | Get ticket detail |
-| GET | `/health` | Health check |
-| GET | `/health/config` | Runtime configuration dump |
-| GET | `/docs` | OpenAPI Swagger UI |
+| GET | `/api/documents` | Document list |
+| POST | `/api/documents/upload` | Upload document |
+| DELETE | `/api/documents/{id}` | Delete document |
+| GET | `/api/jobs` | Job list |
+| POST | `/api/jobs` | Submit async job |
+| GET | `/api/approvals` | Approval list |
+| POST | `/api/approvals/{id}/approve` | Approve HITL |
+| POST | `/api/approvals/{id}/reject` | Reject HITL |
+| GET | `/health/live` | Liveness check |
+| GET | `/health/ready` | Readiness check |
+| GET | `/docs` | OpenAPI Swagger |
+
+---
 
 ## Project Structure
 
 ```
 ├── app/
-│   ├── agent/
-│   │   └── tools.py          # 6 e-commerce tools (order_lookup, policy_check, etc.)
-│   ├── agent_graph/
-│   │   ├── graph.py          # LangGraph: 11 nodes (incl. exchange_parallel)
-│   │   ├── nodes.py          # Node implementations + routing functions
-│   │   └── state.py          # TicketAgentState (55 fields, TypedDict)
-│   ├── supervisor/
-│   │   └── router.py         # Intent routing + emotion detection
-│   ├── mock/
-│   │   ├── orders.py         # Order fixtures (3 policy states)
-│   │   ├── inventory.py      # Multi-warehouse stock
-│   │   └── logistics.py      # Tracking + pickup
-│   ├── api/                  # REST API layer
-│   ├── db/                   # SQLAlchemy async models
-│   ├── services/             # Ticket state machine, session memory
-│   ├── policy/               # Safety guardrails
-│   ├── retrieval_pipeline.py # Hybrid BM25 + Qdrant retrieval
-│   ├── domain_router.py      # 5-domain e-commerce classification
-│   └── config.py             # Settings (env-driven, device auto-detect)
-├── frontend/src/             # React 18 demo UI (Vite + TypeScript)
-├── data/docs_ecom/           # E-commerce FAQ knowledge base (24 Q&A, 54 chunks)
-├── scripts/                  # FAQ builder + reindex
-├── tests/                    # Locust load test
-├── docs/                     # Audit reports, plans, specs
-└── docker-compose.yml        # PostgreSQL + optional Qdrant server
+│   ├── agent/                  # Tool Registry + Permission Gate + Harness
+│   │   ├── tool_registry.py
+│   │   ├── permission_gate.py
+│   │   └── harness.py
+│   ├── agent_graph/            # LangGraph workflow nodes
+│   ├── ingestion/              # Document parsers + pipeline
+│   │   └── parsers/            # PDF, DOCX, Image, Markdown parsers
+│   ├── db/models/              # SQLAlchemy models (13 tables)
+│   ├── api/                    # REST endpoints
+│   ├── worker/                 # Async task queue (arq)
+│   ├── degradation.py          # Fault tolerance manager
+│   ├── input_sanitizer.py      # Injection protection
+│   ├── retrieval_pipeline.py   # Hybrid BM25 + Qdrant
+│   └── config.py               # Settings (pydantic-settings)
+├── frontend/src/               # React 18 + TypeScript admin UI
+│   └── components/             # 7 tab pages
+├── data/eval/                  # 100 RAG + 10 Agent gold cases
+├── scripts/                    # Eval runner, seed data, reindex
+├── tests/                      # 269 unit + integration tests
+├── docs/                       # Architecture + audit reports
+├── alembic/                    # Database migrations
+├── docker-compose.yml          # Qdrant + PostgreSQL + Redis + App + Worker
+└── .env.example                # Full configuration template
 ```
+
+---
+
+## Evaluation
+
+```bash
+# RAG evaluation (100 cases, 6 categories)
+python scripts/run_eval_rag.py
+
+# Categories: faq(30) + pdf_table(20) + no_answer(15) +
+#             permission(15) + policy(10) + multi_turn(10)
+
+# Agent evaluation (10 multi-turn scenarios)
+# python scripts/run_eval_agent.py
+```
+
+| Metric | Target | Dry-run |
+|---|---|---|
+| Recall@5 | ≥0.85 | 1.00 |
+| MRR@10 | ≥0.70 | 1.00 |
+| nDCG@10 | ≥0.75 | 1.00 |
+| Citation Precision | ≥0.90 | 0.75 |
+| Unsupported Rate | ≤0.08 | 0.25 |
+| Unauthorized in TopK | 0 | 0 |
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+python -m pytest tests/ -q
+
+# Current: 269 passed, 0 failed
+# Coverage: models, retrieval, agent, ingestion, degradation, eval
+```
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | Framework | FastAPI 0.136 (async) |
-| Agent | LangGraph (11-node workflow) |
-| Vector DB | Qdrant (embedded, 54 FAQ nodes) |
+| Agent | Coordinator Harness + LangGraph |
+| Vector DB | Qdrant (server / embedded) |
 | Sparse Index | BM25 (rank-bm25) |
-| Embedding | Qwen3-Embedding-0.6B (GPU auto-detect) |
-| LLM | Zhipu GLM-4-Flash (API) |
+| Embedding | Qwen3-Embedding-0.6B |
+| LLM | SenseNova DeepSeek-V4-Flash |
+| VLM | SenseNova sensenova-6.7-flash-lite |
 | Database | SQLite (dev) / PostgreSQL 16 (prod) |
-| Frontend | React 18 + Vite + TypeScript |
-| Testing | Python bench (load), Locust (planned), pytest |
+| Cache | Redis + in-process LRU |
+| Queue | arq + Redis |
+| Frontend | React 18 + TypeScript + Vite 5 |
+| Testing | pytest (269 tests) |
+| Infra | Docker Compose (Qdrant, Redis, PostgreSQL) |
 
-## Performance
-
-> Measured on Intel i7 CPU (no GPU), 5 concurrent users, 16 requests.
-
-| Metric | Value |
-|--------|-------|
-| P50 Latency | 169ms |
-| P95 Latency | 5464ms |
-| P99 Latency | 5464ms |
-| RPS (5 users) | 2.9 req/s |
-| Failure rate | 0% |
-| FAQ entries | 50 Q&A (106 vectors) |
-| Intent accuracy (keyword) | >95% |
-
-> Note: P95/P99 reflects LLM draft generation via SenseNova DeepSeek-V4 API (15-20s RTT per request).
-> Exchange flow completes in <200ms (no LLM, mock data). Circuit breaker triggers at 2 consecutive LLM failures and degrades to cached response.
+---
 
 ## License
 

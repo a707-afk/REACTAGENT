@@ -1,3 +1,4 @@
+# === Core Framework ===
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 pydantic>=2.0.0
@@ -6,7 +7,17 @@ python-dotenv>=1.0.0
 httpx>=0.27.0
 openai>=1.0.0
 
-# RAG（在 conda rags 中安装；PyTorch 建议由 conda 预先装好后装以下包）
+# === Database ===
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.29.0
+aiosqlite>=0.20.0
+alembic>=1.13.0
+
+# === Redis / Task Queue ===
+redis>=5.0.0
+arq>=0.26.0
+
+# === RAG / Vector ===
 llama-index-core>=0.10.0
 llama-index-embeddings-huggingface
 llama-index-vector-stores-qdrant
@@ -16,4 +27,19 @@ sentence-transformers>=3.0.0
 transformers>=4.51.0
 rank-bm25>=0.2.2
 jieba>=0.42.1
+
+# === File Upload ===
+python-multipart>=0.0.6
+
+# === Observability (optional but imported) ===
+prometheus_client>=0.20.0
+
+# === Dev / Testing ===
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-timeout>=2.2.0
+pytest-cov>=4.1.0
+fakeredis>=2.21.0
+
+# === Demo UI ===
 gradio>=4.44.0,<6

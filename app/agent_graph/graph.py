@@ -89,11 +89,12 @@ def build_ticket_agent_graph(*, settings: Settings | None = None):
         "tracking_flow":     "tracking_flow",
         "retrieve":          "retrieve",
     })
-    # All worker nodes go directly to draft (skip retrieve/gate/grader pipeline)
-    g.add_edge("exchange_parallel", "draft")
-    g.add_edge("refund_flow",       "draft")
-    g.add_edge("complaint_flow",    "draft")
-    g.add_edge("tracking_flow",     "draft")
+    # All worker nodes now go to retrieve (not directly to draft).
+    # Workers set retrieved_chunks via actual RAG pipeline.
+    g.add_edge("exchange_parallel", "retrieve")
+    g.add_edge("refund_flow",       "retrieve")
+    g.add_edge("complaint_flow",    "retrieve")
+    g.add_edge("tracking_flow",     "retrieve")
     g.add_edge("retrieve", "gate")
     g.add_conditional_edges("gate", nodes.route_after_gate, {
         "grader": "grader",
@@ -144,6 +145,7 @@ def _ticket_agent_initial(
         "loop_detected": False,
         "tool_calls": [],
         "tool_results": [],
+        "evidence_sources": [],
         "_transition_count": 0,
         "_llm_failures": 0,
     }

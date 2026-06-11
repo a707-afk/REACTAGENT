@@ -171,6 +171,14 @@ def node_evidence_gate(state: TicketAgentState, *, settings: Settings | None = N
         )
 
     if not scored:
+        # If a worker node already generated a response, preserve it
+        existing_draft = state.get("draft_reply")
+        if existing_draft and state.get("grader_passed"):
+            return {
+                "gate_passed": True,
+                "gate_error_code": None,
+                "audit_trace": _append_audit(state, "gate", {"skipped": True, "reason": "worker_prefilled"}),
+            }
         return {
             "gate_passed": False,
             "gate_error_code": "NO_RESULTS",
@@ -521,8 +529,6 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
         return {
             "draft_reply": "请问您是想换哪个订单的商品？能告诉我商品名称或订单号吗？",
             "grader_passed": True, "gate_passed": True,
-            "retrieved_chunks": [{"text": "未找到订单", "score": 1.0,
-                                   "file_name": "exchange_parallel", "domain": "exchange"}],
             "audit_trace": _append_audit(state, "exchange_parallel", {"result": "order_not_found"}),
         }
 
@@ -591,7 +597,7 @@ async def node_exchange_parallel(state: TicketAgentState, *, settings: Settings 
         "exchange_ready": all_ok,
         "exchange_summary": summary,
         "grader_passed": True,
-        "retrieved_chunks": [{"text": summary, "score": 1.0, "file_name": "exchange_check", "domain": "exchange"}],
+        # NOT setting retrieved_chunks — evidence comes from RAG pipeline
         "routed_domains": ["exchange"],
         "gate_passed": True,
         "audit_trace": _append_audit(state, "exchange_parallel", {
@@ -627,8 +633,7 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
         return {
             "draft_reply": "暂时找不到您的订单，请提供订单号或商品名称，我来帮您处理退款申请。",
             "grader_passed": True, "gate_passed": True,
-            "retrieved_chunks": [{"text": "未找到订单", "score": 1.0,
-                                   "file_name": "refund_flow", "domain": "refund"}],
+            # NOT setting retrieved_chunks — evidence comes from RAG pipeline
             "audit_trace": _append_audit(state, "refund_flow", {"result": "order_not_found"}),
         }
 
@@ -643,7 +648,6 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
         reply = f"很抱歉，订单 {order_id}（{order.get('product','')}）{policy.get('reason','不符合退款条件')}。\n如有疑问请联系人工客服。"
         _exec("create_after_sale_ticket", state, {"type":"refund","priority":"p3_low","order_id":order_id,"detail":f"退款被拒：{policy.get('reason','')}"})
         return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
-                "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "refund_flow", "domain": "refund"}],
                 "audit_trace": _append_audit(state, "refund_flow", {"result": "denied"})}
 
     deduction_rate = policy.get("deduction_rate", 0)
@@ -659,7 +663,6 @@ def node_refund_flow(state: TicketAgentState, *, settings: Settings | None = Non
     reply = f"退款申请已提交！\n订单：{order_id}（{order.get('product','')}）\n退款金额：¥{refund_amount:.2f}{deduction_note}\n工单号：{ticket.get('ticket_id','AS-未知')}\n预计 3-5 个工作日原路退回。"
 
     return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
-            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "refund_flow", "domain": "refund"}],
             "audit_trace": _append_audit(state, "refund_flow", {"order_id": order_id, "refund_amount": refund_amount})}
 
 
@@ -699,7 +702,6 @@ def node_complaint_flow(state: TicketAgentState, *, settings: Settings | None = 
         reply = f"感谢反馈，已记录投诉（{tid}），{sla_desc}内联系您。补偿 ¥{compensation} 优惠券。"
 
     return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
-            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "complaint_flow", "domain": "complaint"}],
             "audit_trace": _append_audit(state, "complaint_flow", {"emotion": emotion, "priority": priority})}
 
 
@@ -718,7 +720,6 @@ def node_tracking_flow(state: TicketAgentState, *, settings: Settings | None = N
     if not orders:
         reply = "暂时找不到您的订单，请提供订单号或商品名称，我来帮您查询物流状态。"
         return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
-                "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "tracking_flow", "domain": "tracking"}],
                 "audit_trace": _append_audit(state, "tracking_flow", {"result": "order_not_found"})}
 
     order = orders[0]
@@ -736,5 +737,4 @@ def node_tracking_flow(state: TicketAgentState, *, settings: Settings | None = N
         reply = f"包裹（{order_id}，{order.get('product','')}）\n状态：{status}\n承运商：{logistics.get('carrier','未知')}\n最新：{logistics.get('last_update','未知')}\n预计：{logistics.get('estimated_delivery','未知')}"
 
     return {"draft_reply": reply, "grader_passed": True, "gate_passed": True,
-            "retrieved_chunks": [{"text": reply, "score": 1.0, "file_name": "tracking_flow", "domain": "tracking"}],
             "audit_trace": _append_audit(state, "tracking_flow", {"order_id": order_id, "status": status})}

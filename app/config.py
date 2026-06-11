@@ -20,22 +20,39 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "cs-agent-backend"
+    app_name: str = "ecom-agent"
     debug: bool = False
 
     # Database
     database_url: str = Field(
-        default="sqlite+aiosqlite:///./data/cs_agent.db",
+        default="sqlite+aiosqlite:///./data/ecom_agent.db",
         validation_alias=AliasChoices("DATABASE_URL"),
         description="Async DB URL: sqlite+aiosqlite:///... or postgresql+asyncpg://...",
     )
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=10, ge=0, le=100)
 
-    
+    # Redis
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        validation_alias=AliasChoices("REDIS_URL"),
+        description="Redis URL for task queue, distributed cache, rate limiting",
+    )
+    redis_password: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("REDIS_PASSWORD"),
+        description="Redis password (if required)",
+    )
 
     # LLM：SenseNova (商汤) DeepSeek-V4-Flash via OpenAI 兼容端点
     sensenova_api_keys: str = Field(default="", description="SenseNova API keys, comma-separated for rotation")
+
+    # VLM：SenseNova (商汤) sensenova-6.7-flash-lite for OCR/multimodal
+    vlm_model: str = Field(
+        default="sensenova-6.7-flash-lite",
+        validation_alias=AliasChoices("VLM_MODEL"),
+        description="Vision-Language Model for OCR and image understanding",
+    )
 
     qwen_embedding_model_path: str = Field(default=_DEFAULT_QWEN_EMBED_PATH)
 
@@ -186,10 +203,18 @@ class Settings(BaseSettings):
 
     # K2（产品语义）：Rerank 之后的门控；最优重排分低于阈值则拒答（见 retrieval_gates）。
     retrieval_gate_enabled: bool = Field(default=True)
-    retrieval_similarity_threshold: float = Field(default=0.6, ge=0.0)
+    retrieval_similarity_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
     retrieval_score_higher_is_better: bool = Field(
         default=True,
         description="对重排分：True 表示分数越大越相关。False：视为距离类，内部取反后再与阈值比；阈值仍按「越大越好」校准。",
+    )
+    retrieval_gate_strict_mode: bool = Field(
+        default=False,
+        description="True 时严格 gate，False 时 relax gate（允许弱匹配通过）",
+    )
+    retrieval_min_chunks_threshold: int = Field(
+        default=1, ge=0, le=10,
+        description="至少需要多少个 chunk 才通过 gate",
     )
     refusal_no_results: str = Field(default="知识库中无相关内容")
     refusal_gate_fail: str = Field(default="知识库中无相关内容")
@@ -319,7 +344,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("OTEL_ENABLED"),
     )
     otel_service_name: str = Field(
-        default="cs-agent-backend",
+        default="ecom-agent",
         validation_alias=AliasChoices("OTEL_SERVICE_NAME"),
     )
     otel_exporter_endpoint: str | None = Field(

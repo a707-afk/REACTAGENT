@@ -1,53 +1,70 @@
 import { useState } from "react";
 import "./App.css";
 import { AgentStreamTab } from "./components/AgentStreamTab";
+import { ChatStreamTab } from "./components/ChatStreamTab";
+import { RetrieveTab } from "./components/RetrieveTab";
+import { DocumentsTab } from "./components/DocumentsTab";
+import { TicketsTab } from "./components/TicketsTab";
+import { ApprovalsTab } from "./components/ApprovalsTab";
+import { EvalTab } from "./components/EvalTab";
+
+const TABS = [
+  { key: "chat", label: "💬 对话" },
+  { key: "retrieve", label: "🔍 检索" },
+  { key: "agent", label: "🤖 Agent" },
+  { key: "tickets", label: "📋 工单" },
+  { key: "documents", label: "📄 文档" },
+  { key: "approvals", label: "✅ 审批" },
+  { key: "eval", label: "📊 评测" },
+];
 
 export default function App() {
-  const DEMO_SCENARIOS = [
-    { label: "换货", query: "买了件M码T恤太小了想换L码" },
-    { label: "退款", query: "我要退款，质量太差了" },
-    { label: "退货政策", query: "七天无理由退货有什么条件" },
-    { label: "投诉", query: "投诉你们客服态度太差了" },
-    { label: "物流查询", query: "我的快递到哪了" },
-  ];
+  const [tab, setTab] = useState("chat");
+  const [_apiKey, setApiKey] = useState(() => localStorage.getItem("apiKey") ?? "");
 
-  const [query, setQuery] = useState("");
-
-  const handleDemoClick = (q: string) => {
-    setQuery(q);
+  const handleKeySet = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem("apiKey", key.trim());
+    alert("API Key 已保存");
   };
 
   return (
     <div className="app">
       <header>
         <h1>EcomAgent</h1>
-        <p>电商智能售后多Agent系统 — 换货/退款/投诉/物流</p>
+        <p>企业级 RAG+Agent 智能客服平台</p>
       </header>
 
-      <div className="demo-bar" style={{
-        display: "flex", gap: "8px", padding: "12px 16px",
-        flexWrap: "wrap", alignItems: "center",
-      }}>
-        <span style={{ fontSize: "13px", color: "#666", marginRight: "4px" }}>快速场景:</span>
-        {DEMO_SCENARIOS.map((s) => (
-          <button
-            key={s.label}
-            type="button"
-            onClick={() => handleDemoClick(s.query)}
-            style={{
-              padding: "6px 14px", borderRadius: "6px", border: "1px solid #d0d0d0",
-              background: query === s.query ? "#534AB7" : "#fff",
-              color: query === s.query ? "#fff" : "#333",
-              cursor: "pointer", fontSize: "12px",
-            }}
-          >
-            {s.label}
-          </button>
-        ))}
+      {/* ── API Key ── */}
+      <div className="apikey-bar">
+        <span>API Key:</span>
+        <input
+          type="password"
+          placeholder="sk-xxx (留空使用默认)"
+          defaultValue={_apiKey}
+          onBlur={(e) => handleKeySet(e.target.value)}
+          className="apikey-input"
+        />
       </div>
 
+      {/* ── Tabs ── */}
+      <nav className="tabs">
+        {TABS.map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)} className={tab === t.key ? "active" : ""}>
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* ── Tab Content ── */}
       <div className="panel">
-        <AgentStreamTab presetQuery={query} />
+        {tab === "chat" && <ChatStreamTab />}
+        {tab === "retrieve" && <RetrieveTab />}
+        {tab === "agent" && <AgentStreamTab />}
+        {tab === "tickets" && <TicketsTab />}
+        {tab === "documents" && <DocumentsTab />}
+        {tab === "approvals" && <ApprovalsTab />}
+        {tab === "eval" && <EvalTab />}
       </div>
     </div>
   );
