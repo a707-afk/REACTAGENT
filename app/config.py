@@ -1,16 +1,16 @@
-from functools import lru_cache
+﻿from functools import lru_cache
 from typing import Literal
 
 from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 默认指向本机 ModelScope 缓存路径；其他机器请设置环境变量 QWEN_EMBEDDING_MODEL_PATH
-_DEFAULT_QWEN_EMBED_PATH = (
-    "models/Qwen/Qwen3-Embedding-0___6B"
-)
-_DEFAULT_QWEN_RERANK_PATH = (
-    r"C:\Users\Lenovo\.cache\modelscope\hub\models\Qwen\Qwen3-Reranker-0___6B"
-)
+
+
+
+
+
+
+
 
 
 class Settings(BaseSettings):
@@ -25,9 +25,9 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = Field(
-        default="sqlite+aiosqlite:///./data/ecom_agent.db",
+        default="postgresql+asyncpg://ecomagent:ecomagent@localhost:5432/ecomagent",
         validation_alias=AliasChoices("DATABASE_URL"),
-        description="Async DB URL: sqlite+aiosqlite:///... or postgresql+asyncpg://...",
+        description="Async DB URL: postgresql+asyncpg://...",
     )
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=10, ge=0, le=100)
@@ -54,7 +54,22 @@ class Settings(BaseSettings):
         description="Vision-Language Model for OCR and image understanding",
     )
 
-    qwen_embedding_model_path: str = Field(default=_DEFAULT_QWEN_EMBED_PATH)
+    # Embedding model (sentence-transformers compatible)
+    embedding_model_name: str = Field(
+        default="BAAI/bge-m3",
+        validation_alias=AliasChoices("EMBEDDING_MODEL_NAME"),
+        description="sentence-transformers model name or path for embeddings",
+    )
+    embedding_model_path: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("EMBEDDING_MODEL_PATH"),
+        description="Override local path for embedding model",
+    )
+    reranker_model_path: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("RERANKER_MODEL_PATH"),
+        description="Path to reranker model directory on disk",
+    )
 
     # 本地 Embedding / Reranker（torch）：auto=有 NVIDIA CUDA 用 GPU，否则 CPU
     inference_device: Literal["auto", "cuda", "cpu"] = Field(
@@ -144,7 +159,7 @@ class Settings(BaseSettings):
         default="auto",
         description="auto | qwen3_causal | cross_encoder",
     )
-    rerank_model: str = Field(default=_DEFAULT_QWEN_RERANK_PATH)
+    rerank_model: str = Field(default="BAAI/bge-reranker-v2-m3")
     rerank_candidate_top_k: int = Field(default=20, ge=1, le=100)
     qwen_rerank_max_length: int = Field(default=8192, ge=512, le=32768)
     qwen_rerank_batch_size: int = Field(default=4, ge=1, le=32)

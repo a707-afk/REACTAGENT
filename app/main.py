@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import logging
 import time
@@ -162,14 +162,14 @@ def create_app() -> FastAPI:
     @app.get("/health/config")
     def health_config():
         """不加载大模型；用于确认路径与密钥是否已配置。"""
-        p = Path(settings.qwen_embedding_model_path)
+        p = Path(settings.embedding_model_path or settings.embedding_model_name)
         from app.inference_device import cuda_device_info, resolve_inference_device
 
         resolved_dev = resolve_inference_device(settings)
         cuda_info = cuda_device_info()
 
         return {
-            "qwen_embedding_model_path": str(p.resolve()),
+            "embedding_model_path": str(p.resolve()),
             "qwen_model_dir_exists": p.is_dir(),
             "sensenova_api_configured": bool(settings.sensenova_api_keys),
             "query_rewrite_mode": settings.query_rewrite_mode,

@@ -1,4 +1,4 @@
-"""LlamaIndex + 本地 HuggingFace/Sentence-Transformers 布局的 Embedding 模型。"""
+﻿"""LlamaIndex + 本地 HuggingFace/Sentence-Transformers 布局的 Embedding 模型。"""
 from __future__ import annotations
 
 from functools import lru_cache
@@ -16,7 +16,7 @@ def get_embedding_model() -> HuggingFaceEmbedding:
     device = resolve_inference_device(settings)
     log_device_context("Qwen Embedding", device)
     return HuggingFaceEmbedding(
-        model_name=settings.qwen_embedding_model_path,
+        model_name=settings.embedding_model_path or settings.embedding_model_name,
         trust_remote_code=True,
         device=device,
     )

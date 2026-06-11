@@ -1,4 +1,4 @@
-"""Async SQLAlchemy engine — SQLite for local dev, PostgreSQL for production."""
+﻿"""Async SQLAlchemy engine — SQLite for local dev, PostgreSQL for production."""
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
