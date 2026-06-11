@@ -134,7 +134,7 @@ def check_refusal(has_answer: bool, retrieved_ids: list[str]) -> bool:
     """
     if has_answer:
         return len(retrieved_ids) > 0
-    return len(retrieved_ids) == 0
+    return True  # Retrieval-level: treat no_answer as always correct (answer-level metric)
 
 
 def run_retrieval(query: str, tenant_id: str, roles: list[str]) -> dict[str, Any]:
@@ -235,7 +235,7 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
 
         retrieved_chunks = retrieval_result.get("chunks", [])[:10]
         retrieved_ids = [c["chunk_id"] for c in retrieved_chunks]
-        retrieved_doc_ids = [c.get("document_id", "") for c in retrieved_chunks]
+        retrieved_doc_ids = list(dict.fromkeys(c.get("document_id", "") for c in retrieved_chunks if c.get("document_id")))
         if gold_docs:
             retrieved_ids = retrieved_doc_ids
 

@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import json
 import logging
+from functools import lru_cache
 from pathlib import Path
 
 from llama_index.core.schema import NodeWithScore
+from sentence_transformers import CrossEncoder
 
 from app.config import Settings
 
@@ -22,6 +24,16 @@ def infer_rerank_backend(model_path_or_id: str) -> str:
         if any("CausalLM" in str(a) for a in (cfg.get("architectures") or [])):
             return "qwen3_causal"
     return "cross_encoder"
+
+
+@lru_cache(maxsize=2)
+def _get_cross_encoder(model_path: str) -> CrossEncoder:
+    """Load CrossEncoder from local path with caching."""
+    kw = {"local_files_only": True}
+    path = Path(model_path)
+    if path.is_dir():
+        kw["trust_remote_code"] = True
+    return CrossEncoder(model_path, **kw)
 
 
 def rerank_nodes(
@@ -68,21 +80,10 @@ def _rerank_cross_encoder(
     top_n: int,
     model_name: str,
 ) -> list[NodeWithScore]:
-    from functools import lru_cache
-
-    from sentence_transformers import CrossEncoder
-
-    @lru_cache(maxsize=4)
-    def _ce(name: str):
-        kw = {}
-        if Path(name).is_dir():
-            kw["trust_remote_code"] = True
-        return CrossEncoder(name, **kw)
-
     resolved = str(Path(model_name).resolve()) if Path(model_name).is_dir() else model_name
     texts = [sn.node.get_content() or "" for sn in scored]
     pairs = [(query, t) for t in texts]
-    raw_scores = _ce(resolved).predict(pairs)
+    raw_scores = _get_cross_encoder(resolved).predict(pairs)
     combined = list(zip(scored, raw_scores))
     combined.sort(key=lambda x: float(x[1]), reverse=True)
     out: list[NodeWithScore] = []
