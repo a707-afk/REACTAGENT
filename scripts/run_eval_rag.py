@@ -174,7 +174,7 @@ def run_retrieval(query: str, tenant_id: str, roles: list[str]) -> dict[str, Any
             chunks.append({
                 "chunk_id": node_id,
                 "score": round(score, 4),
-                "document_id": meta.get("document_id", ""),
+                "document_id": meta.get("file_name", meta.get("document_id", "")),
                 "text_snippet": sn.node.get_content()[:200],
             })
 
@@ -208,6 +208,9 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
     for case in cases:
         t0 = time.perf_counter()
         gold_chunks = case.get("gold_chunk_ids", [])
+        gold_docs = case.get("gold_document_ids", [])
+        if not gold_chunks and gold_docs:
+            gold_chunks = gold_docs
         forbidden = case.get("forbidden_document_ids", [])
         has_answer = len(gold_chunks) > 0
 
@@ -230,7 +233,11 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         total_latency_ms += elapsed_ms
 
-        retrieved_ids = [c["chunk_id"] for c in retrieval_result.get("chunks", [])[:10]]
+        retrieved_chunks = retrieval_result.get("chunks", [])[:10]
+        retrieved_ids = [c["chunk_id"] for c in retrieved_chunks]
+        retrieved_doc_ids = [c.get("document_id", "") for c in retrieved_chunks]
+        if gold_docs:
+            retrieved_ids = retrieved_doc_ids
 
         # Compute per-case metrics
         recall5 = compute_recall_at_k(gold_chunks, retrieved_ids, k=5)
