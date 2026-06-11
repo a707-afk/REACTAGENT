@@ -1,4 +1,4 @@
-"""API 鉴权与防护中间件（X-API-Key/Bearer、RPM 限流、请求体大小检查）。"""
+﻿"""API 鉴权与防护中间件（X-API-Key/Bearer、RPM 限流、请求体大小检查）。"""
 from __future__ import annotations
 
 import hmac
@@ -9,7 +9,7 @@ from collections import defaultdict
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_413_CONTENT_TOO_LARGE, HTTP_429_TOO_MANY_REQUESTS
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_429_TOO_MANY_REQUESTS
 
 from app.config import get_settings
 from app.metrics import record_rate_limit_hit
@@ -54,7 +54,7 @@ class ApiGuardMiddleware(BaseHTTPMiddleware):
             try:
                 if int(cl) > max_body:
                     return JSONResponse(
-                        status_code=HTTP_413_CONTENT_TOO_LARGE,
+                        status_code=413,
                         content={"detail": f"Request body exceeds {max_body} bytes"},
                     )
             except ValueError:
