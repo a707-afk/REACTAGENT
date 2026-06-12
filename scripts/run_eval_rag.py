@@ -116,7 +116,7 @@ def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str], re
         return 1.0
     gold_set = set(gold_ids)
     if retrieved_docs:
-        matching = sum(1 for doc_id in retrieved_docs if doc_id in gold_set)
+        matching = sum(1 for doc_id in set(retrieved_docs) if doc_id in gold_set)
         return matching / len(retrieved_ids)
     citations_in_gold = sum(1 for rid in retrieved_ids if rid in gold_set)
     return citations_in_gold / len(retrieved_ids)
