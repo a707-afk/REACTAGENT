@@ -120,6 +120,9 @@ def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str], re
         return matching / len(retrieved_ids)
     citations_in_gold = sum(1 for rid in retrieved_ids if rid in gold_set)
     return citations_in_gold / len(retrieved_ids)
+
+
+def check_unauthorized(forbidden_ids: list[str], retrieved_ids: list[str], k: int = 10) -> int:
     """Count forbidden chunks appearing in top-K."""
     if not forbidden_ids:
         return 0
