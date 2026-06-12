@@ -117,7 +117,7 @@ class Settings(BaseSettings):
     )
 
     # 切片：P0 = markdown_heading_overlap；heading_only = 仅按标题不切二次
-    chunk_strategy: str = Field(default="markdown_heading_overlap")
+    chunk_strategy: str = Field(default="hierarchical_recursive")
     chunk_size_tokens: int = Field(default=512, ge=64)
     chunk_overlap_tokens: int = Field(default=64, ge=0)
 
