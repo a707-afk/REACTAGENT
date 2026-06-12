@@ -277,6 +277,8 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
     avg_latency = total_latency_ms / max(n, 1)
 
     # Unsupported sentence rate (estimated from citation precision inverse)
+    if dry_run:
+        unsupported_rate = 0.0
     else:
         unsupported_rate = 1.0 - avg_cit_precision
 
@@ -449,3 +451,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
