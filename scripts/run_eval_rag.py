@@ -103,9 +103,10 @@ def compute_ndcg(gold_ids: list[str], retrieved_ids: list[str], k: int = 10) -> 
     return dcg / idcg if idcg > 0 else 1.0
 
 
-def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str]) -> float:
-    """Fraction of retrieved chunks matching gold. Measures retrieval accuracy against gold documents.
+def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str], retrieved_docs: list[str] | None = None) -> float:
+    """Fraction of retrieved chunks whose document_id matches gold document IDs.
 
+    When retrieved_docs is provided, compares document-level IDs (not chunk UUIDs).
     If no gold chunks specified, returns 1.0 (no constraint).
     If no chunks retrieved, returns 0.0.
     """
@@ -114,11 +115,11 @@ def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str]) ->
     if not gold_ids:
         return 1.0
     gold_set = set(gold_ids)
+    if retrieved_docs:
+        matching = sum(1 for doc_id in retrieved_docs if doc_id in gold_set)
+        return matching / len(retrieved_ids)
     citations_in_gold = sum(1 for rid in retrieved_ids if rid in gold_set)
     return citations_in_gold / len(retrieved_ids)
-
-
-def check_unauthorized(forbidden_ids: list[str], retrieved_ids: list[str], k: int = 10) -> int:
     """Count forbidden chunks appearing in top-K."""
     if not forbidden_ids:
         return 0
@@ -243,7 +244,8 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
         recall5 = compute_recall_at_k(gold_chunks, retrieved_ids, k=5)
         mrr10 = compute_mrr(gold_chunks, retrieved_ids, k=10)
         ndcg10 = compute_ndcg(gold_chunks, retrieved_ids, k=10)
-        cit_precision = compute_citation_precision(retrieved_ids, gold_chunks)
+        retrieved_docs = [c.get("document_id", "") for c in retrieval_result.get("chunks", [])]
+        cit_precision = compute_citation_precision(retrieved_ids, gold_chunks, retrieved_docs=retrieved_docs)
         unauthorized = check_unauthorized(forbidden, retrieved_ids[:10], k=10)
         refusal_correct = check_refusal(has_answer, retrieved_ids)
 
@@ -451,4 +453,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
