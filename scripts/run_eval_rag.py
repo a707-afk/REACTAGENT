@@ -1,4 +1,4 @@
-﻿"""RAG evaluation runner.
+"""RAG evaluation runner.
 
 Evaluates retrieval quality against gold-standard cases and produces
 JSON + Markdown reports with standard metrics.
@@ -48,7 +48,7 @@ THRESHOLDS = {
 def load_cases(category: str | None = None) -> list[dict]:
     """Load gold-standard eval cases from JSONL files."""
     cases = []
-    patterns = [f"{category}.jsonl"] if category else [f"{c}.jsonl" for c in ["faq", "pdf_table", "no_answer", "permission", "policy", "multi_turn"]]
+    patterns = [f"{category}.jsonl"] if category else [f"{c}.jsonl" for c in ["faq", "pdf_table", "no_answer", "permission", "policy", "multi_turn", "adversarial"]]
     for pattern in patterns:
         path = EVAL_DIR / pattern
         if not path.exists():
@@ -63,18 +63,18 @@ def load_cases(category: str | None = None) -> list[dict]:
 
 
 def compute_recall_at_k(gold_ids: list[str], retrieved_ids: list[str], k: int = 5) -> float:
-    """Compute Recall@K."""
+    """Compute Recall@K. Returns NaN when gold_ids is empty (metric undefined)."""
     if not gold_ids:
-        return 1.0  # If no gold chunks, any result is "correct" (for no_answer)
+        return float("nan")  # No gold chunks → metric not applicable
     gold_set = set(gold_ids)
     hit = sum(1 for rid in retrieved_ids[:k] if rid in gold_set)
     return hit / len(gold_set)
 
 
 def compute_mrr(gold_ids: list[str], retrieved_ids: list[str], k: int = 10) -> float:
-    """Compute Mean Reciprocal Rank (MRR@K)."""
+    """Compute Mean Reciprocal Rank (MRR@K). Returns NaN when gold_ids is empty."""
     if not gold_ids:
-        return 1.0
+        return float("nan")
     gold_set = set(gold_ids)
     for i, rid in enumerate(retrieved_ids[:k]):
         if rid in gold_set:
@@ -83,9 +83,11 @@ def compute_mrr(gold_ids: list[str], retrieved_ids: list[str], k: int = 10) -> f
 
 
 def compute_ndcg(gold_ids: list[str], retrieved_ids: list[str], k: int = 10) -> float:
-    """Compute nDCG@K for binary relevance (each gold chunk = relevance 1)."""
-    if not gold_ids or not retrieved_ids:
-        return 1.0 if not gold_ids else 0.0
+    """Compute nDCG@K for binary relevance. Returns NaN when gold_ids is empty."""
+    if not gold_ids:
+        return float("nan")
+    if not retrieved_ids:
+        return 0.0
 
     gold_set = set(gold_ids)
     k = min(k, len(retrieved_ids))
@@ -113,7 +115,7 @@ def compute_citation_precision(retrieved_ids: list[str], gold_ids: list[str], re
     if not retrieved_ids:
         return 0.0
     if not gold_ids:
-        return 1.0
+        return float("nan")  # No gold chunks → metric not applicable
     gold_set = set(gold_ids)
     if retrieved_docs:
         matching = sum(1 for doc_id in set(retrieved_docs) if doc_id in gold_set)
@@ -213,8 +215,7 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
         t0 = time.perf_counter()
         gold_chunks = case.get("gold_chunk_ids", [])
         gold_docs = case.get("gold_document_ids", [])
-        if not gold_chunks and gold_docs:
-            gold_chunks = gold_docs
+        # Do NOT fallback to gold_docs — chunk-level evaluation requires chunk IDs
         forbidden = case.get("forbidden_document_ids", [])
         has_answer = len(gold_chunks) > 0
 
@@ -239,9 +240,8 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
 
         retrieved_chunks = retrieval_result.get("chunks", [])[:10]
         retrieved_ids = [c["chunk_id"] for c in retrieved_chunks]
+        # Keep document IDs for document-level checks (unauthorized, etc.)
         retrieved_doc_ids = list(dict.fromkeys(c.get("document_id", "") for c in retrieved_chunks if c.get("document_id")))
-        if gold_docs:
-            retrieved_ids = retrieved_doc_ids
 
         # Compute per-case metrics
         recall5 = compute_recall_at_k(gold_chunks, retrieved_ids, k=5)
@@ -249,7 +249,7 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
         ndcg10 = compute_ndcg(gold_chunks, retrieved_ids, k=10)
         retrieved_docs = [c.get("document_id", "") for c in retrieval_result.get("chunks", [])]
         cit_precision = compute_citation_precision(retrieved_ids, gold_chunks, retrieved_docs=retrieved_docs)
-        unauthorized = check_unauthorized(forbidden, retrieved_ids[:10], k=10)
+        unauthorized = check_unauthorized(forbidden, retrieved_doc_ids[:10], k=10)
         refusal_correct = check_refusal(has_answer, retrieved_ids)
 
         results.append({
@@ -269,12 +269,16 @@ def run_eval(cases: list[dict], dry_run: bool = False) -> dict[str, Any]:
             "latency_ms": round(elapsed_ms, 2),
         })
 
-    # Aggregate metrics
+    # Aggregate metrics (skip NaN values from no_answer cases)
+    def _safe_avg(key: str) -> float:
+        vals = [r[key] for r in results if r[key] == r[key]]  # NaN != NaN
+        return sum(vals) / len(vals) if vals else 0.0
+
     n = len(results) or 1
-    avg_recall5 = sum(r["recall_at_5"] for r in results) / n
-    avg_mrr10 = sum(r["mrr_at_10"] for r in results) / n
-    avg_ndcg10 = sum(r["ndcg_at_10"] for r in results) / n
-    avg_cit_precision = sum(r["citation_precision"] for r in results) / n
+    avg_recall5 = _safe_avg("recall_at_5")
+    avg_mrr10 = _safe_avg("mrr_at_10")
+    avg_ndcg10 = _safe_avg("ndcg_at_10")
+    avg_cit_precision = _safe_avg("citation_precision")
     total_unauthorized = sum(r["unauthorized_chunks"] for r in results)
     refusal_correct = sum(1 for r in results if r["refusal_correct"] and not r["has_answer"])
     total_no_answer = sum(1 for r in results if not r["has_answer"])

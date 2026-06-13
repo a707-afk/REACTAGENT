@@ -1,8 +1,13 @@
-"""离线评测 LangGraph 工单 Agent 状态机路径（mock policy / retrieve / LLM，不加载向量索引）。
+"""离线评测 Agent 工单路径。
+
+支持两种模式:
+  --mock (默认): mock policy / retrieve / LLM，不加载向量索引，用于 CI 快速验证路径覆盖。
+  --live: 仅 mock policy，使用真实检索 + LLM，验证端到端质量。
 
 在项目根::
 
-    python scripts/run_eval_agent_ticket.py
+    python scripts/run_eval_agent_ticket.py              # mock 模式
+    python scripts/run_eval_agent_ticket.py --live        # live 模式
 
 环境变量::
     AGENT_EVAL_GOLDEN=data/eval_agent_ticket.jsonl（默认）
@@ -121,24 +126,29 @@ def _check_case(result: dict, expect: dict) -> list[str]:
     return errors
 
 
-def _run_one_case(case: dict) -> dict:
-from app.agent.harness import run_agent_harness as _run_harness
+def _run_one_case(case: dict, live: bool = False) -> dict:
+    from app.agent.harness import run_agent_harness as _run_harness
 
     policy_spec = case.get("mock_policy") or {}
-    retrieve_spec = case.get("mock_retrieve")
-    llm_reply = case.get("mock_llm_reply") or "【mock 草稿】依据知识片段回复。"
-
     policy_mock = _policy_mock_from_spec(policy_spec)
-    retrieve_mock = _retrieve_mock_from_spec(retrieve_spec)
 
-    patches = [
+    # In live mode: only mock policy, use real retrieval + LLM
+    # In mock mode: mock everything (original behavior)
+    active_patches = [
         patch("app.policy.engine.evaluate_policy", return_value=policy_mock),
-        patch("app.retrieval_pipeline.retrieve", return_value=retrieve_mock),
-        patch("app.vector_index.get_vector_index", return_value=MagicMock()),
-        patch("app.llm.chat_completion", return_value=llm_reply),
     ]
 
-    for p in patches:
+    if not live:
+        retrieve_spec = case.get("mock_retrieve")
+        llm_reply = case.get("mock_llm_reply") or "【mock 草稿】依据知识片段回复。"
+        retrieve_mock = _retrieve_mock_from_spec(retrieve_spec)
+        active_patches.extend([
+            patch("app.retrieval_pipeline.retrieve", return_value=retrieve_mock),
+            patch("app.vector_index.get_vector_index", return_value=MagicMock()),
+            patch("app.llm.chat_completion", return_value=llm_reply),
+        ])
+
+    for p in active_patches:
         p.start()
     try:
         harness_args = {
@@ -157,11 +167,23 @@ from app.agent.harness import run_agent_harness as _run_harness
             "audit_trace": harness_result.audit_trace,
         }
     finally:
-        for p in patches:
+        for p in active_patches:
             p.stop()
 
     expect = case.get("expect") or {}
-    errors = _check_case(out, expect)
+
+    # In live mode, relax expectations for non-policy cases:
+    # only check that the agent completed (not blocked) and produced a draft
+    if live and not policy_spec.get("policy_action") == "intercept":
+        relaxed_errors = []
+        # For live mode, we still check policy_intercept cases strictly
+        # but for normal cases, only verify the agent didn't crash
+        if out.get("final_action") in ("failed", "terminated"):
+            relaxed_errors.append(f"agent failed/terminated: {out.get('final_action')}")
+        errors = relaxed_errors
+    else:
+        errors = _check_case(out, expect)
+
     return {
         "id": case.get("id"),
         "description": case.get("description"),
@@ -181,6 +203,12 @@ from app.agent.harness import run_agent_harness as _run_harness
 
 
 def main() -> int:
+    import argparse
+    parser = argparse.ArgumentParser(description="Agent ticket path eval")
+    parser.add_argument("--live", action="store_true", help="Live mode: use real retrieval + LLM, only mock policy")
+    args = parser.parse_args()
+    live = args.live
+
     golden = Path(os.getenv("AGENT_EVAL_GOLDEN", "data/eval_agent_ticket.jsonl"))
     if not golden.is_absolute():
         golden = ROOT / golden
@@ -191,6 +219,17 @@ def main() -> int:
         print(f"Missing golden: {golden}", file=sys.stderr)
         return 2
 
+    # Pre-flight check for live mode
+    if live:
+        try:
+            from app.vector_index import get_vector_index
+            get_vector_index()
+            print("Qdrant pre-flight check passed")
+        except Exception as e:
+            print(f"Qdrant not available for live evaluation: {e}", file=sys.stderr)
+            print("Falling back to mock mode.", file=sys.stderr)
+            live = False
+
     cases: list[dict] = []
     for line in golden.read_text(encoding="utf-8").splitlines():
         line = line.strip()
@@ -198,7 +237,7 @@ def main() -> int:
             continue
         cases.append(json.loads(line))
 
-    results = [_run_one_case(c) for c in cases]
+    results = [_run_one_case(c, live=live) for c in cases]
     passed = sum(1 for r in results if r["passed"])
     total = len(results)
 
@@ -211,6 +250,7 @@ def main() -> int:
 
     summary = {
         "golden": _relative_to_repo(golden),
+        "mode": "live" if live else "mock",
         "total": total,
         "passed": passed,
         "failed": len(failed),
@@ -232,7 +272,7 @@ def main() -> int:
         f"- **Run date (UTC)**: {iso_now}",
         "- **Command**: `python scripts/run_eval_agent_ticket.py`（repo root）",
         f"- **Golden**: `{summary['golden']}`",
-        "- **Mode**: mock `evaluate_policy` / `retrieve_scored_nodes` / LLM（不加载 Chroma/Qdrant）",
+        f"- **Mode**: {'live (real retrieval + LLM, mock policy)' if live else 'mock (mock policy / retrieve / LLM)'}",
         "",
         "## Metrics",
         "",
