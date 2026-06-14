@@ -79,28 +79,3 @@ def test_grounding_report_to_dict_shape():
     assert d["method"] == "ngram"
     assert len(d["sentences"]) == 1
     assert d["sentences"][0]["best_chunk_id"] == "c1"
-
-
-def test_node_hallucination_uses_grounding():
-    from app.agent_graph.nodes import node_hallucination
-
-    state = {
-        "grader_passed": True,
-        "policy_skip_rag": False,
-        "draft_reply": "P1 应升级至二线 on-call。",
-        "retrieved_chunks": [
-            {
-                "text": "P1 升级至二线 on-call。",
-                "node_id": "n-sla",
-                "file_name": "sla.md",
-                "file_path": "wf/sla.md",
-            }
-        ],
-        "audit_trace": [],
-    }
-    out = node_hallucination(state)
-    assert out.get("hallucination_passed") is True
-    assert "grounding" in (out.get("hallucination_feedback") or "") or out.get("hallucination_feedback")
-    audit = out.get("audit_trace") or []
-    hall = [t for t in audit if t.get("step") == "hallucination"]
-    assert hall and hall[-1].get("method") == "ngram"

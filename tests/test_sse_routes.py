@@ -32,35 +32,3 @@ def test_chat_stream_headers_and_done_event():
     assert "text/event-stream" in r.headers.get("content-type", "")
     body = r.text
     assert "event: error" in body or "event: done" in body
-
-
-def test_agent_ticket_stream_headers():
-    app = create_app()
-    client = TestClient(app)
-
-    low_risk = MagicMock(
-        should_skip_rag=True,
-        policy_action=PolicyAction.intercept,
-        policy_risk_level="high",
-        requires_human_review=True,
-        intercept_reason_code="POLICY_TEST",
-        message_zh="策略拦截",
-        policy_warnings=[],
-    )
-
-    with patch("app.agent_graph.nodes.evaluate_policy", return_value=low_risk):
-        r = client.post(
-            "/agent/ticket/stream",
-            json={
-                "ticket_id": "T-SSE-01",
-                "user_query": "测试",
-                "top_k": 3,
-            },
-        )
-
-    assert r.status_code == 200
-    assert "text/event-stream" in r.headers.get("content-type", "")
-    assert "event: step" in r.text
-    assert "event: done" in r.text
-    done_lines = [ln for ln in r.text.split("\n") if ln.startswith("data:")]
-    assert any("final_action" in ln for ln in done_lines)

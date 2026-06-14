@@ -16,7 +16,6 @@ from app.metrics import metrics_text, record_http_request
 from app.api_guard import ApiGuardMiddleware
 from app.config import get_settings
 from app.logging_config import setup_logging
-from app.api.chat import router as api_chat_router
 from app.api.tickets import router as api_tickets_router
 from app.api.jobs import router as api_jobs_router
 from app.api.documents import router as api_documents_router
@@ -141,7 +140,6 @@ def create_app() -> FastAPI:
 
 
     app.include_router(rag_router)
-    app.include_router(api_chat_router)
     app.include_router(api_tickets_router)
     app.include_router(api_jobs_router)
     app.include_router(api_documents_router)

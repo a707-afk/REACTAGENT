@@ -1,7 +1,0 @@
-{
-  "count": 80,
-  "topk_overlap_hit_rate": 0.975,
-  "primary_accuracy": 0.8,
-  "macro_f1_approx": 0.7999178228796392,
-  "golden": "C:\\Users\\Lenovo\\Desktop\\传统文件项目\\rag-kb-project\\data\\router_eval_golden.jsonl"
-}
