@@ -502,41 +502,16 @@ def _assess_risk(objective: str) -> str:
 
 
 def _classify_intent(objective: str) -> dict[str, Any]:
-    """Pre-plan intent classification reusing supervisor router logic."""
-    from app.supervisor.router import detect_emotion
+    """Pre-plan intent classification.
 
-    EXCHANGE_KW = ["换货", "换个", "换成", "换一件", "换尺码", "换码", "太小", "太大", "尺寸不对", "尺码不合适", "想换"]
-    REFUND_KW = ["退款", "退货", "退钱", "不想要", "取消订单", "申请退"]
-    TRACKING_KW = ["物流", "快递", "到哪了", "几天到", "发货了吗", "运输", "签收", "查一下", "查快递", "查物流"]
-    COMPLAINT_KW = ["投诉", "差评", "举报", "骗子", "假货", "质量问题", "态度差", "要投诉", "太差了", "气死", "骗人"]
-
-    query = objective.strip()
-    def match(kw_list):
-        return any(kw in query for kw in kw_list)
-
-    if match(EXCHANGE_KW):
-        intent, confidence = "exchange", 0.95
-    elif match(REFUND_KW):
-        intent, confidence = "refund", 0.95
-    elif match(TRACKING_KW):
-        intent, confidence = "tracking", 0.95
-    elif match(COMPLAINT_KW):
-        intent, confidence = "complaint", 0.95
-    else:
-        intent, confidence = "unknown", 0.30
-
-    emotion = detect_emotion(query) if intent == "complaint" else None
-
-    # Extract product keyword
-    PRODUCT_KW = ["T恤", "衬衫", "裤子", "裙子", "卫衣", "外套", "鞋", "运动鞋", "包", "手机", "耳机", "手表"]
-    order_hint = next((kw for kw in PRODUCT_KW if kw in query), "")
-
-    return {
-        "intent": intent,
-        "confidence": confidence,
-        "emotion": emotion,
-        "order_hint": order_hint,
-    }
+    NOTE: The e-commerce-specific keyword classifier (refund/exchange/
+    tracking/complaint) was removed in the pivot to Deep Research Agent.
+    A research-domain intent classifier is not needed for the ReAct loop
+    (the LLM planner handles decomposition). This stub returns a neutral
+    intent so the legacy harness path remains runnable until Phase 2
+    replaces this harness with research_harness.py.
+    """
+    return {"intent": "research", "confidence": 0.30, "emotion": None, "order_hint": ""}
 
 
 def _build_plan(objective: str, risk_level: str, intent_info: dict[str, Any] | None = None) -> list[dict]:
@@ -557,9 +532,9 @@ def _build_plan(objective: str, risk_level: str, intent_info: dict[str, Any] | N
         tools_text = "\n".join(tools_desc)
 
         system = (
-            "你是一个电商售后 Agent 规划器。根据用户目标，生成一个执行计划。\n"
+            "你是一个技术研究分析 Agent 规划器。根据用户的研究问题，生成一个执行计划。\n"
             "计划是一个 JSON 数组，每个步骤包含 type、tool、params。\n"
-            "type 可以是 'retrieve'（检索知识库）或 'execute'（调用工具）。\n"
+            "type 可以是 'retrieve'（检索本地研究文档库）或 'execute'（调用工具）。\n"
             "只使用下面列出的可用工具，不要发明不存在的工具。\n"
             "params 中的值应基于用户请求推断，不要用占位符。\n"
             "返回纯 JSON，不要包含其他文字。"
@@ -587,22 +562,14 @@ def _build_plan(objective: str, risk_level: str, intent_info: dict[str, Any] | N
 
 
 def _build_plan_rule_based(objective: str, risk_level: str) -> list[dict]:
-    """Rule-based fallback planner using composite tools."""
-    low = objective.lower()
-    # Use composite tools for known intents
-    if any(w in low for w in ["退款", "refund", "退货", "退钱", "不想要"]):
-        return [{"type": "execute", "tool": "process_refund", "params": {"user_id": "current_user", "keyword": objective[:15]}}]
-    elif any(w in low for w in ["换货", "exchange", "尺码", "太小", "太大", "想换"]):
-        return [{"type": "execute", "tool": "process_exchange", "params": {"user_id": "current_user", "keyword": objective[:15], "query_text": objective}}]
-    elif any(w in low for w in ["物流", "track", "快递", "包裹", "到哪了"]):
-        return [{"type": "execute", "tool": "process_tracking", "params": {"user_id": "current_user", "keyword": objective[:15]}}]
-    elif any(w in low for w in ["投诉", "complaint", "举报", "骗子"]):
-        from app.supervisor.router import detect_emotion
-        emotion = detect_emotion(objective)
-        return [{"type": "execute", "tool": "process_complaint", "params": {"user_id": "current_user", "keyword": objective[:15], "emotion": emotion, "query_text": objective}}]
-    else:
-        # Fallback: retrieve from knowledge base
-        return [{"type": "retrieve", "description": "Search knowledge base for relevant policies"}]
+    """Rule-based fallback planner.
+
+    E-commerce composite tools were removed in the pivot to Deep Research
+    Agent. The fallback now delegates to the local research corpus via a
+    retrieve step. Phase 2 will replace this with a ReAct loop that calls
+    local_search/web_search/synthesize tools dynamically.
+    """
+    return [{"type": "retrieve", "description": f"Search local research corpus for: {objective[:80]}"}]
 
 
 def _generate_draft(objective: str, observations: list[dict], errors: list[dict]) -> str:
@@ -624,10 +591,10 @@ def _generate_draft(objective: str, observations: list[dict], errors: list[dict]
     try:
         from app.llm import chat_completion
         system = (
-            "你是一个专业的电商售后客服 Agent。根据用户问题和工具查询结果，生成一个专业、友好的回复。\n"
+            "你是一个技术研究分析 Agent。根据用户研究问题和检索到的资料，生成一个专业、客观的分析回复。\n"
             "规则：\n"
             "1. 只基于提供的工具结果回答，不要编造信息\n"
-            "2. 如果信息不足，明确告知用户需要更多信息或建议联系人工客服\n"
+            "2. 如果信息不足，明确告知需要检索更多资料或该问题超出当前知识库范围\n"
             "3. 对于退款/补偿类问题，说明处理时效和流程\n"
             "4. 回复要简洁、专业、有温度\n"
             "5. 不要暴露内部系统名称或技术细节"
@@ -647,7 +614,7 @@ def _generate_draft(objective: str, observations: list[dict], errors: list[dict]
 
     # Fallback: template-based draft
     if not observations:
-        return f"根据您的请求「{objective}」，我暂时无法获取完整信息，建议联系人工客服处理。"
+        return f"针对研究问题「{objective}」，我暂时未检索到足够资料，建议换个角度检索或扩大范围。"
     parts = []
     for obs in observations[-5:]:
         result = obs.get("result", {})
@@ -684,14 +651,14 @@ def _evaluate_result(draft: str, observations: list[dict], errors: list[dict]) -
         obs_text = json.dumps([{"tool": o.get("tool"), "result_keys": list(o.get("result", {}).keys()) if isinstance(o.get("result"), dict) else []} for o in observations[-5:]], ensure_ascii=False)
 
         system = (
-            "你是一个回复质量审查员。检查客服回复是否基于工具查询结果。\n"
+            "你是一个研究回复质量审查员。检查 Agent 的回复是否基于检索到的研究资料。\n"
             "返回 JSON: {\"grounded\": true/false, \"unsupported_claims\": [...], \"safe\": true/false}\n"
             "grounded=true 表示回复的所有信息都来自工具结果。\n"
             "safe=true 表示没有暴露内部系统名、API key、个人信息。\n"
             "只返回 JSON，不要其他文字。"
         )
         user = (
-            f"客服回复:\n{draft[:800]}\n\n"
+            f"Agent 回复:\n{draft[:800]}\n\n"
             f"工具查询结果摘要:\n{obs_text}\n\n"
             "请评估 (JSON):"
         )

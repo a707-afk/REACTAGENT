@@ -1,82 +1,64 @@
-﻿"""工单 Agent 图状态（与设计文档 §状态字段 对齐）。"""
+"""Research Agent state (TypedDict).
+
+Replaces the old TicketAgentState which was e-commerce-specific (exchange/
+refund/order fields). This state tracks a Deep Research Agent run: the
+research objective, the multi-step plan, working memory of gathered
+evidence, and the final synthesized answer with citations.
+"""
 from __future__ import annotations
 
 from typing import Any, TypedDict
 
 
-class TicketAgentState(TypedDict, total=False):
-    ticket_id: str
-    user_query: str
-    customer_id: str | None
-    customer_tier: str | None
-    trace_id: str | None
-    top_k: int
+class ResearchAgentState(TypedDict, total=False):
+    """State carried through the ReAct research loop.
 
-    user_context: dict[str, Any]
+    Fields are grouped by concern. All are optional (total=False) so the
+    loop can populate them incrementally.
+    """
 
-    policy_skip_rag: bool
-    policy_result: dict[str, Any]
-    risk_level: str | None
-    intent: str | None
+    # ── Run identity ────────────────────────────────────────────────
+    run_id: str
+    session_id: str | None              # multi-turn session binding
+    trace_id: str | None                # observability trace id
 
-    retrieval_query: str | None
-    routed_domains: list[str]
-    retrieved_chunks: list[dict[str, Any]]
-    evidence_sources: list[dict[str, Any]]  # Worker-generated context (NOT retrieved evidence)
-    router_trace: dict[str, Any] | None
+    # ── Research objective ──────────────────────────────────────────
+    objective: str                      # the research question
+    user_context: dict[str, Any]        # tenant_id, roles, scopes
+    risk_level: str                     # low | medium | high | critical
 
-    gate_passed: bool
-    gate_error_code: str | None
-    ranked_quality_scores: list[float]
+    # ── Decomposition (planning) ────────────────────────────────────
+    sub_questions: list[str]            # objective broken into sub-questions
+    current_subquestion: str | None     # which sub-question we're researching now
+    subquestion_index: int              # pointer into sub_questions
 
-    # Agentic 闭环（阶段 H）
-    iterations: int
-    max_iterations: int
-    grader_passed: bool | None
-    grader_feedback: str | None
-    hallucination_passed: bool | None
-    hallucination_feedback: str | None
-    citations: list[dict[str, Any]]
-    rewrite_history: list[str]
-    loop_detected: bool
+    # ── ReAct loop control ──────────────────────────────────────────
+    iterations: int                     # current ReAct step
+    max_iterations: int                 # budget cap (default 8)
+    thoughts: list[dict[str, Any]]      # per-step LLM reasoning trace
+    actions: list[dict[str, Any]]       # per-step tool calls
+    observations: list[dict[str, Any]]  # per-step tool results
 
-    draft_reply: str | None
-    worker_draft: str | None               # pre-filled draft from worker nodes (refund/complaint/etc.)
-    required_fields: list[str]
+    # ── Working memory (current sub-question) ───────────────────────
+    gathered_facts: list[dict[str, Any]]      # facts found this sub-question
+    gathered_sources: list[dict[str, Any]]    # sources (url/doc_id + snippet)
+    sufficient: bool                          # has reflect decided "enough"?
+
+    # ── Long-term memory (cross sub-questions) ──────────────────────
+    verified_facts: list[dict[str, Any]]      # deduped, prioritized
+    all_sources: list[dict[str, Any]]
+
+    # ── Synthesis / output ──────────────────────────────────────────
+    draft_answer: str | None
+    final_answer: str | None
+    citations: list[dict[str, Any]]           # [{index, source_id, snippet}]
+    faithfulness_score: float | None          # grounding metric
+    coverage_score: float | None              # fact coverage metric
+
+    # ── HITL ────────────────────────────────────────────────────────
     human_review_required: bool
-    final_action: str
-    ticket_note: str | None
+    final_action: str                         # completed | waiting_approval | failed
 
-    audit_trace: list[dict[str, Any]]
-
-    # Agent Tools (Phase: tools integration)
-    tool_calls: list[dict[str, Any]]       # LLM-decided tool invocations
-    tool_results: list[dict[str, Any]]     # tool execution results
-    session_id: str | None                 # multi-turn session binding
-    conversation_history: str | None       # injected context for LLM prompt
-    user_id: str | None                   # user identity for order lookup
-
-    # EcomAgent: Supervisor routing
-    emotion: str | None                    # detected emotion (angry/neutral)
-    order_hint: str | None                 # product keyword extracted from query
-    intent_confidence: float | None        # supervisor confidence score
-
-    # EcomAgent: Exchange flow state
-    order_id: str | None                   # current order ID
-    return_reason: str | None              # reason for return/exchange
-    product_sku: str | None               # SKU of product to exchange
-    target_size: str | None               # target size for exchange
-    target_color: str | None              # target color for exchange
-    pickup_address: str | None            # address for pickup scheduling
-    inventory_result: dict[str, Any] | None   # inventory query result
-    logistics_result: dict[str, Any] | None   # logistics/pickup result
-    exchange_ready: bool | None            # all three workers passed
-    exchange_summary: str | None           # human-readable parallel check summary
-
-    # EcomAgent: Hallucination retry control
-    draft_attempts: int | None             # retry counter for hallucination loop
-
-    # Internal / streaming (prefixed with _ per convention)
-    _streamed_draft: str | None            # tracking incremental SSE draft output
-    _transition_count: int | None          # graph transition counter
-    _llm_failures: int | None              # circuit breaker failure counter
+    # ── Audit ───────────────────────────────────────────────────────
+    audit_trace: list[dict[str, Any]]         # step-by-step for replay
+    errors: list[dict[str, Any]]

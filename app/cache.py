@@ -17,8 +17,7 @@ from typing import Any
 from llama_index.core.schema import NodeWithScore, TextNode
 
 from app.config import Settings
-from app.domain_router import RouterResult
-from app.retrieval_pipeline import ScoredRetrieval
+from app.retrieval_pipeline import ScoredRetrieval, RouterResult
 
 logger = logging.getLogger(__name__)
 

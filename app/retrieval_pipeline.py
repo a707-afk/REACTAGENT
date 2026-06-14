@@ -1,4 +1,11 @@
-"""向量 + BM25 混合召回，再 Rerank；支持中/英/德三语双知识库路由。"""
+"""向量 + BM25 混合召回，再 Rerank；支持多语种知识库检索。
+
+Note: The e-commerce domain_router and retrieval_intent_boost modules
+were removed in the pivot to Deep Research Agent. The pipeline now runs
+domain-agnostic retrieval. The RouterResult dataclass is kept as a
+neutral stub so downstream code (cache.py, routes_rag.py) that reads
+``scored.router_result`` continues to work (it will always be None).
+"""
 from __future__ import annotations
 
 import logging
@@ -8,11 +15,27 @@ from typing import Any
 from llama_index.core.schema import NodeWithScore
 
 from app.config import Settings
-from app.domain_router import RouterResult, route_domains
 from app.observability import log_structured_event
 from app.query_rewrite import resolve_retrieval_query
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class RouterResult:
+    """Neutral router result stub.
+
+    The e-commerce domain router was removed. This dataclass is retained
+    so ``ScoredRetrieval.router_result`` and ``cache.py`` continue to
+    type-check. It is always None in practice for Deep Research.
+    """
+    allowed_domains: tuple[str, ...] = ()
+    primary_domain: str | None = None
+    confidence: float = 0.0
+    method: str = "disabled"
+    raw_confidence: float | None = None
+    domain_weights: tuple[tuple[str, float], ...] = ()
+    routing_trace: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -226,8 +249,7 @@ def _retrieve_scored_nodes_impl(
         idx = index
 
     rr: RouterResult | None = None
-    if getattr(settings, "domain_router_enabled", True) and not skip_domain_router:
-        rr = route_domains(rq, settings)
+    # domain_router was removed in the Deep Research pivot; rr stays None.
 
     candidate_k = (
         max(top_k, settings.rerank_candidate_top_k)
@@ -343,30 +365,9 @@ def _retrieve_scored_nodes_impl(
                 language=lang, collection_used=lang_route.collection_name,
             )
 
-    from app.retrieval_intent_boost import apply_retrieval_intent_boost
-
-    merged = apply_retrieval_intent_boost(merged, rq, settings)
-
-    if (
-        rr
-        and rr.allowed_domains
-        and getattr(settings, "domain_router_hard_filter", False)
-    ):
-        from app.access_control import filter_nodes_by_domain
-
-        strict = getattr(settings, "domain_router_strict", False)
-        before_domain = merged
-        post_d = filter_nodes_by_domain(before_domain, rr.allowed_domains, strict=strict)
-        if post_d:
-            merged = post_d
-        elif getattr(settings, "domain_router_fallback_all", True):
-            logger.warning(
-                "domain_router: 过滤后无候选，回退为不按 domain 过滤（primary=%s）",
-                rr.primary_domain,
-            )
-            merged = before_domain
-        else:
-            merged = []
+    # retrieval_intent_boost was removed in the Deep Research pivot.
+    # Rerank operates directly on the merged hybrid candidates.
+    # (The domain hard-filter block was removed with domain_router.)
 
     if not merged:
         _log_retrieve_event(trace_id, hits=0, retrieval_query=rq, router_result=rr)

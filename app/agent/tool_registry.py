@@ -365,126 +365,50 @@ def get_tool_registry() -> ToolRegistry:
 
 
 def _register_default_tools(reg: ToolRegistry) -> None:
-    """Register all default e-commerce after-sales tools (atomic + composite)."""
-    from app.agent.tools import (
-        TOOL_ORDER_LOOKUP, TOOL_POLICY_CHECK, TOOL_INVENTORY_QUERY,
-        TOOL_CREATE_PICKUP, TOOL_TRACK_SHIPMENT, TOOL_CREATE_AFTER_SALE_TICKET,
-        _execute_order_lookup, _execute_policy_check, _execute_inventory_query,
-        _execute_create_pickup, _execute_track_shipment, _execute_create_after_sale_ticket,
+    """Register all Deep Research Agent tools.
+
+    Replaces the deleted e-commerce tools (order_lookup, process_refund,
+    etc.) with research-domain tools:
+      - local_search: retrieve from local research corpus
+      - web_search:   query the web (stub until Phase 4)
+      - fetch_page:   fetch a URL (stub until Phase 4)
+      - synthesize:   LLM-synthesize evidence into a cited answer
+    """
+    from app.agent.research_tools import (
+        TOOL_LOCAL_SEARCH, TOOL_WEB_SEARCH, TOOL_FETCH_PAGE, TOOL_SYNTHESIZE,
+        _execute_local_search, _execute_web_search, _execute_fetch_page,
+        _execute_synthesize,
     )
 
-    def _wrap_sync(fn):
-        """Wrap a sync function that takes (state, args) into a (params) function."""
-        def wrapped(params):
-            # The handler now only takes params (state is handled by harness)
-            return fn(None, params)
-        return wrapped
-
+    # All research tools are read-only (no side effects on business state).
+    # synthesize calls the LLM but writes nothing; web_search/fetch_page
+    # hit external APIs but create no persistent state. Risk stays LOW so
+    # the ReAct loop can call them freely without HITL.
     reg.register(ToolDef(
-        name="order_lookup", description="Look up user orders",
-        schema=TOOL_ORDER_LOOKUP,
+        name="local_search",
+        description="检索本地研究文档库（Qdrant+BM25 混合检索）",
+        schema=TOOL_LOCAL_SEARCH,
         side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
-        handler=_wrap_sync(_execute_order_lookup), timeout_seconds=10,
+        handler=_execute_local_search, timeout_seconds=15,
     ))
     reg.register(ToolDef(
-        name="policy_check", description="Check return/exchange eligibility",
-        schema=TOOL_POLICY_CHECK,
+        name="web_search",
+        description="联网搜索（Tavily，Phase 4 启用）",
+        schema=TOOL_WEB_SEARCH,
         side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
-        handler=_wrap_sync(_execute_policy_check), timeout_seconds=10,
+        handler=_execute_web_search, timeout_seconds=15,
     ))
     reg.register(ToolDef(
-        name="inventory_query", description="Check inventory availability",
-        schema=TOOL_INVENTORY_QUERY,
+        name="fetch_page",
+        description="抓取指定 URL 内容（Phase 4 启用）",
+        schema=TOOL_FETCH_PAGE,
         side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
-        handler=_wrap_sync(_execute_inventory_query), timeout_seconds=10,
+        handler=_execute_fetch_page, timeout_seconds=15,
     ))
     reg.register(ToolDef(
-        name="create_pickup", description="Create pickup for returns",
-        schema=TOOL_CREATE_PICKUP,
-        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.MEDIUM,
-        handler=_wrap_sync(_execute_create_pickup), timeout_seconds=15,
-    ))
-    reg.register(ToolDef(
-        name="track_shipment", description="Track shipment status",
-        schema=TOOL_TRACK_SHIPMENT,
+        name="synthesize",
+        description="LLM 综合多源证据为带引用的分析回答",
+        schema=TOOL_SYNTHESIZE,
         side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
-        handler=_wrap_sync(_execute_track_shipment), timeout_seconds=10,
-    ))
-    reg.register(ToolDef(
-        name="create_after_sale_ticket", description="Create after-sales ticket",
-        schema=TOOL_CREATE_AFTER_SALE_TICKET,
-        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
-        required_scopes=["ticket:write"],
-        handler=_wrap_sync(_execute_create_after_sale_ticket), timeout_seconds=15,
-    ))
-
-    # ── Composite tools (high-level business flows) ──────────────────
-    from app.agent.composite_tools import (
-        process_exchange, process_refund, process_complaint, process_tracking,
-    )
-
-    reg.register(ToolDef(
-        name="process_exchange",
-        description="换货流程：查订单→并行检查政策+库存+预约取件。触发关键词: 换货/换码/太小/太大/尺码不合适",
-        schema={"type": "function", "function": {
-            "name": "process_exchange",
-            "description": "Process exchange request: lookup order, check policy+inventory+pickup in parallel",
-            "parameters": {"type": "object", "properties": {
-                "user_id": {"type": "string", "description": "User ID"},
-                "keyword": {"type": "string", "description": "Product keyword"},
-                "target_size": {"type": "string", "description": "Target size", "default": "L"},
-                "color": {"type": "string", "description": "Target color", "default": ""},
-                "address": {"type": "string", "description": "Pickup address", "default": ""},
-                "query_text": {"type": "string", "description": "Original user query"},
-            }, "required": ["user_id"]},
-        }},
-        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.MEDIUM,
-        handler=process_exchange, timeout_seconds=20,
-    ))
-    reg.register(ToolDef(
-        name="process_refund",
-        description="退款流程：查订单→政策检查→计算金额→创建工单。触发关键词: 退款/退货/退钱/不想要",
-        schema={"type": "function", "function": {
-            "name": "process_refund",
-            "description": "Process refund request: lookup order, check policy, calculate refund, create ticket",
-            "parameters": {"type": "object", "properties": {
-                "user_id": {"type": "string", "description": "User ID"},
-                "keyword": {"type": "string", "description": "Product keyword or order hint"},
-                "return_reason": {"type": "string", "description": "Reason for refund", "default": "申请退款"},
-            }, "required": ["user_id"]},
-        }},
-        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
-        required_scopes=["ticket:write"],
-        handler=process_refund, timeout_seconds=15,
-    ))
-    reg.register(ToolDef(
-        name="process_complaint",
-        description="投诉流程：情绪分级→P0紧急/P2标准工单+补偿。触发关键词: 投诉/差评/举报/骗子/质量问题",
-        schema={"type": "function", "function": {
-            "name": "process_complaint",
-            "description": "Process complaint: detect emotion, create priority ticket with compensation",
-            "parameters": {"type": "object", "properties": {
-                "user_id": {"type": "string", "description": "User ID"},
-                "keyword": {"type": "string", "description": "Product keyword or order hint"},
-                "emotion": {"type": "string", "description": "Detected emotion: angry/neutral", "default": "neutral"},
-                "query_text": {"type": "string", "description": "Original complaint text"},
-            }, "required": ["user_id"]},
-        }},
-        side_effect=SideEffect.WRITE_INTERNAL, risk_level=RiskLevel.HIGH,
-        required_scopes=["ticket:write"],
-        handler=process_complaint, timeout_seconds=15,
-    ))
-    reg.register(ToolDef(
-        name="process_tracking",
-        description="物流查询流程：查订单→查物流状态。触发关键词: 物流/快递/到哪了/查快递",
-        schema={"type": "function", "function": {
-            "name": "process_tracking",
-            "description": "Track shipment status: lookup order then track logistics",
-            "parameters": {"type": "object", "properties": {
-                "user_id": {"type": "string", "description": "User ID"},
-                "keyword": {"type": "string", "description": "Product keyword or order hint"},
-            }, "required": ["user_id"]},
-        }},
-        side_effect=SideEffect.READ_ONLY, risk_level=RiskLevel.LOW,
-        handler=process_tracking, timeout_seconds=15,
+        handler=_execute_synthesize, timeout_seconds=30,
     ))

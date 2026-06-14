@@ -4,15 +4,13 @@ import { AgentStreamTab } from "./components/AgentStreamTab";
 import { ChatStreamTab } from "./components/ChatStreamTab";
 import { RetrieveTab } from "./components/RetrieveTab";
 import { DocumentsTab } from "./components/DocumentsTab";
-import { TicketsTab } from "./components/TicketsTab";
 import { ApprovalsTab } from "./components/ApprovalsTab";
 import { EvalTab } from "./components/EvalTab";
 
 const TABS = [
   { key: "chat", label: "💬 对话" },
   { key: "retrieve", label: "🔍 检索" },
-  { key: "agent", label: "🤖 Agent" },
-  { key: "tickets", label: "📋 工单" },
+  { key: "agent", label: "🤖 研究 Agent" },
   { key: "documents", label: "📄 文档" },
   { key: "approvals", label: "✅ 审批" },
   { key: "eval", label: "📊 评测" },
@@ -31,8 +29,8 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>EcomAgent</h1>
-        <p>企业级 RAG+Agent 智能客服平台</p>
+        <h1>Deep Research Agent</h1>
+        <p>企业级技术选型调研助手 — 自主多步检索 · 引用溯源 · 多租户隔离</p>
       </header>
 
       {/* ── API Key ── */}
@@ -61,7 +59,6 @@ export default function App() {
         {tab === "chat" && <ChatStreamTab />}
         {tab === "retrieve" && <RetrieveTab />}
         {tab === "agent" && <AgentStreamTab />}
-        {tab === "tickets" && <TicketsTab />}
         {tab === "documents" && <DocumentsTab />}
         {tab === "approvals" && <ApprovalsTab />}
         {tab === "eval" && <EvalTab />}
