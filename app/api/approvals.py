@@ -14,13 +14,11 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from app.api.deps import get_db_session
+from app.api.deps import AuthContext, get_db_session, require_auth
 from app.db.models.approval import Approval
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/approvals", tags=["approvals"])
-
-_DEFAULT_TENANT = "corp-default"
 
 
 # ── Models ─────────────────────────────────────────────────────────
@@ -62,18 +60,19 @@ class RejectRequest(BaseModel):
 
 @router.get("/", response_model=ApprovalListResponse)
 async def list_approvals(
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
     status: str | None = Query(default="pending"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
-    """List approvals for a tenant."""
+    """List approvals for a tenant (tenant-scoped via auth)."""
     from sqlalchemy import select, func
 
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     base = (Approval.tenant_id == tenant_id)
     if status:
         base = base & (Approval.status == status)
@@ -102,13 +101,14 @@ async def list_approvals(
 async def approve_request(
     approval_id: str,
     body: ApproveRequest,
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Approve a pending approval request."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     approval = await db.get(Approval, approval_id)
     if approval is None or approval.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Approval not found")
@@ -135,13 +135,14 @@ async def approve_request(
 async def reject_request(
     approval_id: str,
     body: RejectRequest,
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Reject a pending approval request."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     approval = await db.get(Approval, approval_id)
     if approval is None or approval.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Approval not found")

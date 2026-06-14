@@ -1,4 +1,8 @@
+# Secrets — never commit any env variant except the placeholder .env.example
 .env
+.env.*
+!.env.example
+
 .venv/
 venv/
 __pycache__/

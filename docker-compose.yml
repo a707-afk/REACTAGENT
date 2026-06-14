@@ -1,42 +1,52 @@
-# EcomAgent — Docker Compose (dev)
-# Start: docker compose up -d qdrant postgres redis
-# Includes: App server, Worker, PostgreSQL, Redis, Qdrant (server mode)
+# EcomAgent — Docker Compose (production-hardened)
+#
+# Security posture (Phase 0):
+#   - Internal services (qdrant/postgres/redis) NOT exposed to host.
+#     Only reachable from `app`/`worker` on the internal compose network.
+#   - Postgres password + Redis password required (no weak defaults).
+#   - Secrets read from environment, not hardcoded.
+#
+# Override for local dev (expose ports): see docker-compose.override.yml.example
 
 services:
   qdrant:
     image: qdrant/qdrant:latest
-    ports:
-      - "6333:6333"
-      - "6334:6334"
+    expose:
+      - "6333"
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
+    networks: [internal]
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD must be set}", "--appendonly", "yes"]
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep -q PONG"]
       interval: 5s
       timeout: 3s
       retries: 5
     restart: unless-stopped
+    networks: [internal]
 
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://ecomagent:ecomagent@postgres:5432/ecomagent
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ecomagent}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@postgres:5432/${POSTGRES_DB:-ecomagent}
       - QDRANT_URL=http://qdrant:6333
-      - REDIS_URL=redis://redis:6379/0
-      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:-}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379/0
+      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:?SENSENOVA_API_KEYS must be set}
       - QWEN_EMBEDDING_MODEL_PATH=/models/qwen3-embedding
       - INFERENCE_DEVICE=cpu
       - DEBUG=false
+      - API_AUTH_ENABLED=true
+      - API_KEYS=${APP_API_KEYS:?APP_API_KEYS must be set}
     volumes:
       - ./data:/data
       - model_cache:/models
@@ -52,15 +62,16 @@ services:
       start_period: 15s
       retries: 3
     restart: unless-stopped
+    networks: [internal, default]
 
   worker:
     build: .
     command: ["python", "-m", "app.worker.worker"]
     environment:
-      - DATABASE_URL=postgresql+asyncpg://ecomagent:ecomagent@postgres:5432/ecomagent
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ecomagent}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@postgres:5432/${POSTGRES_DB:-ecomagent}
       - QDRANT_URL=http://qdrant:6333
-      - REDIS_URL=redis://redis:6379/0
-      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:-}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379/0
+      - SENSENOVA_API_KEYS=${SENSENOVA_API_KEYS:?SENSENOVA_API_KEYS must be set}
       - QWEN_EMBEDDING_MODEL_PATH=/models/qwen3-embedding
       - INFERENCE_DEVICE=cpu
     volumes:
@@ -71,23 +82,31 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks: [internal]
 
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      - POSTGRES_USER=ecomagent
-      - POSTGRES_PASSWORD=ecomagent
-      - POSTGRES_DB=ecomagent
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=${POSTGRES_USER:-ecomagent}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      - POSTGRES_DB=${POSTGRES_DB:-ecomagent}
+    expose:
+      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ecomagent"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ecomagent}"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+    internal: true   # no outbound internet access from data services
+  default:
 
 volumes:
   pgdata:

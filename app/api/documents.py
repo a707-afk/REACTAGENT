@@ -13,18 +13,17 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
+import json
+
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, Depends
 from pydantic import BaseModel
 
-from app.api.deps import get_db_session
+from app.api.deps import AuthContext, get_db_session, require_auth
 from app.db.models.document import Document
 from app.db.models.ingestion_job import IngestionJob
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/documents", tags=["documents"])
-
-# Default tenant for single-tenant deployments
-_DEFAULT_TENANT = "corp-default"
 
 
 # ── Request/Response models ────────────────────────────────────────
@@ -78,20 +77,27 @@ class DeleteResponse(BaseModel):
 @router.post("/upload", response_model=UploadResponse, status_code=201)
 async def upload_document(
     file: UploadFile = File(...),
-    tenant_id: str = Form(default=_DEFAULT_TENANT),
     domain: str | None = Form(default=None),
     security_level: str = Form(default="internal"),
     allowed_roles: str | None = Form(default=None),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Upload a file for ingestion.
 
     The file will be saved and an ingestion job will be queued.
+
+    Security: tenant_id is resolved from the authenticated principal
+    (require_auth), NOT from a client-supplied Form field. This prevents
+    cross-tenant upload via header/parameter tampering.
     """
     from app.ingestion.pipeline import validate_file, compute_content_hash
 
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
+
+    # tenant_id from auth context — never trust client input
+    tenant_id = auth.tenant_id
 
     # Read file data
     file_data = await file.read()
@@ -145,6 +151,16 @@ async def upload_document(
 
     # Create IngestionJob
     job_id = str(uuid.uuid4())
+    # Build task_params via json.dumps to prevent JSON injection via
+    # client-controlled Form fields (domain / allowed_roles). Previously
+    # this used %-formatting into a JSON string, which allowed a malicious
+    # allowed_roles value containing `"` to break out and inject keys.
+    task_params_obj = {
+        "domain": domain or "",
+        "security_level": security_level,
+        "allowed_roles": allowed_roles or "",
+        "tenant_id": tenant_id,
+    }
     job = IngestionJob(
         id=job_id,
         tenant_id=tenant_id,
@@ -152,9 +168,7 @@ async def upload_document(
         status="queued",
         progress=0,
         task_type="ingest_document",
-        task_params='{"domain": "%s", "security_level": "%s", "allowed_roles": "%s"}' % (
-            domain or "", security_level, allowed_roles or ""
-        ),
+        task_params=json.dumps(task_params_obj, ensure_ascii=False),
     )
     db.add(job)
     await db.flush()
@@ -200,13 +214,14 @@ async def upload_document(
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Get document details."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     doc = await db.get(Document, document_id)
     if doc is None or doc.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -233,18 +248,22 @@ async def get_document(
 
 @router.get("/", response_model=DocumentListResponse)
 async def list_documents(
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
     status: str | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
-    """List documents with pagination and filtering."""
+    """List documents with pagination and filtering.
+
+    Security: tenant scope comes from auth context, not query param.
+    """
     from sqlalchemy import select, func
 
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     base_filter = (Document.tenant_id == tenant_id) & (Document.status != "deleted")
     if status:
         base_filter = base_filter & (Document.status == status)
@@ -290,13 +309,14 @@ async def list_documents(
 @router.post("/{document_id}/reindex", response_model=ReindexResponse)
 async def reindex_document(
     document_id: str,
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Re-index a document (creates a new ingestion job)."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     doc = await db.get(Document, document_id)
     if doc is None or doc.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -326,13 +346,14 @@ async def reindex_document(
 @router.delete("/{document_id}", response_model=DeleteResponse)
 async def delete_document(
     document_id: str,
-    tenant_id: str = Query(default=_DEFAULT_TENANT),
+    auth: AuthContext = Depends(require_auth),
     db=Depends(get_db_session),
 ):
     """Soft-delete a document and remove its vectors."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
+    tenant_id = auth.tenant_id
     doc = await db.get(Document, document_id)
     if doc is None or doc.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Document not found")

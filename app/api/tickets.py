@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db_session, verify_api_key
+from app.api.deps import AuthContext, get_db_session, require_auth
 from app.config import get_settings
 from app.db.models.ticket import Ticket, TicketPriority, TicketStatus, can_transition
 from app.db.models.ticket_event import TicketEvent
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 @router.post("")
 async def create_ticket(
     request: Request,
-    _auth: bool = Depends(verify_api_key),
+    auth: AuthContext = Depends(require_auth),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Create a new support ticket (persisted to DB)."""
@@ -35,7 +35,7 @@ async def create_ticket(
     priority = str(body.get("priority", "p2_medium"))
     domain = body.get("domain")
     customer_id = body.get("customer_id")
-    tenant_id = getattr(request.state, "tenant_id", "default")
+    tenant_id = auth.tenant_id
 
     # Validate priority
     try:
@@ -86,14 +86,17 @@ async def list_tickets(
     tenant_id_filter: str | None = None,
     offset: int = 0,
     limit: int = 50,
-    _auth: bool = Depends(verify_api_key),
+    auth: AuthContext = Depends(require_auth),
     db: AsyncSession = Depends(get_db_session),
 ):
     """List tickets with pagination, tenant and status filtering."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not configured")
 
-    tenant_id = tenant_id_filter or getattr(request.state, "tenant_id", "default")
+    # tenant_id always comes from auth context, never from client input.
+    # (tenant_id_filter is ignored on purpose; it would let a caller escape
+    # their tenant scope. Kept in signature for backward-compat only.)
+    tenant_id = auth.tenant_id
 
     # Base query: always filter by tenant
     base_q = select(Ticket).where(Ticket.tenant_id == tenant_id)
@@ -125,15 +128,14 @@ async def list_tickets(
 @router.get("/{ticket_id}")
 async def get_ticket(
     ticket_id: str,
-    request: Request,
-    _auth: bool = Depends(verify_api_key),
+    auth: AuthContext = Depends(require_auth),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Get a single ticket by ID (tenant-scoped)."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not configured")
 
-    tenant_id = getattr(request.state, "tenant_id", "default")
+    tenant_id = auth.tenant_id
     q = select(Ticket).where(Ticket.id == ticket_id, Ticket.tenant_id == tenant_id)
     ticket = (await db.execute(q)).scalar_one_or_none()
 
@@ -146,14 +148,14 @@ async def get_ticket(
 async def transition_ticket(
     ticket_id: str,
     request: Request,
-    _auth: bool = Depends(verify_api_key),
+    auth: AuthContext = Depends(require_auth),
     db: AsyncSession = Depends(get_db_session),
 ):
     """Transition a ticket to a new status (state machine enforced)."""
     if db is None:
         raise HTTPException(status_code=503, detail="Database not configured")
 
-    tenant_id = getattr(request.state, "tenant_id", "default")
+    tenant_id = auth.tenant_id
     q = select(Ticket).where(Ticket.id == ticket_id, Ticket.tenant_id == tenant_id)
     ticket = (await db.execute(q)).scalar_one_or_none()
 

@@ -9,7 +9,7 @@ from typing import Iterator
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from app.api.deps import get_db_session, verify_api_key
+from app.api.deps import AuthContext, get_db_session, require_auth
 from app.config import get_settings
 from app.llm import chat_completion
 from app.observability import log_structured_event
@@ -116,13 +116,13 @@ def _execute_chat(req: ChatRequest, tid: str | None) -> ChatResponse:
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest, request: Request, _auth: bool = Depends(verify_api_key)):
+async def chat(req: ChatRequest, request: Request, auth: AuthContext = Depends(require_auth)):
     tid = getattr(request.state, "trace_id", None)
     return _execute_chat(req, tid)
 
 
 @router.post("/chat/stream")
-async def chat_stream(req: ChatRequest, request: Request, _auth: bool = Depends(verify_api_key)):
+async def chat_stream(req: ChatRequest, request: Request, auth: AuthContext = Depends(require_auth)):
     tid = getattr(request.state, "trace_id", None)
 
     async def _gen():
