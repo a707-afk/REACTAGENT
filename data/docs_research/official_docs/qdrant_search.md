@@ -1,6 +1,3 @@
-<!-- source: Qdrant Search -->
-<!-- cleaned: nav-bar removed -->
-
 # Similarity search
 
 

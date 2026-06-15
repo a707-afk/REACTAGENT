@@ -1,47 +1,4 @@
-﻿# Weaviate 
-
-[![GitHub Repo stars](https://img.shields.io/github/stars/weaviate/weaviate?style=social)](https://github.com/weaviate/weaviate)
-[![Go Reference](https://pkg.go.dev/badge/github.com/weaviate/weaviate.svg)](https://pkg.go.dev/github.com/weaviate/weaviate)
-[![Build Status](https://github.com/weaviate/weaviate/actions/workflows/.github/workflows/pull_requests.yaml/badge.svg?branch=main)](https://github.com/weaviate/weaviate/actions/workflows/.github/workflows/pull_requests.yaml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/weaviate/weaviate)](https://goreportcard.com/report/github.com/weaviate/weaviate)
-[![Coverage Status](https://codecov.io/gh/weaviate/weaviate/branch/main/graph/badge.svg)](https://codecov.io/gh/weaviate/weaviate)
-
-**Weaviate** is an open-source, cloud-native vector database that stores both objects and vectors, enabling semantic search at scale. It combines vector similarity search with keyword filtering, retrieval-augmented generation (RAG), and reranking in a single query interface. Common use cases include RAG systems, semantic and image search, recommendation engines, chatbots, and content classification.
-
-Weaviate supports two approaches to store vectors: automatic vectorization at import using [integrated models](https://docs.weaviate.io/weaviate/model-providers) (OpenAI, Cohere, HuggingFace, and others) or direct import of [pre-computed vector embeddings](https://docs.weaviate.io/weaviate/starter-guides/custom-vectors). Production deployments benefit from built-in multi-tenancy, replication, RBAC authorization, and [many other features](#weaviate-features).
-
-To get started quickly, have a look at one of these tutorials:
-
-- [Quickstart - Weaviate Cloud](https://docs.weaviate.io/weaviate/quickstart)
-- [Quickstart - local Docker instance](https://docs.weaviate.io/weaviate/quickstart/local)
-
-## Installation
-
-Weaviate offers multiple installation and deployment options:
-
-- [Docker](https://docs.weaviate.io/deploy/installation-guides/docker-installation)
-- [Kubernetes](https://docs.weaviate.io/deploy/installation-guides/k8s-installation)
-- [Weaviate Cloud](https://console.weaviate.cloud)
-
-See the [installation docs](https://docs.weaviate.io/deploy) for more deployment options, such as [AWS](https://docs.weaviate.io/deploy/installation-guides/aws-marketplace) and [GCP](https://docs.weaviate.io/deploy/installation-guides/gcp-marketplace).
-
-## Getting started
-
-You can easily start Weaviate and a local vector embedding model with [Docker](https://docs.docker.com/desktop/).
-Create a `docker-compose.yml` file:
-
-```yml
-services:
- weaviate:
- image: cr.weaviate.io/semitechnologies/weaviate:1.36.0
- ports:
- - "8080:8080"
- - "50051:50051"
- environment:
- ENABLE_MODULES: text2vec-model2vec
- MODEL2VEC_INFERENCE_API: http://text2vec-model2vec:8080
-
- # A lightweight embedding model that will generate vectors from objects during import
+# A lightweight embedding model that will generate vectors from objects during import
  text2vec-model2vec:
  image: cr.weaviate.io/semitechnologies/model2vec-inference:minishlab-potion-base-32M
 ```

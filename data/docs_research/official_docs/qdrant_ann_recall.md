@@ -1,6 +1,3 @@
-<!-- source: Qdrant Ann Recall -->
-<!-- cleaned: nav-bar removed -->
-
 # Measuring ANN Recall
 Time: 15 minLevel: Beginner
 

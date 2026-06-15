@@ -11,7 +11,7 @@ group: standalone
 
 你也可以[从源代码编译 Milvus](https://github.com/milvus-io/milvus#to-start-developing-milvus)。
 
-<div class="alert note">
+
 Docker Compose 部署方式只用作测试使用，不能用于生产环境。
 </div>
 
@@ -23,7 +23,7 @@ Docker Compose 部署方式只用作测试使用，不能用于生产环境。
 
 - minikube：详见 [minikube 快速开始文档](https://kubernetes.io/docs/tasks/tools/install-minikube/)。
 
-<div class="alert note">
+
 安装 minikube 时会自动安装虚拟机监控器（hypervisor）和命令行工具 Kubectl，帮助你从本地工作站管理 Kubernetes。
 </div>
 
@@ -35,7 +35,7 @@ $ minikube start
 ```
 
 ## 2. 启动 Milvus
-<div class="alert note">
+
 使用 Kubernetes 包管理工具 Helm 能够简化本步骤。
 </div>
 
@@ -52,7 +52,7 @@ $ helm repo update
 #### 安装 Milvus Helm chart：
 设置发布命名（release name）以标记或追踪该 chart 部署。
 
-<div class="alert note">
+
 本教程使用 <code> my-release</code> 作为 release name。如需使用不同的 release name, 请在以下命令中修改相应的 release name。
 </div>
 
@@ -60,7 +60,7 @@ $ helm repo update
 ```
 $ helm install my-release milvus/milvus
 ```
-<div class="alert note">
+
 详见 <a href="https://artifacthub.io/packages/helm/milvus/milvus">Milvus Helm charts</a>。
 </div>
 
@@ -91,7 +91,7 @@ $ helm uninstall my-release
 ```
 $ minikube stop
 ```
-<div class="alert note">
+
 如需重新启动集群，请运行命令：<code>minikube start</code>
 </div>
 
@@ -102,7 +102,6 @@ $ minikube stop
 ```
 minikube delete
 ```
-<div class="alert note">
+
 如需留存日志，在删除集群前从每个 pod 的 <code>stderr</code> 中复制日志及相关资源。运行 <code>kubectl logs (podname)</code> 指令获取 pod 标准错误流。
 </div>
-
