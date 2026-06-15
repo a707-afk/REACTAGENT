@@ -46,9 +46,9 @@ Then provide some texts to the model.
 
 ```python
 sentences = [
-    "The weather is lovely today.",
-    "It's so sunny outside!",
-    "He drove to the stadium.",
+ "The weather is lovely today.",
+ "It's so sunny outside!",
+ "He drove to the stadium.",
 ]
 embeddings = model.encode(sentences)
 print(embeddings.shape)
@@ -61,8 +61,8 @@ And that's already it. We now have numpy arrays with the embeddings, one for eac
 similarities = model.similarity(embeddings, embeddings)
 print(similarities)
 # tensor([[1.0000, 0.6660, 0.1046],
-#         [0.6660, 1.0000, 0.1411],
-#         [0.1046, 0.1411, 1.0000]])
+# [0.6660, 1.0000, 0.1411],
+# [0.1046, 0.1411, 1.0000]])
 ```
 
 ### Reranker Models
@@ -82,9 +82,9 @@ Then provide some texts to the model.
 # The texts for which to predict similarity scores
 query = "How many people live in Berlin?"
 passages = [
-    "Berlin had a population of 3,520,031 registered inhabitants in an area of 891.82 square kilometers.",
-    "Berlin has a yearly total of about 135 million day visitors, making it one of the most-visited cities in the European Union.",
-    "In 2013 around 600,000 Berliners were registered in one of the more than 2,300 sport and fitness clubs.",
+ "Berlin had a population of 3,520,031 registered inhabitants in an area of 891.82 square kilometers.",
+ "Berlin has a yearly total of about 135 million day visitors, making it one of the most-visited cities in the European Union.",
+ "In 2013 around 600,000 Berliners were registered in one of the more than 2,300 sport and fitness clubs.",
 ]
 
 # 2a. predict scores for pairs of texts
@@ -101,7 +101,7 @@ ranks = model.rank(query, passages, return_documents=True)
 
 print("Query:", query)
 for rank in ranks:
-    print(f"- #{rank['corpus_id']} ({rank['score']:.2f}): {rank['text']}")
+ print(f"- #{rank['corpus_id']} ({rank['score']:.2f}): {rank['text']}")
 """
 Query: How many people live in Berlin?
 - #0 (8.61): Berlin had a population of 3,520,031 registered inhabitants in an area of 891.82 square kilometers.
@@ -123,9 +123,9 @@ model = SparseEncoder("naver/splade-cocondenser-ensembledistil")
 
 # The sentences to encode
 sentences = [
-    "The weather is lovely today.",
-    "It's so sunny outside!",
-    "He drove to the stadium.",
+ "The weather is lovely today.",
+ "It's so sunny outside!",
+ "He drove to the stadium.",
 ]
 
 # 2. Calculate sparse embeddings by calling model.encode()
@@ -136,9 +136,9 @@ print(embeddings.shape)
 # 3. Calculate the embedding similarities
 similarities = model.similarity(embeddings, embeddings)
 print(similarities)
-# tensor([[   35.629,     9.154,     0.098],
-#         [    9.154,    27.478,     0.019],
-#         [    0.098,     0.019,    29.553]])
+# tensor([[ 35.629, 9.154, 0.098],
+# [ 9.154, 27.478, 0.019],
+# [ 0.098, 0.019, 29.553]])
 
 # 4. Check sparsity stats
 stats = SparseEncoder.sparsity(embeddings)
@@ -156,19 +156,19 @@ We provide a large list of pretrained models for more than 100 languages. Some m
 
 ## Training
 
-> **Tip:** Using an AI coding agent (Claude Code, Codex, Cursor, Gemini CLI, ...)? Install the [`train-sentence-transformers`](skills/) Hugging Face Agent Skill via `hf skills add train-sentence-transformers [--claude] [--global]` and ask your agent to fine-tune a model on your data.
+> **Tip:** Using an AI coding agent (Claude Code, Codex, Cursor, Gemini CLI, ...)? Install the [ rain-sentence-transformers`](skills/) Hugging Face Agent Skill via `hf skills add train-sentence-transformers [--claude] [--global]` and ask your agent to fine-tune a model on your data.
 
 This framework allows you to fine-tune your own sentence embedding methods, so that you get task-specific sentence embeddings. You have various options to choose from in order to get perfect sentence embeddings for your specific task.
 
 - Embedding Models
-  - [Sentence Transformer > Training Overview](https://www.sbert.net/docs/sentence_transformer/training_overview.html)
-  - [Sentence Transformer > Training Examples](https://www.sbert.net/docs/sentence_transformer/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/sentence_transformer/training).
+ - [Sentence Transformer > Training Overview](https://www.sbert.net/docs/sentence_transformer/training_overview.html)
+ - [Sentence Transformer > Training Examples](https://www.sbert.net/docs/sentence_transformer/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/sentence_transformer/training).
 - Reranker Models
-  - [Cross Encoder > Training Overview](https://www.sbert.net/docs/cross_encoder/training_overview.html)
-  - [Cross Encoder > Training Examples](https://www.sbert.net/docs/cross_encoder/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/cross_encoder/training).
+ - [Cross Encoder > Training Overview](https://www.sbert.net/docs/cross_encoder/training_overview.html)
+ - [Cross Encoder > Training Examples](https://www.sbert.net/docs/cross_encoder/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/cross_encoder/training).
 - Sparse Embedding Models
-  - [Sparse Encoder > Training Overview](https://www.sbert.net/docs/sparse_encoder/training_overview.html)
-  - [Sparse Encoder > Training Examples](https://www.sbert.net/docs/sparse_encoder/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/sparse_encoder/training).
+ - [Sparse Encoder > Training Overview](https://www.sbert.net/docs/sparse_encoder/training_overview.html)
+ - [Sparse Encoder > Training Examples](https://www.sbert.net/docs/sparse_encoder/training/examples.html) or [training examples on GitHub](https://github.com/huggingface/sentence-transformers/tree/main/examples/sparse_encoder/training).
 
 Some highlights across the different types of training are:
 
@@ -204,23 +204,23 @@ You can use this framework for:
 
 - **Computing Sentence Embeddings**
 
-  - [Dense Embeddings](https://www.sbert.net/examples/sentence_transformer/applications/computing-embeddings/README.html)
-  - [Sparse Embeddings](https://www.sbert.net/examples/sparse_encoder/applications/computing_embeddings/README.html)
+ - [Dense Embeddings](https://www.sbert.net/examples/sentence_transformer/applications/computing-embeddings/README.html)
+ - [Sparse Embeddings](https://www.sbert.net/examples/sparse_encoder/applications/computing_embeddings/README.html)
 
 - **Semantic Textual Similarity**
 
-  - [Dense STS](https://www.sbert.net/docs/sentence_transformer/usage/semantic_textual_similarity.html)
-  - [Sparse STS](https://www.sbert.net/examples/sparse_encoder/applications/semantic_textual_similarity/README.html)
+ - [Dense STS](https://www.sbert.net/docs/sentence_transformer/usage/semantic_textual_similarity.html)
+ - [Sparse STS](https://www.sbert.net/examples/sparse_encoder/applications/semantic_textual_similarity/README.html)
 
 - **Semantic Search**
 
-  - [Dense Search](https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html)
-  - [Sparse Search](https://www.sbert.net/examples/sparse_encoder/applications/semantic_search/README.html)
+ - [Dense Search](https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html)
+ - [Sparse Search](https://www.sbert.net/examples/sparse_encoder/applications/semantic_search/README.html)
 
 - **Retrieve & Re-Rank**
 
-  - [Dense only Retrieval](https://www.sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
-  - [Sparse/Dense/Hybrid Retrieval](https://www.sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
+ - [Dense only Retrieval](https://www.sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
+ - [Sparse/Dense/Hybrid Retrieval](https://www.sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
 
 - [Clustering](https://www.sbert.net/examples/sentence_transformer/applications/clustering/README.html)
 
@@ -254,29 +254,29 @@ pytest
 
 If you find this repository helpful, feel free to cite our publication [Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks](https://huggingface.co/papers/1908.10084):
 
-```bibtex
+``ibtex
 @inproceedings{reimers-2019-sentence-bert,
-    title = "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
-    author = "Reimers, Nils and Gurevych, Iryna",
-    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing",
-    month = "11",
-    year = "2019",
-    publisher = "Association for Computational Linguistics",
-    url = "https://arxiv.org/abs/1908.10084",
+ title = "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+ author = "Reimers, Nils and Gurevych, Iryna",
+ booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing",
+ month = "11",
+ year = "2019",
+ publisher = "Association for Computational Linguistics",
+ url = "https://arxiv.org/abs/1908.10084",
 }
 ```
 
 If you use one of the multilingual models, feel free to cite our publication [Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation](https://huggingface.co/papers/2004.09813):
 
-```bibtex
+``ibtex
 @inproceedings{reimers-2020-multilingual-sentence-bert,
-    title = "Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation",
-    author = "Reimers, Nils and Gurevych, Iryna",
-    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing",
-    month = "11",
-    year = "2020",
-    publisher = "Association for Computational Linguistics",
-    url = "https://arxiv.org/abs/2004.09813",
+ title = "Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation",
+ author = "Reimers, Nils and Gurevych, Iryna",
+ booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing",
+ month = "11",
+ year = "2020",
+ publisher = "Association for Computational Linguistics",
+ url = "https://arxiv.org/abs/2004.09813",
 }
 ```
 

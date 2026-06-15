@@ -2,25 +2,25 @@
 ![Chroma](./docs/assets/chroma-wordmark-white.png#gh-dark-mode-only)
 
 <p align="center">
-    <b>Chroma - the open-source data infrastructure for AI</b>. <br />
+ <b>Chroma - the open-source data infrastructure for AI</b>. <br />
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/MMeYNTmh3x" target="_blank">
-      <img src="https://img.shields.io/discord/1073293645303795742?cacheSeconds=3600" alt="Discord">
-  </a> |
-  <a href="https://github.com/chroma-core/chroma/blob/master/LICENSE" target="_blank">
-      <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
-  </a> |
-  <a href="https://docs.trychroma.com/" target="_blank">
-      Docs
-  </a> |
-  <a href="https://www.trychroma.com/" target="_blank">
-      Homepage
-  </a>
+ <a href="https://discord.gg/MMeYNTmh3x" target="_blank">
+ <img src="https://img.shields.io/discord/1073293645303795742?cacheSeconds=3600" alt="Discord">
+ </a> |
+ <a href="https://github.com/chroma-core/chroma/blob/master/LICENSE" target="_blank">
+ <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
+ </a> |
+ <a href="https://docs.trychroma.com/" target="_blank">
+ Docs
+ </a> |
+ <a href="https://www.trychroma.com/" target="_blank">
+ Homepage
+ </a>
 </p>
 
-```bash
+`sh
 pip install chromadb # python client
 # for javascript, npm install chromadb!
 # for client-server mode, chroma run --path /chroma_db_path
@@ -46,17 +46,17 @@ collection = client.create_collection("all-my-documents")
 
 # Add docs to the collection. Can also update and delete. Row-based API coming soon!
 collection.add(
-    documents=["This is document1", "This is document2"], # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
-    metadatas=[{"source": "notion"}, {"source": "google-docs"}], # filter on these!
-    ids=["doc1", "doc2"], # unique for each doc
+ documents=["This is document1", "This is document2"], # we handle tokenization, embedding, and indexing automatically. You can skip that and add your own embeddings as well
+ metadatas=[{"source": "notion"}, {"source": "google-docs"}], # filter on these!
+ ids=["doc1", "doc2"], # unique for each doc
 )
 
 # Query/search 2 most similar results. You can also .get by id
 results = collection.query(
-    query_texts=["This is a query document"],
-    n_results=2,
-    # where={"metadata_field": "is_equal_to_this"}, # optional filter
-    # where_document={"$contains":"search_string"}  # optional filter
+ query_texts=["This is a query document"],
+ n_results=2,
+ # where={"metadata_field": "is_equal_to_this"}, # optional filter
+ # where_document={"$contains":"search_string"} # optional filter
 )
 ```
 
@@ -71,7 +71,7 @@ Chroma is a rapidly developing project. We welcome PR contributors and ideas for
 - [Read our contributing guide](https://docs.trychroma.com/docs/overview/oss#contributing)
 
 **Release Cadence**
-We currently release new tagged versions of the `pypi` and `npm` packages on Mondays. Hotfixes go out at any time during the week.
+We currently release new tagged versions of the `pypi` and pm` packages on Mondays. Hotfixes go out at any time during the week.
 
 ## License
 

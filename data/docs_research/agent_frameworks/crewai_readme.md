@@ -1,54 +1,54 @@
 <p align="center">
-  <a href="https://github.com/crewAIInc/crewAI">
-    <img src="docs/images/crewai_logo.png" width="600px" alt="Open source Multi-AI Agent orchestration framework">
-  </a>
+ <a href="https://github.com/crewAIInc/crewAI">
+ <img src="docs/images/crewai_logo.png" width="600px" alt="Open source Multi-AI Agent orchestration framework">
+ </a>
 </p>
 <p align="center" style="display: flex; justify-content: center; gap: 20px; align-items: center;">
-  <a href="https://trendshift.io/repositories/11239" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/11239" alt="crewAIInc%2FcrewAI | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
+ <a href="https://trendshift.io/repositories/11239" target="_blank">
+ <img src="https://trendshift.io/api/badge/repositories/11239" alt="crewAIInc%2FcrewAI | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
+ </a>
 </p>
 
 <p align="center">
-  <a href="https://crewai.com">Homepage</a>
-  ·
-  <a href="https://docs.crewai.com">Docs</a>
-  ·
-  <a href="https://app.crewai.com">Start Cloud Trial</a>
-  ·
-  <a href="https://blog.crewai.com">Blog</a>
-  ·
-  <a href="https://community.crewai.com">Forum</a>
+ <a href="https://crewai.com">Homepage</a>
+ ·
+ <a href="https://docs.crewai.com">Docs</a>
+ ·
+ <a href="https://app.crewai.com">Start Cloud Trial</a>
+ ·
+ <a href="https://blog.crewai.com">Blog</a>
+ ·
+ <a href="https://community.crewai.com">Forum</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/crewAIInc/crewAI">
-    <img src="https://img.shields.io/github/stars/crewAIInc/crewAI" alt="GitHub Repo stars">
-  </a>
-  <a href="https://github.com/crewAIInc/crewAI/network/members">
-    <img src="https://img.shields.io/github/forks/crewAIInc/crewAI" alt="GitHub forks">
-  </a>
-  <a href="https://github.com/crewAIInc/crewAI/issues">
-    <img src="https://img.shields.io/github/issues/crewAIInc/crewAI" alt="GitHub issues">
-  </a>
-  <a href="https://github.com/crewAIInc/crewAI/pulls">
-    <img src="https://img.shields.io/github/issues-pr/crewAIInc/crewAI" alt="GitHub pull requests">
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT">
-  </a>
+ <a href="https://github.com/crewAIInc/crewAI">
+ <img src="https://img.shields.io/github/stars/crewAIInc/crewAI" alt="GitHub Repo stars">
+ </a>
+ <a href="https://github.com/crewAIInc/crewAI/network/members">
+ <img src="https://img.shields.io/github/forks/crewAIInc/crewAI" alt="GitHub forks">
+ </a>
+ <a href="https://github.com/crewAIInc/crewAI/issues">
+ <img src="https://img.shields.io/github/issues/crewAIInc/crewAI" alt="GitHub issues">
+ </a>
+ <a href="https://github.com/crewAIInc/crewAI/pulls">
+ <img src="https://img.shields.io/github/issues-pr/crewAIInc/crewAI" alt="GitHub pull requests">
+ </a>
+ <a href="https://opensource.org/licenses/MIT">
+ <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT">
+ </a>
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/crewai/">
-    <img src="https://img.shields.io/pypi/v/crewai" alt="PyPI version">
-  </a>
-  <a href="https://pypi.org/project/crewai/">
-    <img src="https://img.shields.io/pypi/dm/crewai" alt="PyPI downloads">
-  </a>
-  <a href="https://twitter.com/crewAIInc">
-    <img src="https://img.shields.io/twitter/follow/crewAIInc?style=social" alt="Twitter Follow">
-  </a>
+ <a href="https://pypi.org/project/crewai/">
+ <img src="https://img.shields.io/pypi/v/crewai" alt="PyPI version">
+ </a>
+ <a href="https://pypi.org/project/crewai/">
+ <img src="https://img.shields.io/pypi/dm/crewai" alt="PyPI downloads">
+ </a>
+ <a href="https://twitter.com/crewAIInc">
+ <img src="https://img.shields.io/twitter/follow/crewAIInc?style=social" alt="Twitter Follow">
+ </a>
 </p>
 
 ### Fast and Flexible Multi-Agent Automation Framework
@@ -90,11 +90,11 @@ intelligent automations.
 - [Understanding Flows and Crews](#understanding-flows-and-crews)
 - [CrewAI vs LangGraph](#how-crewai-compares)
 - [Examples](#examples)
-  - [Quick Tutorial](#quick-tutorial)
-  - [Write Job Descriptions](#write-job-descriptions)
-  - [Trip Planner](#trip-planner)
-  - [Stock Analysis](#stock-analysis)
-  - [Using Crews and Flows Together](#using-crews-and-flows-together)
+ - [Quick Tutorial](#quick-tutorial)
+ - [Write Job Descriptions](#write-job-descriptions)
+ - [Trip Planner](#trip-planner)
+ - [Stock Analysis](#stock-analysis)
+ - [Using Crews and Flows Together](#using-crews-and-flows-together)
 - [Connecting Your Crew to a Model](#connecting-your-crew-to-a-model)
 - [How CrewAI Compares](#how-crewai-compares)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
@@ -119,7 +119,7 @@ Four skills that activate automatically when you ask relevant CrewAI questions:
 | `getting-started` | Scaffolding new projects, choosing between `LLM.call()` / `Agent` / `Crew` / `Flow`, wiring `crew.py` / `main.py` |
 | `design-agent` | Configuring agents — role, goal, backstory, tools, LLMs, memory, guardrails |
 | `design-task` | Writing task descriptions, dependencies, structured output (`output_pydantic`, `output_json`), human review |
-| `ask-docs` | Querying the live [CrewAI docs MCP server](https://docs.crewai.com/mcp) for up-to-date API details |
+| sk-docs` | Querying the live [CrewAI docs MCP server](https://docs.crewai.com/mcp) for up-to-date API details |
 
 **Cursor, Codex, Windsurf, and others ([skills.sh](https://skills.sh/crewaiinc/skills)):**
 ```shell
@@ -131,7 +131,7 @@ This installs the official [CrewAI Skills](https://github.com/crewAIInc/skills) 
 ## Why CrewAI?
 
 <div align="center" style="margin-bottom: 30px;">
-  <img src="docs/images/asset.png" alt="CrewAI Logo" width="100%">
+ <img src="docs/images/asset.png" alt="CrewAI Logo" width="100%">
 </div>
 
 CrewAI unlocks the true potential of multi-agent automation, delivering the best-in-class combination of speed, flexibility, and control with either Crews of AI Agents or Flows of Events:
@@ -165,17 +165,17 @@ CrewAI offers two powerful, complementary approaches that work seamlessly togeth
 
 1. **Crews**: Teams of AI agents with true autonomy and agency, working together to accomplish complex tasks through role-based collaboration. Crews enable:
 
-   - Natural, autonomous decision-making between agents
-   - Dynamic task delegation and collaboration
-   - Specialized roles with defined goals and expertise
-   - Flexible problem-solving approaches
+ - Natural, autonomous decision-making between agents
+ - Dynamic task delegation and collaboration
+ - Specialized roles with defined goals and expertise
+ - Flexible problem-solving approaches
 
 2. **Flows**: Production-ready, event-driven workflows that deliver precise control over complex automations. Flows provide:
 
-   - Fine-grained control over execution paths for real-world scenarios
-   - Secure, consistent state management between tasks
-   - Clean integration of AI agents with production Python code
-   - Conditional branching for complex business logic
+ - Fine-grained control over execution paths for real-world scenarios
+ - Secure, consistent state management between tasks
+ - Clean integration of AI agents with production Python code
+ - Conditional branching for complex business logic
 
 The true power of CrewAI emerges when combining Crews and Flows. This synergy allows you to:
 
@@ -214,15 +214,15 @@ If you encounter issues during installation or usage, here are some common solut
 
 1. **ModuleNotFoundError: No module named 'tiktoken'**
 
-   - Install tiktoken explicitly: `uv pip install 'crewai[embeddings]'`
-   - If using embedchain or other tools: `uv pip install 'crewai[tools]'`
+ - Install tiktoken explicitly: `uv pip install 'crewai[embeddings]'`
+ - If using embedchain or other tools: `uv pip install 'crewai[tools]'`
 
 2. **Failed building wheel for tiktoken**
 
-   - Ensure Rust compiler is installed (see installation steps above)
-   - For Windows: Verify Visual C++ Build Tools are installed
-   - Try upgrading pip: `uv pip install --upgrade pip`
-   - If issues persist, use a pre-built wheel: `uv pip install tiktoken --prefer-binary`
+ - Ensure Rust compiler is installed (see installation steps above)
+ - For Windows: Verify Visual C++ Build Tools are installed
+ - Try upgrading pip: `uv pip install --upgrade pip`
+ - If issues persist, use a pre-built wheel: `uv pip install tiktoken --prefer-binary`
 
 ### 2. Setting Up Your Crew with the YAML Configuration
 
@@ -241,19 +241,19 @@ my_project/
 ├── README.md
 ├── .env
 └── src/
-    └── my_project/
-        ├── __init__.py
-        ├── main.py
-        ├── crew.py
-        ├── tools/
-        │   ├── custom_tool.py
-        │   └── __init__.py
-        └── config/
-            ├── agents.yaml
-            └── tasks.yaml
+ └── my_project/
+ ├── __init__.py
+ ├── main.py
+ ├── crew.py
+ ├── tools/
+ │ ├── custom_tool.py
+ │ └── __init__.py
+ └── config/
+ ├── agents.yaml
+ └── tasks.yaml
 ```
 
-You can now start developing your crew by editing the files in the `src/my_project` folder. The `main.py` file is the entry point of the project, the `crew.py` file is where you define your crew, the `agents.yaml` file is where you define your agents, and the `tasks.yaml` file is where you define your tasks.
+You can now start developing your crew by editing the files in the `src/my_project` folder. The `main.py` file is the entry point of the project, the `crew.py` file is where you define your crew, the gents.yaml` file is where you define your agents, and the asks.yaml` file is where you define your tasks.
 
 #### To customize your project, you can:
 
@@ -278,24 +278,24 @@ Modify the files as needed to fit your use case:
 ```yaml
 # src/my_project/config/agents.yaml
 researcher:
-  role: >
-    {topic} Senior Data Researcher
-  goal: >
-    Uncover cutting-edge developments in {topic}
-  backstory: >
-    You're a seasoned researcher with a knack for uncovering the latest
-    developments in {topic}. Known for your ability to find the most relevant
-    information and present it in a clear and concise manner.
+ role: >
+ {topic} Senior Data Researcher
+ goal: >
+ Uncover cutting-edge developments in {topic}
+ backstory: >
+ You're a seasoned researcher with a knack for uncovering the latest
+ developments in {topic}. Known for your ability to find the most relevant
+ information and present it in a clear and concise manner.
 
 reporting_analyst:
-  role: >
-    {topic} Reporting Analyst
-  goal: >
-    Create detailed reports based on {topic} data analysis and research findings
-  backstory: >
-    You're a meticulous analyst with a keen eye for detail. You're known for
-    your ability to turn complex data into clear and concise reports, making
-    it easy for others to understand and act on the information you provide.
+ role: >
+ {topic} Reporting Analyst
+ goal: >
+ Create detailed reports based on {topic} data analysis and research findings
+ backstory: >
+ You're a meticulous analyst with a keen eye for detail. You're known for
+ your ability to turn complex data into clear and concise reports, making
+ it easy for others to understand and act on the information you provide.
 ```
 
 **tasks.yaml**
@@ -303,23 +303,23 @@ reporting_analyst:
 ````yaml
 # src/my_project/config/tasks.yaml
 research_task:
-  description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is 2025.
-  expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+ description: >
+ Conduct a thorough research about {topic}
+ Make sure you find any interesting and relevant information given
+ the current year is 2025.
+ expected_output: >
+ A list with 10 bullet points of the most relevant information about {topic}
+ agent: researcher
 
 reporting_task:
-  description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
-  expected_output: >
-    A fully fledge reports with the mains topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
-  output_file: report.md
+ description: >
+ Review the context you got and expand each topic into a full section for a report.
+ Make sure the report is detailed and contains any and all relevant information.
+ expected_output: >
+ A fully fledge reports with the mains topics, each with a full section of information.
+ Formatted as markdown without '```'
+ agent: reporting_analyst
+ output_file: report.md
 ````
 
 **crew.py**
@@ -334,47 +334,47 @@ from typing import List
 
 @CrewBase
 class LatestAiDevelopmentCrew():
-	"""LatestAiDevelopment crew"""
-	agents: List[BaseAgent]
-	tasks: List[Task]
+ """LatestAiDevelopment crew"""
+ agents: List[BaseAgent]
+ tasks: List[Task]
 
-	@agent
-	def researcher(self) -> Agent:
-		return Agent(
-			config=self.agents_config['researcher'],
-			verbose=True,
-			tools=[SerperDevTool()]
-		)
+ @agent
+ def researcher(self) -> Agent:
+ return Agent(
+ config=self.agents_config['researcher'],
+ verbose=True,
+ tools=[SerperDevTool()]
+ )
 
-	@agent
-	def reporting_analyst(self) -> Agent:
-		return Agent(
-			config=self.agents_config['reporting_analyst'],
-			verbose=True
-		)
+ @agent
+ def reporting_analyst(self) -> Agent:
+ return Agent(
+ config=self.agents_config['reporting_analyst'],
+ verbose=True
+ )
 
-	@task
-	def research_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['research_task'],
-		)
+ @task
+ def research_task(self) -> Task:
+ return Task(
+ config=self.tasks_config['research_task'],
+ )
 
-	@task
-	def reporting_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['reporting_task'],
-			output_file='report.md'
-		)
+ @task
+ def reporting_task(self) -> Task:
+ return Task(
+ config=self.tasks_config['reporting_task'],
+ output_file='report.md'
+ )
 
-	@crew
-	def crew(self) -> Crew:
-		"""Creates the LatestAiDevelopment crew"""
-		return Crew(
-			agents=self.agents, # Automatically created by the @agent decorator
-			tasks=self.tasks, # Automatically created by the @task decorator
-			process=Process.sequential,
-			verbose=True,
-		)
+ @crew
+ def crew(self) -> Crew:
+ """Creates the LatestAiDevelopment crew"""
+ return Crew(
+ agents=self.agents, # Automatically created by the @agent decorator
+ tasks=self.tasks, # Automatically created by the @task decorator
+ process=Process.sequential,
+ verbose=True,
+ )
 ```
 
 **main.py**
@@ -386,13 +386,13 @@ import sys
 from latest_ai_development.crew import LatestAiDevelopmentCrew
 
 def run():
-    """
-    Run the crew.
-    """
-    inputs = {
-        'topic': 'AI Agents'
-    }
-    LatestAiDevelopmentCrew().crew().kickoff(inputs=inputs)
+ """
+ Run the crew.
+ """
+ inputs = {
+ 'topic': 'AI Agents'
+ }
+ LatestAiDevelopmentCrew().crew().kickoff(inputs=inputs)
 ```
 
 ### 3. Running Your Crew
@@ -411,23 +411,23 @@ crewai install (Optional)
 
 To run your crew, execute the following command in the root of your project:
 
-```bash
+`sh
 crewai run
 ```
 
 or
 
-```bash
+`sh
 python src/my_project/main.py
 ```
 
 If an error happens due to the usage of poetry, please run the following command to update your crewai package:
 
-```bash
+`sh
 crewai update
 ```
 
-You should see the output in the console and the `report.md` file should be created in the root of your project with the full final report.
+You should see the output in the console and the eport.md` file should be created in the root of your project with the full final report.
 
 In addition to the sequential process, you can use the hierarchical process, which automatically assigns a manager to the defined crew to properly coordinate the planning and execution of tasks through delegation and validation of results. [See more about the processes here](https://docs.crewai.com/core-concepts/Processes/).
 
@@ -478,10 +478,10 @@ You can test different real life examples of AI crews in the [CrewAI-examples re
 ### Using Crews and Flows Together
 
 CrewAI's power truly shines when combining Crews with Flows to create sophisticated automation pipelines.
-CrewAI flows support logical operators like `or_` and `and_` to combine multiple conditions. This can be used with `@start`, `@listen`, or `@router` decorators to create complex triggering conditions.
+CrewAI flows support logical operators like `or_` and nd_` to combine multiple conditions. This can be used with `@start`, `@listen`, or `@router` decorators to create complex triggering conditions.
 
 - `or_`: Triggers when any of the specified conditions are met.
-- `and_`Triggers when all of the specified conditions are met.
+- nd_`Triggers when all of the specified conditions are met.
 
 Here's how you can orchestrate multiple Crews within a Flow:
 
@@ -492,79 +492,79 @@ from pydantic import BaseModel
 
 # Define structured state for precise control
 class MarketState(BaseModel):
-    sentiment: str = "neutral"
-    confidence: float = 0.0
-    recommendations: list = []
+ sentiment: str = "neutral"
+ confidence: float = 0.0
+ recommendations: list = []
 
 class AdvancedAnalysisFlow(Flow[MarketState]):
-    @start()
-    def fetch_market_data(self):
-        # Demonstrate low-level control with structured state
-        self.state.sentiment = "analyzing"
-        return {"sector": "tech", "timeframe": "1W"}  # These parameters match the task description template
+ @start()
+ def fetch_market_data(self):
+ # Demonstrate low-level control with structured state
+ self.state.sentiment = "analyzing"
+ return {"sector": "tech", "timeframe": "1W"} # These parameters match the task description template
 
-    @listen(fetch_market_data)
-    def analyze_with_crew(self, market_data):
-        # Show crew agency through specialized roles
-        analyst = Agent(
-            role="Senior Market Analyst",
-            goal="Conduct deep market analysis with expert insight",
-            backstory="You're a veteran analyst known for identifying subtle market patterns"
-        )
-        researcher = Agent(
-            role="Data Researcher",
-            goal="Gather and validate supporting market data",
-            backstory="You excel at finding and correlating multiple data sources"
-        )
+ @listen(fetch_market_data)
+ def analyze_with_crew(self, market_data):
+ # Show crew agency through specialized roles
+ analyst = Agent(
+ role="Senior Market Analyst",
+ goal="Conduct deep market analysis with expert insight",
+ backstory="You're a veteran analyst known for identifying subtle market patterns"
+ )
+ researcher = Agent(
+ role="Data Researcher",
+ goal="Gather and validate supporting market data",
+ backstory="You excel at finding and correlating multiple data sources"
+ )
 
-        analysis_task = Task(
-            description="Analyze {sector} sector data for the past {timeframe}",
-            expected_output="Detailed market analysis with confidence score",
-            agent=analyst
-        )
-        research_task = Task(
-            description="Find supporting data to validate the analysis",
-            expected_output="Corroborating evidence and potential contradictions",
-            agent=researcher
-        )
+ analysis_task = Task(
+ description="Analyze {sector} sector data for the past {timeframe}",
+ expected_output="Detailed market analysis with confidence score",
+ agent=analyst
+ )
+ research_task = Task(
+ description="Find supporting data to validate the analysis",
+ expected_output="Corroborating evidence and potential contradictions",
+ agent=researcher
+ )
 
-        # Demonstrate crew autonomy
-        analysis_crew = Crew(
-            agents=[analyst, researcher],
-            tasks=[analysis_task, research_task],
-            process=Process.sequential,
-            verbose=True
-        )
-        return analysis_crew.kickoff(inputs=market_data)  # Pass market_data as named inputs
+ # Demonstrate crew autonomy
+ analysis_crew = Crew(
+ agents=[analyst, researcher],
+ tasks=[analysis_task, research_task],
+ process=Process.sequential,
+ verbose=True
+ )
+ return analysis_crew.kickoff(inputs=market_data) # Pass market_data as named inputs
 
-    @router(analyze_with_crew)
-    def determine_next_steps(self):
-        # Show flow control with conditional routing
-        if self.state.confidence > 0.8:
-            return "high_confidence"
-        elif self.state.confidence > 0.5:
-            return "medium_confidence"
-        return "low_confidence"
+ @router(analyze_with_crew)
+ def determine_next_steps(self):
+ # Show flow control with conditional routing
+ if self.state.confidence > 0.8:
+ return "high_confidence"
+ elif self.state.confidence > 0.5:
+ return "medium_confidence"
+ return "low_confidence"
 
-    @listen("high_confidence")
-    def execute_strategy(self):
-        # Demonstrate complex decision making
-        strategy_crew = Crew(
-            agents=[
-                Agent(role="Strategy Expert",
-                      goal="Develop optimal market strategy")
-            ],
-            tasks=[
-                Task(description="Create detailed strategy based on analysis",
-                     expected_output="Step-by-step action plan")
-            ]
-        )
-        return strategy_crew.kickoff()
+ @listen("high_confidence")
+ def execute_strategy(self):
+ # Demonstrate complex decision making
+ strategy_crew = Crew(
+ agents=[
+ Agent(role="Strategy Expert",
+ goal="Develop optimal market strategy")
+ ],
+ tasks=[
+ Task(description="Create detailed strategy based on analysis",
+ expected_output="Step-by-step action plan")
+ ]
+ )
+ return strategy_crew.kickoff()
 
-    @listen(or_("medium_confidence", "low_confidence"))
-    def request_additional_analysis(self):
-        self.state.recommendations.append("Gather more data")
-        return "Additional analysis required"
+ @listen(or_("medium_confidence", "low_confidence"))
+ def request_additional_analysis(self):
+ self.state.recommendations.append("Gather more data")
+ return "Additional analysis required"
 ```
 
 This example demonstrates how to:
@@ -603,44 +603,44 @@ CrewAI is open-source and we welcome contributions. If you're looking to contrib
 
 ### Installing Dependencies
 
-```bash
+`sh
 uv lock
 uv sync
 ```
 
 ### Virtual Env
 
-```bash
+`sh
 uv venv
 ```
 
 ### Pre-commit hooks
 
-```bash
+`sh
 pre-commit install
 ```
 
 ### Running Tests
 
-```bash
+`sh
 uv run pytest .
 ```
 
 ### Running static type checks
 
-```bash
+`sh
 uvx mypy src
 ```
 
 ### Packaging
 
-```bash
+`sh
 uv build
 ```
 
 ### Installing Locally
 
-```bash
+`sh
 uv pip install dist/*.tar.gz
 ```
 
@@ -653,27 +653,27 @@ It's pivotal to understand that **NO data is collected** concerning prompts, tas
 Data collected includes:
 
 - Version of CrewAI
-  - So we can understand how many users are using the latest version
+ - So we can understand how many users are using the latest version
 - Version of Python
-  - So we can decide on what versions to better support
+ - So we can decide on what versions to better support
 - General OS (e.g. number of CPUs, macOS/Windows/Linux)
-  - So we know what OS we should focus on and if we could build specific OS related features
+ - So we know what OS we should focus on and if we could build specific OS related features
 - Number of agents and tasks in a crew
-  - So we make sure we are testing internally with similar use cases and educate people on the best practices
+ - So we make sure we are testing internally with similar use cases and educate people on the best practices
 - Crew Process being used
-  - Understand where we should focus our efforts
+ - Understand where we should focus our efforts
 - If Agents are using memory or allowing delegation
-  - Understand if we improved the features or maybe even drop them
+ - Understand if we improved the features or maybe even drop them
 - If Tasks are being executed in parallel or sequentially
-  - Understand if we should focus more on parallel execution
+ - Understand if we should focus more on parallel execution
 - Language model being used
-  - Improved support on most used languages
+ - Improved support on most used languages
 - Roles of agents in a crew
-  - Understand high level use cases so we can build better tools, integrations and examples about it
+ - Understand high level use cases so we can build better tools, integrations and examples about it
 - Tools names available
-  - Understand out of the publicly available tools, which ones are being used the most so we can improve them
+ - Understand out of the publicly available tools, which ones are being used the most so we can improve them
 
-Users can opt-in to Further Telemetry, sharing the complete telemetry data by setting the `share_crew` attribute to `True` on their Crews. Enabling `share_crew` results in the collection of detailed crew and task execution data, including `goal`, `backstory`, `context`, and `output` of tasks. This enables a deeper insight into usage patterns while respecting the user's choice to share.
+Users can opt-in to Further Telemetry, sharing the complete telemetry data by setting the `share_crew` attribute to `True` on their Crews. Enabling `share_crew` results in the collection of detailed crew and task execution data, including `goal`, ackstory`, `context`, and `output` of tasks. This enables a deeper insight into usage patterns while respecting the user's choice to share.
 
 ## License
 

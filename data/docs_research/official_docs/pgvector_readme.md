@@ -1,3 +1,7 @@
+<!-- source: pgvector Overview -->
+<!-- url: https://raw.githubusercontent.com/pgvector/pgvector/master/README.md -->
+<!-- fetched: 2026-06-14 -->
+
 # pgvector
 
 Open-source vector similarity search for Postgres
@@ -35,7 +39,7 @@ You can also install it with [Docker](#docker), [Homebrew](#homebrew), [PGXN](#p
 
 ### Windows
 
-Ensure [C++ support in Visual Studio](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools) is installed and run `x64 Native Tools Command Prompt for VS [version]` as administrator. Then use `nmake` to build:
+Ensure [C++ support in Visual Studio](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools) is installed and run `x64 Native Tools Command Prompt for VS [version]` as administrator. Then use make` to build:
 
 ```cmd
 set "PGROOT=C:\Program Files\PostgreSQL\18"
@@ -54,7 +58,7 @@ You can also install it with [Docker](#docker) or [conda-forge](#conda-forge).
 
 Enable the extension (do this once in each database where you want to use it)
 
-```tsql
+`` sql
 CREATE EXTENSION vector;
 ```
 
@@ -112,7 +116,7 @@ Upsert vectors
 
 ```sql
 INSERT INTO items (id, embedding) VALUES (1, '[1,2,3]'), (2, '[4,5,6]')
-    ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding;
+ ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding;
 ```
 
 Update vectors
@@ -168,7 +172,7 @@ SELECT embedding <-> '[3,1,2]' AS distance FROM items;
 
 For inner product, multiply by -1 (since `<#>` returns the negative inner product)
 
-```tsql
+`` sql
 SELECT (embedding <#> '[3,1,2]') * -1 AS inner_product FROM items;
 ```
 
@@ -251,7 +255,7 @@ Supported types are:
 
 - `vector` - up to 2,000 dimensions
 - `halfvec` - up to 4,000 dimensions
-- `bit` - up to 64,000 dimensions
+- it` - up to 64,000 dimensions
 - `sparsevec` - up to 1,000 non-zero elements
 
 ### Index Options
@@ -296,10 +300,10 @@ SET maintenance_work_mem = '8GB';
 
 A notice is shown when the graph no longer fits
 
-```text
-NOTICE:  hnsw graph no longer fits into maintenance_work_mem after 100000 tuples
-DETAIL:  Building will take significantly more time.
-HINT:  Increase maintenance_work_mem to speed up builds.
+`` ext
+NOTICE: hnsw graph no longer fits into maintenance_work_mem after 100000 tuples
+DETAIL: Building will take significantly more time.
+HINT: Increase maintenance_work_mem to speed up builds.
 ```
 
 Note: Do not set `maintenance_work_mem` so high that it exhausts the memory on the server
@@ -338,7 +342,7 @@ An IVFFlat index divides vectors into lists, and then searches a subset of those
 Three keys to achieving good recall are:
 
 1. Create the index *after* the table has some data
-2. Choose an appropriate number of lists - a good place to start is `rows / 1000` for up to 1M rows and `sqrt(rows)` for over 1M rows
+2. Choose an appropriate number of lists - a good place to start is ows / 1000` for up to 1M rows and `sqrt(rows)` for over 1M rows
 3. When querying, specify an appropriate number of [probes](#query-options) (higher is better for recall, lower is better for speed) - a good place to start is `sqrt(lists)`
 
 Add an index for each distance function you want to use.
@@ -373,7 +377,7 @@ Supported types are:
 
 - `vector` - up to 2,000 dimensions
 - `halfvec` - up to 4,000 dimensions
-- `bit` - up to 64,000 dimensions
+- it` - up to 64,000 dimensions
 
 ### Query Options
 
@@ -416,7 +420,7 @@ The phases for IVFFlat are:
 
 1. `initializing`
 2. `performing k-means`
-3. `assigning tuples`
+3. ssigning tuples`
 4. `loading tuples`
 
 Note: `%` is only populated during the `loading tuples` phase
@@ -489,7 +493,7 @@ With relaxed ordering, you can use a [materialized CTE](https://www.postgresql.o
 
 ```sql
 WITH relaxed_results AS MATERIALIZED (
-    SELECT id, embedding <-> '[1,2,3]' AS distance FROM items WHERE category_id = 123 ORDER BY distance LIMIT 5
+ SELECT id, embedding <-> '[1,2,3]' AS distance FROM items WHERE category_id = 123 ORDER BY distance LIMIT 5
 ) SELECT * FROM relaxed_results ORDER BY distance + 0;
 ```
 
@@ -499,7 +503,7 @@ For queries that filter by distance, use a materialized CTE and place the distan
 
 ```sql
 WITH nearest_results AS MATERIALIZED (
-    SELECT id, embedding <-> '[1,2,3]' AS distance FROM items ORDER BY distance LIMIT 5
+ SELECT id, embedding <-> '[1,2,3]' AS distance FROM items ORDER BY distance LIMIT 5
 ) SELECT * FROM nearest_results WHERE distance < 5 ORDER BY distance;
 ```
 
@@ -561,7 +565,7 @@ SELECT * FROM items ORDER BY embedding::halfvec(3) <-> '[1,2,3]' LIMIT 5;
 
 ## Binary Vectors
 
-Use the `bit` type to store binary vectors ([example](https://github.com/pgvector/pgvector-python/blob/master/examples/imagehash/example.py))
+Use the it` type to store binary vectors ([example](https://github.com/pgvector/pgvector-python/blob/master/examples/imagehash/example.py))
 
 ```sql
 CREATE TABLE items (id bigserial PRIMARY KEY, embedding bit(3));
@@ -594,7 +598,7 @@ Re-rank by the original vectors for better recall
 
 ```sql
 SELECT * FROM (
-    SELECT * FROM items ORDER BY binary_quantize(embedding)::bit(3) <~> binary_quantize('[1,-2,3]') LIMIT 20
+ SELECT * FROM items ORDER BY binary_quantize(embedding)::bit(3) <~> binary_quantize('[1,-2,3]') LIMIT 20
 ) ORDER BY embedding <=> '[1,-2,3]' LIMIT 5;
 ```
 
@@ -626,7 +630,7 @@ Use together with Postgres [full-text search](https://www.postgresql.org/docs/cu
 
 ```sql
 SELECT id, content FROM items, plainto_tsquery('hello search') query
-    WHERE textsearch @@ query ORDER BY ts_rank_cd(textsearch, query) DESC LIMIT 5;
+ WHERE textsearch @@ query ORDER BY ts_rank_cd(textsearch, query) DESC LIMIT 5;
 ```
 
 You can use [Reciprocal Rank Fusion](https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search/rrf.py) or a [cross-encoder](https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search/cross_encoder.py) to combine results.
@@ -649,7 +653,7 @@ Re-rank by the full vectors for better recall
 
 ```sql
 SELECT * FROM (
-    SELECT * FROM items ORDER BY subvector(embedding, 1, 3)::vector(3) <=> subvector('[1,2,3,4,5]'::vector, 1, 3) LIMIT 20
+ SELECT * FROM items ORDER BY subvector(embedding, 1, 3)::vector(3) <=> subvector('[1,2,3,4,5]'::vector, 1, 3) LIMIT 20
 ) ORDER BY embedding <=> '[1,2,3,4,5]' LIMIT 5;
 ```
 
@@ -715,7 +719,7 @@ SET max_parallel_workers_per_gather = 4;
 
 If vectors are normalized to length 1 (like [OpenAI embeddings](https://platform.openai.com/docs/guides/embeddings/which-distance-function-should-i-use)), use inner product for best performance.
 
-```tsql
+`` sql
 SELECT * FROM items ORDER BY embedding <#> '[3,1,2]' LIMIT 5;
 ```
 
@@ -840,7 +844,7 @@ SELECT * FROM embeddings WHERE model_id = 123 ORDER BY embedding::vector(3) <-> 
 
 #### Can I store vectors with more precision?
 
-You can use the `double precision[]` or `numeric[]` type to store vectors with more precision.
+You can use the `double precision[]` or umeric[]` type to store vectors with more precision.
 
 ```sql
 CREATE TABLE items (id bigserial PRIMARY KEY, embedding double precision[]);
@@ -947,7 +951,7 @@ Also, note that `NULL` vectors are not indexed (as well as zero vectors for cosi
 
 ### Vector Type
 
-Each vector takes `4 * dimensions + 8` bytes of storage. Each element is a single-precision floating-point number (like the `real` type in Postgres), and all elements must be finite (no `NaN`, `Infinity` or `-Infinity`). Vectors can have up to 16,000 dimensions.
+Each vector takes `4 * dimensions + 8` bytes of storage. Each element is a single-precision floating-point number (like the eal` type in Postgres), and all elements must be finite (no `NaN`, `Infinity` or `-Infinity`). Vectors can have up to 16,000 dimensions.
 
 ### Vector Operators
 
@@ -1127,7 +1131,7 @@ If compilation fails with `Cannot open include file: 'postgres.h': No such file 
 
 ### Mismatched Architecture
 
-If compilation fails with `error C2196: case value '4' already used`, make sure you’re using the `x64 Native Tools Command Prompt`. Then run `nmake /F Makefile.win clean` and re-run the installation instructions.
+If compilation fails with `error C2196: case value '4' already used`, make sure you’re using the `x64 Native Tools Command Prompt`. Then run make /F Makefile.win clean` and re-run the installation instructions.
 
 ### Missing Symbol
 
@@ -1151,18 +1155,18 @@ This adds pgvector to the [Postgres image](https://hub.docker.com/_/postgres) (r
 
 Supported tags are:
 
-- `pg18-trixie`, `0.8.2-pg18-trixie`
-- `pg18-bookworm`, `0.8.2-pg18-bookworm`, `pg18`, `0.8.2-pg18`
-- `pg17-trixie`, `0.8.2-pg17-trixie`
-- `pg17-bookworm`, `0.8.2-pg17-bookworm`, `pg17`, `0.8.2-pg17`
-- `pg16-trixie`, `0.8.2-pg16-trixie`
-- `pg16-bookworm`, `0.8.2-pg16-bookworm`, `pg16`, `0.8.2-pg16`
-- `pg15-trixie`, `0.8.2-pg15-trixie`
-- `pg15-bookworm`, `0.8.2-pg15-bookworm`, `pg15`, `0.8.2-pg15`
-- `pg14-trixie`, `0.8.2-pg14-trixie`
-- `pg14-bookworm`, `0.8.2-pg14-bookworm`, `pg14`, `0.8.2-pg14`
-- `pg13-trixie`, `0.8.2-pg13-trixie`
-- `pg13-bookworm`, `0.8.2-pg13-bookworm`, `pg13`, `0.8.2-pg13`
+- `pg18-trixie`, .8.2-pg18-trixie`
+- `pg18-bookworm`, .8.2-pg18-bookworm`, `pg18`, .8.2-pg18`
+- `pg17-trixie`, .8.2-pg17-trixie`
+- `pg17-bookworm`, .8.2-pg17-bookworm`, `pg17`, .8.2-pg17`
+- `pg16-trixie`, .8.2-pg16-trixie`
+- `pg16-bookworm`, .8.2-pg16-bookworm`, `pg16`, .8.2-pg16`
+- `pg15-trixie`, .8.2-pg15-trixie`
+- `pg15-bookworm`, .8.2-pg15-bookworm`, `pg15`, .8.2-pg15`
+- `pg14-trixie`, .8.2-pg14-trixie`
+- `pg14-bookworm`, .8.2-pg14-bookworm`, `pg14`, .8.2-pg14`
+- `pg13-trixie`, .8.2-pg13-trixie`
+- `pg13-bookworm`, .8.2-pg13-bookworm`, `pg13`, .8.2-pg13`
 
 You can also build the image manually:
 
@@ -1309,15 +1313,15 @@ make install
 To run all tests:
 
 ```sh
-make installcheck        # regression tests
-make prove_installcheck  # TAP tests
+make installcheck # regression tests
+make prove_installcheck # TAP tests
 ```
 
 To run single tests:
 
 ```sh
-make installcheck REGRESS=functions                            # regression test
-make prove_installcheck PROVE_TESTS=test/t/001_ivfflat_wal.pl  # TAP test
+make installcheck REGRESS=functions # regression test
+make prove_installcheck PROVE_TESTS=test/t/001_ivfflat_wal.pl # TAP test
 ```
 
 To enable assertions:

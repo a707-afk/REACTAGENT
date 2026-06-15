@@ -1,22 +1,22 @@
 <div align="center">
-  <a href="https://docs.langchain.com/oss/python/langchain/overview">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset=".github/images/logo-light.svg">
-      <img alt="LangChain Logo" src=".github/images/logo-dark.svg" width="50%">
-    </picture>
-  </a>
+ <a href="https://docs.langchain.com/oss/python/langchain/overview">
+ <picture>
+ <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-dark.svg">
+ <source media="(prefers-color-scheme: light)" srcset=".github/images/logo-light.svg">
+ <img alt="LangChain Logo" src=".github/images/logo-dark.svg" width="50%">
+ </picture>
+ </a>
 </div>
 
 <div align="center">
-  <h3>The agent engineering platform.</h3>
+ <h3>The agent engineering platform.</h3>
 </div>
 
 <div align="center">
-  <a href="https://opensource.org/licenses/MIT" target="_blank"><img src="https://img.shields.io/pypi/l/langchain" alt="PyPI - License"></a>
-  <a href="https://pypistats.org/packages/langchain" target="_blank"><img src="https://img.shields.io/pepy/dt/langchain" alt="PyPI - Downloads"></a>
-  <a href="https://pypi.org/project/langchain/#history" target="_blank"><img src="https://img.shields.io/pypi/v/langchain?label=%20" alt="Version"></a>
-  <a href="https://x.com/langchain_oss" target="_blank"><img src="https://img.shields.io/twitter/url/https/twitter.com/langchain_oss.svg?style=social&label=Follow%20%40LangChain" alt="Twitter / X"></a>
+ <a href="https://opensource.org/licenses/MIT" target="_blank"><img src="https://img.shields.io/pypi/l/langchain" alt="PyPI - License"></a>
+ <a href="https://pypistats.org/packages/langchain" target="_blank"><img src="https://img.shields.io/pepy/dt/langchain" alt="PyPI - Downloads"></a>
+ <a href="https://pypi.org/project/langchain/#history" target="_blank"><img src="https://img.shields.io/pypi/v/langchain?label=%20" alt="Version"></a>
+ <a href="https://x.com/langchain_oss" target="_blank"><img src="https://img.shields.io/twitter/url/https/twitter.com/langchain_oss.svg?style=social&label=Follow%20%40LangChain" alt="Twitter / X"></a>
 </div>
 
 <br>
@@ -28,7 +28,7 @@ LangChain is a framework for building agents and LLM-powered applications. It he
 
 ## Quickstart
 
-```bash
+`sh
 uv add langchain
 ```
 

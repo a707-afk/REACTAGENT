@@ -22,9 +22,9 @@ Python:
 1. **Starter**: [`llama-index`](https://pypi.org/project/llama-index/). A starter Python package that includes core LlamaIndex as well as a selection of integrations.
 
 2. **Customized**: [`llama-index-core`](https://pypi.org/project/llama-index-core/). Install core LlamaIndex and add your chosen LlamaIndex integration packages on [LlamaHub](https://llamahub.ai/)
-   that are required for your application. There are over 300 LlamaIndex integration
-   packages that work seamlessly with core, allowing you to build with your preferred
-   LLM, embedding, and vector store providers.
+ that are required for your application. There are over 300 LlamaIndex integration
+ packages that work seamlessly with core, allowing you to build with your preferred
+ LLM, embedding, and vector store providers.
 
 The LlamaIndex Python library is namespaced such that import statements which
 include `core` imply that the core package is being used. In contrast, those
@@ -32,10 +32,10 @@ statements without `core` imply that an integration package is being used.
 
 ```python
 # typical pattern
-from llama_index.core.xxx import ClassABC  # core submodule xxx
+from llama_index.core.xxx import ClassABC # core submodule xxx
 from llama_index.xxx.yyy import (
-    SubclassABC,
-)  # integration yyy for submodule xxx
+ SubclassABC,
+) # integration yyy for submodule xxx
 
 # concrete example
 from llama_index.core.llms import LLM
@@ -137,23 +137,23 @@ from transformers import AutoTokenizer
 
 # set the LLM
 Settings.llm = Ollama(
-    model="llama-3.1:latest",
-    request_timeout=360.0,
+ model="llama-3.1:latest",
+ request_timeout=360.0,
 )
 
 # set tokenizer to match LLM
 Settings.tokenizer = AutoTokenizer.from_pretrained(
-    "meta-llama/Llama-3.1-8B-Instruct"
+ "meta-llama/Llama-3.1-8B-Instruct"
 )
 
 # set the embed model
 Settings.embed_model = HuggingFaceEmbedding(
-    model_name="BAAI/bge-small-en-v1.5"
+ model_name="BAAI/bge-small-en-v1.5"
 )
 
 documents = SimpleDirectoryReader("YOUR_DATA_DIRECTORY").load_data()
 index = VectorStoreIndex.from_documents(
-    documents,
+ documents,
 )
 ```
 
@@ -186,18 +186,18 @@ index = load_index_from_storage(storage_context)
 
 By default, `llama-index-core` includes a `_static` folder that contains the nltk and tiktoken cache that is included with the package installation. This ensures that you can easily run `llama-index` in environments with restrictive disk access permissions at runtime.
 
-To verify that these files are safe and valid, we use the github `attest-build-provenance` action. This action will verify that the files in the `_static` folder are the same as the files in the `llama-index-core/llama_index/core/_static` folder.
+To verify that these files are safe and valid, we use the github ttest-build-provenance` action. This action will verify that the files in the `_static` folder are the same as the files in the `llama-index-core/llama_index/core/_static` folder.
 
 To verify this, you can run the following script (pointing to your installed package):
 
-```bash
+`sh
 #!/bin/bash
 STATIC_DIR="venv/lib/python3.13/site-packages/llama_index/core/_static"
 REPO="run-llama/llama_index"
 
 find "$STATIC_DIR" -type f | while read -r file; do
-    echo "Verifying: $file"
-    gh attestation verify "$file" -R "$REPO" || echo "Failed to verify: $file"
+ echo "Verifying: $file"
+ gh attestation verify "$file" -R "$REPO" || echo "Failed to verify: $file"
 done
 ```
 

@@ -1,22 +1,22 @@
 <p align="center">
-  <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-light.svg">
-      <img height="100" alt="Qdrant" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg">
-  </picture>
+ <picture>
+ <source media="(prefers-color-scheme: dark)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-dark.svg">
+ <source media="(prefers-color-scheme: light)" srcset="https://github.com/qdrant/qdrant/raw/master/docs/logo-light.svg">
+ <img height="100" alt="Qdrant" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg">
+ </picture>
 </p>
 
 <p align="center">
-    <b>Vector Search Engine for the next generation of AI applications</b>
+ <b>Vector Search Engine for the next generation of AI applications</b>
 </p>
 
 <p align=center>
-    <a href="https://github.com/qdrant/qdrant/actions/workflows/rust.yml"><img src="https://img.shields.io/github/actions/workflow/status/qdrant/qdrant/rust.yml?style=flat-square" alt="Tests status"></a>
-    <a href="https://api.qdrant.tech/"><img src="https://img.shields.io/badge/Docs-OpenAPI%203.0-success?style=flat-square" alt="OpenAPI Docs"></a>
-    <a href="https://github.com/qdrant/qdrant/blob/master/LICENSE"><img src="https://img.shields.io/github/license/qdrant/qdrant?style=flat-square" alt="Apache 2.0 License"></a>
-    <a href="https://qdrant.to/discord"><img src="https://img.shields.io/discord/907569970500743200?logo=Discord&style=flat-square&color=7289da" alt="Discord"></a>
-    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2025-bc1439.svg?style=flat-square" alt="Roadmap 2025"></a>
-    <a href="https://cloud.qdrant.io/"><img src="https://img.shields.io/badge/Qdrant-Cloud-24386C.svg?logo=cloud&style=flat-square" alt="Qdrant Cloud"></a>
+ <a href="https://github.com/qdrant/qdrant/actions/workflows/rust.yml"><img src="https://img.shields.io/github/actions/workflow/status/qdrant/qdrant/rust.yml?style=flat-square" alt="Tests status"></a>
+ <a href="https://api.qdrant.tech/"><img src="https://img.shields.io/badge/Docs-OpenAPI%203.0-success?style=flat-square" alt="OpenAPI Docs"></a>
+ <a href="https://github.com/qdrant/qdrant/blob/master/LICENSE"><img src="https://img.shields.io/github/license/qdrant/qdrant?style=flat-square" alt="Apache 2.0 License"></a>
+ <a href="https://qdrant.to/discord"><img src="https://img.shields.io/discord/907569970500743200?logo=Discord&style=flat-square&color=7289da" alt="Discord"></a>
+ <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2025-bc1439.svg?style=flat-square" alt="Roadmap 2025"></a>
+ <a href="https://cloud.qdrant.io/"><img src="https://img.shields.io/badge/Qdrant-Cloud-24386C.svg?logo=cloud&style=flat-square" alt="Qdrant Cloud"></a>
 </p>
 
 **Qdrant** (read: _quadrant_) is a vector similarity search engine and vector database.
@@ -45,7 +45,7 @@ Qdrant provides a collection of ready-to-use [agent skills](https://github.com/q
 
 To experience the full power of Qdrant locally, run the container with this command:
 
-```bash
+`sh
 docker run -p 6333:6333 qdrant/qdrant
 ```
 
@@ -66,14 +66,14 @@ Before deploying Qdrant to production, be sure to read our [installation](https:
 Qdrant offers the following client libraries to help you integrate it into your application stack:
 
 - Official:
-  - [Go client](https://github.com/qdrant/go-client)
-  - [Rust client](https://github.com/qdrant/rust-client)
-  - [JavaScript/TypeScript client](https://github.com/qdrant/qdrant-js)
-  - [Python client](https://github.com/qdrant/qdrant-client)
-  - [.NET/C# client](https://github.com/qdrant/qdrant-dotnet)
-  - [Java client](https://github.com/qdrant/java-client)
+ - [Go client](https://github.com/qdrant/go-client)
+ - [Rust client](https://github.com/qdrant/rust-client)
+ - [JavaScript/TypeScript client](https://github.com/qdrant/qdrant-js)
+ - [Python client](https://github.com/qdrant/qdrant-client)
+ - [.NET/C# client](https://github.com/qdrant/qdrant-dotnet)
+ - [Java client](https://github.com/qdrant/java-client)
 - Community:
-  - [PHP](https://github.com/hkulekci/qdrant-php)
+ - [PHP](https://github.com/hkulekci/qdrant-php)
 
 ### Qdrant Edge
 
@@ -85,10 +85,10 @@ To get started with Qdrant Edge from Python or Rust, initialize an instance of E
 from qdrant_edge import Distance, EdgeConfig, EdgeVectorParams, EdgeShard, Point, UpdateOperation
 
 shard = EdgeShard.create("./shard", EdgeConfig(
-    vectors={"my-vector": EdgeVectorParams(size=4, distance=Distance.Cosine)}
+ vectors={"my-vector": EdgeVectorParams(size=4, distance=Distance.Cosine)}
 ))
 shard.update(UpdateOperation.upsert_points([
-    Point(id=1, vector={"my-vector": [0.1, 0.2, 0.3, 0.4]}, payload={"color": "red"})
+ Point(id=1, vector={"my-vector": [0.1, 0.2, 0.3, 0.4]}, payload={"color": "red"})
 ]))
 ```
 

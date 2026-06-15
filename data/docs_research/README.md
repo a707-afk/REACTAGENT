@@ -7,22 +7,22 @@
 
 ```
 docs_research/
-├── vector_dbs/          # 向量数据库对比
-│   ├── qdrant_readme.md
-│   ├── milvus_readme.md
-│   ├── pgvector_readme.md
-│   ├── chroma_readme.md
-│   └── weaviate_readme.md
-├── agent_frameworks/    # Agent 框架对比
-│   ├── langgraph_readme.md
-│   ├── crewai_readme.md
-│   ├── autogen_readme.md
-│   ├── llamaindex_readme.md
-│   └── langchain_readme.md
-└── embeddings/          # Embedding 模型对比
-    ├── bge-m3_readme.md
-    ├── sentence-transformers_readme.md
-    └── qwen3-embedding_readme.md
+├── vector_dbs/ # 向量数据库对比
+│ ├── qdrant_readme.md
+│ ├── milvus_readme.md
+│ ├── pgvector_readme.md
+│ ├── chroma_readme.md
+│ └── weaviate_readme.md
+├── agent_frameworks/ # Agent 框架对比
+│ ├── langgraph_readme.md
+│ ├── crewai_readme.md
+│ ├── autogen_readme.md
+│ ├── llamaindex_readme.md
+│ └── langchain_readme.md
+└── embeddings/ # Embedding 模型对比
+ ├── bge-m3_readme.md
+ ├── sentence-transformers_readme.md
+ └── qwen3-embedding_readme.md
 ```
 
 ## 数据来源
