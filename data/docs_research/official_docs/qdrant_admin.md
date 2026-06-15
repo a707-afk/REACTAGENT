@@ -1,16 +1,6 @@
-<!-- source: Qdrant Administration -->
-<!-- url: https://qdrant.tech/documentation/ops-configuration/administration/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Admin -->
+<!-- cleaned: nav-bar removed -->
 
-Administration - Qdrant
-- OptimizationMonitoring & TelemetrySnapshotsUpgradesSecurityProduction ChecklistTroubleshooting
-### Cloud
-Getting StartedAccount SetupCloud RBACManaged CloudHybrid CloudPrivate CloudInfrastructure ToolsCapacity PlanningCloud SecurityQdrant Cloud APIQdrant Cloud CLIBilling & PaymentsPremium Tier
-### Support
-Support
-- Documentation
-- Configuration
-- Administration
 # Administration
 
 

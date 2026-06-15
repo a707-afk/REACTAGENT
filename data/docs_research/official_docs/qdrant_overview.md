@@ -1,20 +1,6 @@
 <!-- source: Qdrant Overview -->
-<!-- url: https://qdrant.tech/documentation/overview/what-is-qdrant/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- cleaned: nav-bar removed -->
 
-What is Qdrant?
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- Overview
-- What is Qdrant?
 # Introduction
 
 

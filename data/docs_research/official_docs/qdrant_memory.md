@@ -1,16 +1,6 @@
-<!-- source: Qdrant Memory Usage -->
-<!-- url: https://qdrant.tech/documentation/ops-monitoring/memory-usage/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Memory -->
+<!-- cleaned: nav-bar removed -->
 
-Memory Usage - Qdrant
-- OptimizationMonitoring & TelemetrySnapshotsUpgradesSecurityProduction ChecklistTroubleshooting
-### Cloud
-Getting StartedAccount SetupCloud RBACManaged CloudHybrid CloudPrivate CloudInfrastructure ToolsCapacity PlanningCloud SecurityQdrant Cloud APIQdrant Cloud CLIBilling & PaymentsPremium Tier
-### Support
-Support
-- Documentation
-- Monitoring & Telemetry
-- Memory Usage
 # Monitor Collection Memory Usage
 
 

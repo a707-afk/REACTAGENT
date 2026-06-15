@@ -1,16 +1,6 @@
-<!-- source: Qdrant Optimization -->
-<!-- url: https://qdrant.tech/documentation/ops-optimization/optimize/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Optimize -->
+<!-- cleaned: nav-bar removed -->
 
-Optimize Performance - Qdrant
-- OptimizationMonitoring & TelemetrySnapshotsUpgradesSecurityProduction ChecklistTroubleshooting
-### Cloud
-Getting StartedAccount SetupCloud RBACManaged CloudHybrid CloudPrivate CloudInfrastructure ToolsCapacity PlanningCloud SecurityQdrant Cloud APIQdrant Cloud CLIBilling & PaymentsPremium Tier
-### Support
-Support
-- Documentation
-- Optimization
-- Optimize Performance
 # Optimizing Qdrant Performance: Three Scenarios
 
 

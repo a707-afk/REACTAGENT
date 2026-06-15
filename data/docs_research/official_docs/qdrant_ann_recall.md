@@ -1,20 +1,6 @@
-<!-- source: Qdrant ANN Recall -->
-<!-- url: https://qdrant.tech/documentation/tutorials-search-engineering/ann-recall/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Ann Recall -->
+<!-- cleaned: nav-bar removed -->
 
-Measuring ANN Recall - Qdrant
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- Search Engineering
-- Measuring ANN Recall
 # Measuring ANN Recall
 Time: 15 minLevel: Beginner
 

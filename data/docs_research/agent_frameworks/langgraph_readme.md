@@ -1,26 +1,3 @@
-<div align="center">
- <a href="https://www.langchain.com/langgraph">
- <picture>
- <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-dark.svg">
- <source media="(prefers-color-scheme: light)" srcset=".github/images/logo-light.svg">
- <img alt="LangGraph Logo" src=".github/images/logo-dark.svg" width="50%">
- </picture>
- </a>
-</div>
-
-<div align="center">
- <h3>Low-level orchestration framework for building stateful agents.</h3>
-</div>
-
-<div align="center">
- <a href="https://opensource.org/licenses/MIT" target="_blank"><img src="https://img.shields.io/pypi/l/langgraph" alt="PyPI - License"></a>
- <a href="https://pypistats.org/packages/langgraph" target="_blank"><img src="https://img.shields.io/pepy/dt/langgraph" alt="PyPI - Downloads"></a>
- <a href="https://pypi.org/project/langgraph/" target="_blank"><img src="https://img.shields.io/pypi/v/langgraph.svg?label=%20" alt="Version"></a>
- <a href="https://x.com/langchain_oss" target="_blank"><img src="https://img.shields.io/twitter/url/https/twitter.com/langchain_oss.svg?style=social&label=Follow%20%40LangChain" alt="Twitter / X"></a>
-</div>
-
-<br>
-
 Trusted by companies shaping the future of agents – including Klarna, Replit, Elastic, and more – LangGraph is a low-level orchestration framework for building, managing, and deploying long-running, stateful agents.
 
 `sh

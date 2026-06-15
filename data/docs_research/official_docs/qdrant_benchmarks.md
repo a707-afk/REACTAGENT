@@ -1,4 +1,4 @@
-Vector Search Benchmarks - Qdrant
+
 
 # Vector Search Benchmarks
 

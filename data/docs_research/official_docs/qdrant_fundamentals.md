@@ -1,20 +1,6 @@
-<!-- source: Qdrant Fundamentals FAQ -->
-<!-- url: https://qdrant.tech/documentation/faq/qdrant-fundamentals/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Fundamentals -->
+<!-- cleaned: nav-bar removed -->
 
-Qdrant Fundamentals
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- FAQ
-- Qdrant Fundamentals
 # Frequently Asked Questions: General Topics
 VectorsSearchCollectionsCompatibilitySecurityCloud
 ## Vectors

@@ -1,20 +1,5 @@
-Multitenancy - Qdrant
-- Local QuickstartCloud Quickstart
-
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-
-### Support
-Release NotesFAQ
-- Documentation
-- Manage Data
-- Multitenancy
+<!-- source: Qdrant Multitenancy -->
+<!-- cleaned: nav-bar removed -->
 
 # Configure Multitenancy
 

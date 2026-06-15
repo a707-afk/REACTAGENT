@@ -1,16 +1,6 @@
 <!-- source: Qdrant Retrieval Relevance -->
-<!-- url: https://qdrant.tech/documentation/improve-search/retrieval-relevance/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- cleaned: nav-bar removed -->
 
-Measuring Retrieval Relevance - Qdrant
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Improve Search
-- Measuring Retrieval Relevance
 # Measuring Retrieval Relevance
 Time: 40 minLevel: Intermediate
 

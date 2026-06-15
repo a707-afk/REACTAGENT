@@ -1,16 +1,6 @@
-<!-- source: Qdrant Agentic RAG -->
-<!-- url: https://qdrant.tech/documentation/tutorials-build-essentials/agentic-rag-crewai-zoom/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Agentic Rag -->
+<!-- cleaned: nav-bar removed -->
 
-Agentic RAG with CrewAI - Qdrant
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Essential Examples
-- Agentic RAG with CrewAI
 # Qdrant Agentic RAG System with CrewAI
 Time: 45 minLevel: BeginnerOutput: GitHub
 

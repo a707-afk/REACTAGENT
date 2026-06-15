@@ -1,10 +1,5 @@
-<p align="center">
- <img src="https://qianwen-res.oss-accelerate.aliyuncs.com/logo_qwen_embedding.png" width="400"/>
-<p>
+|       |        |        |     ｜    
 
-<p align="center">
-    <a href="https://huggingface.co/collections/Qwen/qwen3-embedding-6841b2055b99c44d9a4c371f">Huggingface</a>   |    <a href="https://modelscope.cn/collections/Qwen3-Embedding-3edc3762d50f48">ModelScope</a>   |    <a href="https://qwenlm.github.io/blog/qwen3-embedding/">Blog</a>    |    <a href="https://arxiv.org/abs/2506.05176">Arxiv</a>    |    <a href="https://bailian.console.aliyun.com/?tab=model#/model-market/detail/text-embedding-v4">API</a> ｜    <a href="https://discord.gg/yPEP2vHTu4">Discord</a>
-</p>
 
 # Qwen3 Embedding
 
@@ -39,8 +34,8 @@ The Qwen3 Embedding model series is the latest proprietary model of the Qwen fam
 
 Qwen3-Embedding model series shares the multilingual support capabilities of the Qwen3 base model.
 
-<details>
-<summary>Click to expand the list of supported languages</summary>
+
+Click to expand the list of supported languages
 
 | Language Family | Languages & Dialects |
 |---|---|
@@ -55,7 +50,6 @@ Qwen3-Embedding model series shares the multilingual support capabilities of the
 | Austroasiatic | Vietnamese, Khmer |
 | Other | Japanese, Korean, Georgian, Basque, Haitian, Papiamento, Kabuverdianu, Tok Pisin, Swahili |
 
-</details>
 
 ## Usage
 
@@ -317,7 +311,7 @@ def process_inputs(pairs, instruction, max_length, suffix_tokens):
 
 def compute_logits(model, messages, sampling_params, true_token, false_token):
  outputs = model.generate(messages, sampling_params, use_tqdm=False)
- scores = []
+ scores = 
  for i in range(len(outputs)):
  final_logits = outputs[i].outputs[0].logprobs[-1]
  token_count = len(outputs[i].outputs[0].token_ids)

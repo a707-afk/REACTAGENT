@@ -1,16 +1,6 @@
 <!-- source: Qdrant Reranking -->
-<!-- url: https://qdrant.tech/documentation/search-precision/reranking-semantic-search/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- cleaned: nav-bar removed -->
 
-Reranking for Better Search - Qdrant
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Search Enhancement
-- Reranking for Better Search
 # Improve Semantic Search with Reranking using Qdrant
 
 

@@ -1,20 +1,6 @@
 <!-- source: Qdrant Multivector -->
-<!-- url: https://qdrant.tech/documentation/tutorials-search-engineering/using-multivector-representations/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- cleaned: nav-bar removed -->
 
-Multivectors and Late Interaction - Qdrant
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- Search Engineering
-- Multivectors and Late Interaction
 # Multivector Representations for Reranking in Qdrant
 Time: 30 minLevel: Intermediate
 

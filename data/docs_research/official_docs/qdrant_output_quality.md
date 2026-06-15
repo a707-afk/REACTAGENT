@@ -1,16 +1,6 @@
-<!-- source: Qdrant Pipeline Output Quality -->
-<!-- url: https://qdrant.tech/documentation/improve-search/pipeline-output-quality/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Output Quality -->
+<!-- cleaned: nav-bar removed -->
 
-Evaluating Pipeline Output Quality - Qdrant
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Improve Search
-- Evaluating Pipeline Output Quality
 # Evaluating Pipeline Output Quality
 Time: 45 minLevel: Intermediate
 

@@ -2,42 +2,28 @@
 <!-- url: https://raw.githubusercontent.com/FlagOpen/FlagEmbedding/master/README.md -->
 <!-- fetched: 2026-06-14 -->
 
-[<img src="./imgs/FlagOpen.png">](https://flagopen.baai.ac.cn/)
+(https://flagopen.baai.ac.cn/)
 
-<h1 align="center">⚡️BGE: One-Stop Retrieval Toolkit For Search and RAG</h1>
+⚡️BGE: One-Stop Retrieval Toolkit For Search and RAG
 
 ![bge_logo](./imgs/bge_logo.jpg)
 
-<p align="center">
- <a href="https://huggingface.co/collections/BAAI/bge-66797a74476eb1f085c7446d">
- <img alt="Build" src="https://img.shields.io/badge/BGE_series-🤗-yellow">
- </a>
- <a href="https://github.com/FlagOpen/FlagEmbedding">
- <img alt="Build" src="https://img.shields.io/badge/Contribution-Welcome-blue">
- </a>
- <a href="https://github.com/FlagOpen/FlagEmbedding/blob/master/LICENSE">
- <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
- </a>
- <a href="https://huggingface.co/C-MTEB">
- <img alt="Build" src="https://img.shields.io/badge/C_MTEB-🤗-yellow">
- </a>
- <a href="https://github.com/FlagOpen/FlagEmbedding/tree/master/research/baai_general_embedding">
- <img alt="Build" src="https://img.shields.io/badge/FlagEmbedding-1.3.0-red">
- </a>
-</p>
-<h4 align="center">
- <p>
- <a href=#news>News</a> |
- <a href=#installation>Installation</a> |
- <a href=#quick-start>Quick Start</a> |
- <a href=#community>Community</a> |
- <a href="https://github.com/FlagOpen/FlagEmbedding/tree/master/research">Projects</a> |
- <a href=#model-list>Model List</a> |
- <a href="#contributors">Contributor</a> |
- <a href="#citation">Citation</a> |
- <a href="#license">License</a>
- <p>
-</h4>
+
+ 
+
+ 
+
+
+  |
+  |
+  |
+  |
+  |
+  |
+  |
+  |
+
+ 
 
 
 [English](README.md) | [中文](https://github.com/FlagOpen/FlagEmbedding/blob/master/README_zh.md)
@@ -48,7 +34,7 @@
 - 3/6/2025: :fire::fire: Introduce **BGE-VL** ([HF repo](https://huggingface.co/collections/BAAI/megapairs-67c6bbe49c15a9e7a7c69d92)), State-Of-The-Art multimodal embedding models to support Any visual search applications (everything, including text-to-image, image-to-text, image&prompt-to-image, text-to-image&text, and more)! They are released under the MIT license and are completely free for both academic and commercial use. We also release **MegaPairs** ([repo](https://github.com/VectorSpaceLab/MegaPairs), [paper](https://arxiv.org/abs/2412.14475)), a massive synthetic dataset which empowers BGE-VL!
 - 12/5/2024: :book: We built the [BGE documentation](https://www.bge-model.com) for centralized BGE information and materials!
 - 10/29/2024: :earth_asia: We created WeChat group for BGE. Scan the [QR code](./imgs/BGE_WeChat_Group.png) to join the group chat! To get the first hand message about our updates and new release, or having any questions or ideas, join us now!
-- <img src="./imgs/BGE_WeChat_Group.png" alt="bge_wechat_group" class="center" width="200">
+- 
 
 - 10/22/2024: We release another interesting model: [OmniGen](https://github.com/VectorSpaceLab/OmniGen), which is a unified image generation model supporting various tasks. OmniGen can accomplish complex image generation tasks without the need for additional plugins like ControlNet, IP-Adapter, or auxiliary models such as pose detection and face detection.
 - 9/10/2024: Introducing **MemoRAG**, a step forward towards RAG 2.0 on top of memory-inspired knowledge discovery (repo: https://github.com/qhjqhj00/MemoRAG, paper: https://arxiv.org/pdf/2409.05591v1)
@@ -57,8 +43,8 @@
 - 7/26/2024: Release a new embedding model [bge-multilingual-gemma2](https://huggingface.co/BAAI/bge-multilingual-gemma2), a multilingual embedding model based on gemma-2-9b, which supports multiple languages and diverse downstream tasks, achieving new SOTA on multilingual benchmarks (MIRACL, MTEB-fr, and MTEB-pl).
 - 7/26/2024: Release a new lightweight reranker [bge-reranker-v2.5-gemma2-lightweight](https://huggingface.co/BAAI/bge-reranker-v2.5-gemma2-lightweight), a lightweight reranker based on gemma-2-9b, which supports token compression and layerwise lightweight operations, can still ensure good performance while saving a significant amount of resources. :fire:
 
-<details>
- <summary>More</summary>
+
+ More
 <!-- ### More -->
 
 - 6/7/2024: Release a new benchmark [MLVU](https://github.com/JUNJIE99/MLVU), the first comprehensive benchmark specifically designed for long video understanding. MLVU features an extensive range of video durations, a diverse collection of video sources, and a set of evaluation tasks uniquely tailored for long-form video understanding. :fire:
@@ -83,9 +69,6 @@ It is the first embedding model which supports all three retrieval methods, achi
 - 08/05/2023: Release base-scale and small-scale models, **best performance among the models of the same size 🤗**
 - 08/02/2023: Release ge-large-*`(short for BAAI General Embedding) Models, **rank 1st on MTEB and C-MTEB benchmark!** :tada: :tada:
 - 08/01/2023: We release the [Chinese Massive Text Embedding Benchmark](https://github.com/FlagOpen/FlagEmbedding/tree/master/research/C_MTEB) (**C-MTEB**), consisting of 31 test dataset.
-
-
-</details>
 
 
 BGE (BAAI General Embedding) focuses on retrieval-augmented LLMs, consisting of the following projects currently:
@@ -168,10 +151,9 @@ The following contents are releasing in the upcoming weeks:
 - Evaluation
 - BGE-EN-ICL
 
-<details>
- <summary>The whole tutorial roadmap</summary>
- <img src="./Tutorials/tutorial_map.png"/>
-</details>
+
+ The whole tutorial roadmap
+
 
 ## Model List
 
@@ -206,10 +188,6 @@ ge` is short for `BAAI general embedding`.
 
 ### Contributors:
 Thank all our contributors for their efforts and warmly welcome new members to join in!
-
-<a href="https://github.com/FlagOpen/FlagEmbedding/graphs/contributors">
- <img src="https://contrib.rocks/image?repo=FlagOpen/FlagEmbedding" />
-</a>
 
 
 ## Citation

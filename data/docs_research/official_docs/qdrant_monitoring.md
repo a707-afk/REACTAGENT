@@ -1,16 +1,6 @@
 <!-- source: Qdrant Monitoring -->
-<!-- url: https://qdrant.tech/documentation/ops-monitoring/monitoring/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- cleaned: nav-bar removed -->
 
-Monitoring & Telemetry - Qdrant
-- OptimizationMonitoring & TelemetrySnapshotsUpgradesSecurityProduction ChecklistTroubleshooting
-### Cloud
-Getting StartedAccount SetupCloud RBACManaged CloudHybrid CloudPrivate CloudInfrastructure ToolsCapacity PlanningCloud SecurityQdrant Cloud APIQdrant Cloud CLIBilling & PaymentsPremium Tier
-### Support
-Support
-- Documentation
-- Monitoring & Telemetry
-- Monitoring & Telemetry
 # Monitoring & Telemetry
 
 

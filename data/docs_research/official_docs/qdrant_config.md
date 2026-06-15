@@ -1,16 +1,6 @@
-<!-- source: Qdrant Configuration -->
-<!-- url: https://qdrant.tech/documentation/ops-configuration/configuration/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Config -->
+<!-- cleaned: nav-bar removed -->
 
-Configuration - Qdrant
-- OptimizationMonitoring & TelemetrySnapshotsUpgradesSecurityProduction ChecklistTroubleshooting
-### Cloud
-Getting StartedAccount SetupCloud RBACManaged CloudHybrid CloudPrivate CloudInfrastructure ToolsCapacity PlanningCloud SecurityQdrant Cloud APIQdrant Cloud CLIBilling & PaymentsPremium Tier
-### Support
-Support
-- Documentation
-- Configuration
-- Configuration
 # Configuration
 
 

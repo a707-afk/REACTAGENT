@@ -1,16 +1,6 @@
-<!-- source: Qdrant Sync with Postgres -->
-<!-- url: https://qdrant.tech/documentation/data-synchronization/with-postgres/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Migration Pg -->
+<!-- cleaned: nav-bar removed -->
 
-With Postgres - Qdrant
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Data Synchronization
-- With Postgres
 # Keeping Postgres and Qdrant in Sync
 
 

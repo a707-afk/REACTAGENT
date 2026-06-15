@@ -1,20 +1,6 @@
-<!-- source: Qdrant Database Optimization FAQ -->
-<!-- url: https://qdrant.tech/documentation/faq/database-optimization/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Db Optimization -->
+<!-- cleaned: nav-bar removed -->
 
-Database Optimization - Qdrant
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- FAQ
-- Database Optimization
 # Frequently Asked Questions: Database Optimization
 
 ### How do I reduce memory usage?

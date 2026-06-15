@@ -1,16 +1,6 @@
-<!-- source: Qdrant GraphRAG + Neo4j -->
-<!-- url: https://qdrant.tech/documentation/examples/graphrag-qdrant-neo4j/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Graphrag -->
+<!-- cleaned: nav-bar removed -->
 
-GraphRAG with Qdrant and Neo4j
-- Migration GuidanceData Synchronization
-### Integrations
-Data ManagementEmbeddingsFrameworksObservabilityPlatforms
-### Ecosystem Guides
-Essential ExamplesBuild PrototypesImprove SearchPractice Datasets
-- Documentation
-- Build Prototypes
-- GraphRAG with Qdrant and Neo4j
 # Build a GraphRAG Agent with Neo4j and Qdrant
 
 

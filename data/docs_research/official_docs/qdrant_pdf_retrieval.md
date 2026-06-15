@@ -1,20 +1,6 @@
-<!-- source: Qdrant PDF Retrieval at Scale -->
-<!-- url: https://qdrant.tech/documentation/tutorials-search-engineering/pdf-retrieval-at-scale/ -->
-<!-- fetched: 2026-06-14 -->
+<!-- source: Qdrant Pdf Retrieval -->
+<!-- cleaned: nav-bar removed -->
 
-Multivector Document Retrieval - Qdrant
-- Local QuickstartCloud Quickstart
-### User Manual
-Manage DataSearchInferenceQdrant EdgeQdrant Web UIAPI & SDKs
-### Qdrant Tools
-Agent SkillsFastEmbedQdrant MCP Server
-### Tutorials
-OverviewBasicsSearch EngineeringOperations & ScaleDevelop & Implement
-### Support
-Release NotesFAQ
-- Documentation
-- Search Engineering
-- Multivector Document Retrieval
 # Qdrant Multivector Document Retrieval with ColPali/ColQwen
 
 
