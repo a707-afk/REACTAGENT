@@ -1,4 +1,4 @@
-<!-- source: Qdrant Agentic Rag -->
+﻿<!-- source: Qdrant Agentic Rag -->
 <!-- cleaned: nav-bar removed -->
 
 # Qdrant Agentic RAG System with CrewAI
@@ -238,18 +238,7 @@ The Streamlit interface provides a clean, chat-like experience for interacting w
 To make the interface more engaging, we add custom styling that makes the output easier to read:
 
 `st.markdown("""
- <style>
- .stApp {
- max-width: 1200px;
- margin: 0 auto;
- }
- .output-container {
- background-color: #f0f2f6;
- padding: 20px;
- border-radius: 10px;
- margin: 10px 0;
- }
- </style>
+ 
 """, unsafe_allow_html=True)
 `
 
